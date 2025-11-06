@@ -55,12 +55,30 @@ const router = createRouter({
       }
     },
     {
+      path: '/usuarios',
+      name: 'Usuarios',
+      component: () => import('../views/UsuariosView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Usuarios - CopyMart ERP'
+      }
+    },
+    {
       path: '/reportes',
       name: 'Reportes',
       component: () => import('../views/ReportesView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Reportes - CopyMart ERP'
+      }
+    },
+    {
+      path: '/perfil',
+      name: 'Perfil',
+      component: () => import('../views/PerfilView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Mi Perfil - CopyMart ERP'
       }
     },
     {

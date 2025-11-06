@@ -69,7 +69,7 @@
                   v-for="item in userMenuItems"
                   :key="item.name"
                   :href="item.href"
-                  @click="item.action && item.action()"
+                  @click="item.action && item.action(); closeUserMenu()"
                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                 >
                   <svg class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,7 +134,7 @@
               v-for="item in userMenuItems"
               :key="item.name"
               :href="item.href"
-              @click="item.action && item.action()"
+              @click="item.action && item.action(); showMobileMenu = false"
               class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200"
             >
               {{ item.name }}
@@ -184,7 +184,14 @@ export default {
         {
           name: 'Perfil',
           href: '#',
-          icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+          icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+          action: () => this.$router.push('/perfil')
+        },
+        {
+          name: 'Usuarios',
+          href: '#',
+          icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
+          action: () => this.$router.push('/usuarios')
         },
         {
           name: 'Configuración',
