@@ -143,17 +143,24 @@
           </div>
         </div>
       </div>
+      
+      <!-- Generador de PDFs -->
+      <div class="mt-8">
+        <PdfGenerator />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import AppNavigation from '../components/AppNavigation.vue'
+import PdfGenerator from '../components/PdfGenerator.vue'
 
 export default {
   name: 'DashboardView',
   components: {
-    AppNavigation
+    AppNavigation,
+    PdfGenerator
   },
   data() {
     return {
