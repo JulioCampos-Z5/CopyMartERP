@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.auth.routers import router as user_router
 from app.equipment.routers import router as equipment_router
 from app.client.routers import router as client_router
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
 
