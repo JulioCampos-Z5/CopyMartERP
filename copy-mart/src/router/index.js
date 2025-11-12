@@ -30,7 +30,7 @@ const router = createRouter({
     {
       path: '/ventas',
       name: 'Ventas',
-      component: () => import('../views/VentasView.vue'),
+      component: () => import('../views/Comercial/VentasView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Ventas - CopyMart ERP'
@@ -70,6 +70,101 @@ const router = createRouter({
       meta: { 
         requiresAuth: true,
         title: 'Reportes - CopyMart ERP'
+      }
+    },
+    // Rutas del área Comercial
+    {
+      path: '/rentas',
+      name: 'Rentas',
+      component: () => import('../views/Comercial/RentasView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Rentas - CopyMart ERP'
+      }
+    },
+    {
+      path: '/atencion-clientes',
+      name: 'AtencionClientes',
+      component: () => import('../views/Comercial/AtencionClientesView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Atención a Clientes - CopyMart ERP'
+      }
+    },
+    // Rutas del área Administración
+    {
+      path: '/compras',
+      name: 'Compras',
+      component: () => import('../views/Administracion/ComprasView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Compras - CopyMart ERP'
+      }
+    },
+    {
+      path: '/almacen',
+      name: 'Almacen',
+      component: () => import('../views/Administracion/AlmacenView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Control de Almacén - CopyMart ERP'
+      }
+    },
+    {
+      path: '/cobranza',
+      name: 'Cobranza',
+      component: () => import('../views/Administracion/CobranzaView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Cobranza - CopyMart ERP'
+      }
+    },
+    {
+      path: '/facturacion',
+      name: 'Facturacion',
+      component: () => import('../views/Administracion/FacturacionView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Sistema de Facturación - CopyMart ERP'
+      }
+    },
+    // Ruta de Recursos Humanos
+    {
+      path: '/recursos-humanos',
+      name: 'RecursosHumanos',
+      component: () => import('../views/RecursosHumanos/RHView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Recursos Humanos - CopyMart ERP'
+      }
+    },
+    // Rutas del área Operaciones
+    {
+      path: '/rutas',
+      name: 'Rutas',
+      component: () => import('../views/Operaciones/RutasView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Rutas - CopyMart ERP'
+      }
+    },
+    {
+      path: '/ordenes-servicio',
+      name: 'OrdenesServicio',
+      component: () => import('../views/Operaciones/OrdenesServicioView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Órdenes de Servicio - CopyMart ERP'
+      }
+    },
+    // Ruta de Tecnologías de la Información
+    {
+      path: '/ti',
+      name: 'TecnologiasInformacion',
+      component: () => import('../views/TecnologiasInformacion/TIView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Tecnologías de la Información - CopyMart ERP'
       }
     },
     {
