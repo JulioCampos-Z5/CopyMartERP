@@ -2,7 +2,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "postgresql://postgres:Merp2003@localhost:5432/copymart"
+# MariaDB/MySQL
+DATABASE_URL = "mysql+pymysql://root:@localhost:3306/copymart"
+
+# PostgreSQL 
+# DATABASE_URL = "postgresql://usuario:password@localhost:5432/copymart_erp"
 
 engine = create_engine(DATABASE_URL)
 

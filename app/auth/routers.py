@@ -10,7 +10,7 @@ from app.auth.services import get_user_by_id, get_user_by_email, create_user, au
 from app.auth.permissions import can_create, can_edit, can_delete, get_accesible_modules
 from app.auth.security import get_password_hash, create_access_token, decode_token
 from app.core.database import get_db
-from app.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter(
     prefix="/users",
@@ -94,14 +94,14 @@ def get_permissions(user_id: int, db: Session = Depends(get_db), current_user: U
 
 # ELIMINAR O AGREGAR MANUALMENTE EN EL DATABASE
 @router.post("/create-admin-test", status_code=201)
-def create_admin_test(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def create_admin_test(db: Session = Depends(get_db)):
     from app.auth.models import RolEnum, DepartmentEnum
     existing_admin = db.query(User).filter(User.rol == RolEnum.ADMINISTRADOR).first()
     if existing_admin:
         return {"message": "Administrator already exists", "email": existing_admin.email}
     admin_user = User(
         email="admin@copymart.com",
-        full_name="Administrator",
+        full_name="Administrador CopyMart",
         password=get_password_hash("admin123"),
         rol=RolEnum.ADMINISTRADOR,
         department=DepartmentEnum.ADMINISTRACION,
@@ -111,8 +111,9 @@ def create_admin_test(db: Session = Depends(get_db), current_user: User = Depend
     db.commit()
     db.refresh(admin_user)
     return {
-        "message": "Administrator created",
+        "message": "Administrator created successfully",
         "email": admin_user.email,
+        "full_name": admin_user.full_name,
         "rol": admin_user.rol,
         "department": admin_user.department
     }

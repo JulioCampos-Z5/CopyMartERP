@@ -19,9 +19,9 @@ class User(Base):
     __tablename__ = "users"
 
     user_id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    password = Column(String, nullable=False)
-    full_name = Column(String, nullable=False)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    password = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=False)
     rol = Column(SQLEnum(RolEnum), nullable=False, default=RolEnum.USUARIO)
     department = Column(SQLEnum(DepartmentEnum), nullable=False)
     is_active = Column(Boolean, default=True)

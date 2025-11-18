@@ -1,6 +1,7 @@
 <template>
-  <AppNavigation>
-    <div class="space-y-6">
+  <BaseLayout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="space-y-6">
       <!-- Header -->
       <div class="bg-cyan-50 p-6 rounded-lg border border-cyan-200">
         <h1 class="text-3xl font-bold text-cyan-800 mb-2">Órdenes de Servicio</h1>
@@ -240,16 +241,17 @@
         </div>
       </div>
     </div>
-  </AppNavigation>
+    </div>
+  </BaseLayout>
 </template>
 
 <script>
-import AppNavigation from '@/components/AppNavigation.vue'
+import BaseLayout from '@/components/BaseLayout.vue'
 
 export default {
   name: 'OrdenesServicioView',
   components: {
-    AppNavigation
+    BaseLayout
   }
 }
 </script>

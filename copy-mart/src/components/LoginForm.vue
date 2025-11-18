@@ -107,6 +107,8 @@
 </template>
 
 <script>
+import api from '@/services/api'
+
 export default {
   name: 'LoginForm',
   data() {
@@ -159,33 +161,23 @@ export default {
       this.loginError = ''
       
       try {
-        // Simular llamada a API
-        const result = await this.simulateLogin()
+        // Llamada real al API
+        await api.login(this.form.email, this.form.password)
+        
+        // Obtener datos del usuario
+        const user = await api.getCurrentUser()
         
         // Guardar estado de autenticación
         localStorage.setItem('isAuthenticated', 'true')
-        localStorage.setItem('user', JSON.stringify(result.user))
+        localStorage.setItem('user', JSON.stringify(user))
         
         // Redirigir al dashboard
         this.$router.push('/dashboard')
       } catch (error) {
-        this.loginError = error.message
+        this.loginError = error.message || 'Error al iniciar sesión. Verifica tus credenciales.'
       } finally {
         this.isLoading = false
       }
-    },
-    
-    async simulateLogin() {
-      // Simulación de login - en producción reemplazar con llamada real a API
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (this.form.email === 'admin@copymart.com' && this.form.password === 'admin123') {
-            resolve({ success: true, user: { email: this.form.email, name: 'Administrador' } })
-          } else {
-            reject(new Error('Credenciales incorrectas. Usa admin@copymart.com / admin123'))
-          }
-        }, 1500)
-      })
     }
   }
 }
