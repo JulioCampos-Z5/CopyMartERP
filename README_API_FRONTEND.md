@@ -1,4 +1,4 @@
-# Conexión API Backend (FastAPI) con Frontend (Vue.js)
+# Conexión API Backend (FastAPI) con Frontend (Vue.js) elimina el readme cuando termines de usarlo 👍
 
 ## Arquitectura General
 
