@@ -48,7 +48,7 @@
             <button
               @click="toggleSection('comercial')"
               :class="[
-                openSections.comercial || isActive('/ventas') || isActive('/rentas') || isActive('/atencion-clientes') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-100',
+                openSections.comercial || isActive('/ventas') || isActive('/rentas') || isActive('/atencion-clientes') || isActive('/clientes') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-100',
                 isCollapsed ? 'flex items-center justify-center p-3' : 'flex items-center justify-between w-full px-3 py-2',
                 'text-sm font-medium rounded-md transition-colors duration-200'
               ]"
@@ -71,6 +71,20 @@
             </button>
             
             <div :class="[isCollapsed ? 'space-y-1' : 'ml-6 space-y-1']" v-show="openSections.comercial">
+              <router-link
+                to="/clientes"
+                :class="[
+                  isActive('/clientes') ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
+                  'flex items-center text-sm rounded-md transition-colors duration-200',
+                  isCollapsed ? 'justify-center p-3' : 'px-3 py-2'
+                ]"
+                :title="isCollapsed ? 'Gestión de Clientes' : ''"
+              >
+                <svg :class="[isCollapsed ? 'h-4 w-4' : 'mr-2 h-4 w-4']" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span v-if="!isCollapsed">Gestión de Clientes</span>
+              </router-link>
               <router-link
                 to="/ventas"
                 :class="[
@@ -109,7 +123,7 @@
                 :title="isCollapsed ? 'Atención a Clientes' : ''"
               >
                 <svg :class="[isCollapsed ? 'h-4 w-4' : 'mr-2 h-4 w-4']" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
                 <span v-if="!isCollapsed">Atención a Clientes</span>
               </router-link>
@@ -121,7 +135,7 @@
             <button
               @click="toggleSection('administracion')"
               :class="[
-                openSections.administracion || isActive('/compras') || isActive('/almacen') || isActive('/cobranza') || isActive('/facturacion') ? 'text-green-600 bg-green-50' : 'text-gray-700 hover:bg-gray-100',
+                openSections.administracion || isActive('/compras') || isActive('/almacen') || isActive('/cobranza') || isActive('/facturacion') || isActive('/inventario') ? 'text-green-600 bg-green-50' : 'text-gray-700 hover:bg-gray-100',
                 'flex items-center w-full rounded-md transition-colors duration-200',
                 isCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2 text-sm font-medium'
               ]"
@@ -146,6 +160,20 @@
             <!-- Submenús de Administración -->
             <div :class="[isCollapsed ? 'space-y-1' : 'ml-6 space-y-1']" v-show="openSections.administracion">
               <router-link
+                to="/inventario"
+                :class="[
+                  isActive('/inventario') ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
+                  'flex items-center text-sm rounded-md transition-colors duration-200',
+                  isCollapsed ? 'justify-center p-3' : 'px-3 py-2'
+                ]"
+                :title="isCollapsed ? 'Inventario de Equipos' : ''"
+              >
+                <svg :class="[isCollapsed ? 'h-4 w-4' : 'mr-2 h-4 w-4']" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                <span v-if="!isCollapsed">Inventario de Equipos</span>
+              </router-link>
+              <router-link
                 to="/compras"
                 :class="[
                   isActive('/compras') ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
@@ -169,7 +197,7 @@
                 :title="isCollapsed ? 'Almacén' : ''"
               >
                 <svg :class="[isCollapsed ? 'h-4 w-4' : 'mr-2 h-4 w-4']" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v2a1 1 0 01-1 1h-1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8H3a1 1 0 01-1-1V5a1 1 0 011-1h4z" />
                 </svg>
                 <span v-if="!isCollapsed">Almacén</span>
               </router-link>
@@ -357,16 +385,26 @@ export default {
     // Cargar usuario actual
     const loadCurrentUser = () => {
       try {
-        const userDataStr = localStorage.getItem('user')
+        const userDataStr = localStorage.getItem('user_data') // Cambiado de 'user' a 'user_data' 
         if (userDataStr) {
           const userData = JSON.parse(userDataStr)
           currentUser.value = {
-            name: userData.full_name || 'Usuario',
+            name: userData.name || userData.full_name || 'Usuario Demo',
             email: userData.email || 'usuario@copymart.com'
+          }
+        } else {
+          // Datos por defecto si no hay usuario
+          currentUser.value = {
+            name: 'Usuario Demo',
+            email: 'demo@copymart.com'
           }
         }
       } catch (error) {
         console.error('Error loading user:', error)
+        currentUser.value = {
+          name: 'Usuario Demo',
+          email: 'demo@copymart.com'
+        }
       }
     }
 
@@ -375,6 +413,8 @@ export default {
       const routeTitles = {
         '/': 'Inicio',
         '/dashboard': 'Dashboard',
+        '/clientes': 'Gestión de Clientes',
+        '/inventario': 'Inventario de Equipos',
         '/ventas': 'Ventas',
         '/rentas': 'Rentas',
         '/atencion-clientes': 'Atención a Clientes',
@@ -386,8 +426,6 @@ export default {
         '/rutas': 'Rutas',
         '/ordenes-servicio': 'Órdenes de Servicio',
         '/ti': 'Tecnologías de Información',
-        '/inventario': 'Inventario',
-        '/clientes': 'Clientes',
         '/reportes': 'Reportes',
         '/usuarios': 'Usuarios',
         '/perfil': 'Mi Perfil'
@@ -408,12 +446,21 @@ export default {
       isCollapsed.value = !isCollapsed.value
     }
 
-    const logout = () => {
-      // Limpiar autenticación
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      localStorage.removeItem('isAuthenticated')
-      router.push('/login')
+    const logout = async () => {
+      try {
+        // Usar el userService para logout
+        const userService = await import('@/services/userService.js')
+        await userService.default.logout()
+      } catch (error) {
+        console.log('Error during logout, cleaning local storage manually')
+        // Limpiar manualmente si hay error
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('user_data')
+        localStorage.removeItem('isAuthenticated')
+      } finally {
+        // Redirigir al login
+        router.push('/login')
+      }
     }
 
     // Abrir secciones según la ruta actual
