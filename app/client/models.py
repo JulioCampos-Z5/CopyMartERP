@@ -11,20 +11,15 @@ class Client(Base):
     name = Column(String, nullable=False)
     comercial_name = Column(String, nullable=True)
     rfc = Column(String, nullable=True)
-
-    # Domicilio del cliente (fiscal)
     address = Column(String, nullable=True)
     colonia = Column(String, nullable=True)
     zip_code = Column(String, nullable=True)
     city = Column(String, nullable=True)
-
     contact_id = Column(Integer, ForeignKey("contacts.contact_id"), nullable=True)
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=True)
-
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relaciones
+    
     branches = relationship("Branch", back_populates="client", cascade="all, delete-orphan")
     contact = relationship("Contact", back_populates="client", uselist=False)
     creator = relationship("User")
@@ -35,21 +30,14 @@ class Branch(Base):
 
     branch_id = Column(Integer, primary_key=True, index=True)
     client_id = Column(Integer, ForeignKey("clients.client_id"), nullable=False)
-
-    # ✔ Distingue matriz (True) y sucursal (False)
     is_main = Column(Boolean, default=False)
-
     name = Column(String, nullable=False)
-
-    # ✔ Domicilio de la matriz o sucursal
     address = Column(String, nullable=True)
     colonia = Column(String, nullable=True)
     zip_code = Column(String, nullable=True)
     city = Column(String, nullable=True)
-
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relaciones
     client = relationship("Client", back_populates="branches")
     areas = relationship("Area", back_populates="branch", cascade="all, delete-orphan")
 
@@ -59,9 +47,7 @@ class Area(Base):
 
     area_id = Column(Integer, primary_key=True, index=True)
     branch_id = Column(Integer, ForeignKey("branches.branch_id"), nullable=False)
-
     name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relaciones
     branch = relationship("Branch", back_populates="areas")
