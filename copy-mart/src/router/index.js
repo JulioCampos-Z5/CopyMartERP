@@ -191,14 +191,18 @@ router.beforeEach((to, from, next) => {
     document.title = to.meta.title
   }
   
-  // Verificar autenticación (en una app real, verificarías el token/estado de auth)
+  // Verificar autenticación
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+  const hasToken = !!localStorage.getItem('token')
   
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirigir al login si la ruta requiere autenticación
+  // Usuario está autenticado si tiene ambos
+  const userLoggedIn = isAuthenticated && hasToken
+  
+  if (to.meta.requiresAuth && !userLoggedIn) {
+    // Redirigir al login si la ruta requiere autenticación y no está autenticado
     next('/login')
-  } else if (to.name === 'Login' && isAuthenticated) {
-    // Redirigir al dashboard si ya está autenticado
+  } else if (to.path === '/login' && userLoggedIn) {
+    // Redirigir al dashboard si intenta ir al login estando ya autenticado
     next('/dashboard')
   } else {
     next()

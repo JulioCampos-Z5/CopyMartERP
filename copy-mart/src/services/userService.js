@@ -3,7 +3,7 @@ const API_BASE_URL = 'http://localhost:8000'
 
 // Interceptor para incluir token en las peticiones
 const apiRequest = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('auth_token')
+  const token = localStorage.getItem('token')
   
   const config = {
     headers: {
@@ -36,28 +36,66 @@ const apiRequest = async (endpoint, options = {}) => {
 export const userService = {
   // Autenticación
   async login(credentials) {
-    const formData = new FormData()
-    formData.append('username', credentials.email)
-    formData.append('password', credentials.password)
-    
-    const response = await fetch(`${API_BASE_URL}/token`, {
+    const response = await fetch(`${API_BASE_URL}/users/login`, {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: credentials.email,
+        password: credentials.password
+      })
     })
     
     if (!response.ok) {
-      throw new Error('Credenciales incorrectas')
+      const error = await response.json().catch(() => ({ detail: 'Credenciales incorrectas' }))
+      throw new Error(error.detail || 'Credenciales incorrectas')
     }
     
     const data = await response.json()
-    localStorage.setItem('auth_token', data.access_token)
-    localStorage.setItem('user_data', JSON.stringify(data.user))
+    
+    // Guardar token
+    localStorage.setItem('token', data.access_token)
+    localStorage.setItem('isAuthenticated', 'true')
+    
+    // Obtener datos completos del usuario
+    try {
+      const userResponse = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${data.access_token}`
+        }
+      })
+      
+      if (userResponse.ok) {
+        const userData = await userResponse.json()
+        localStorage.setItem('user', JSON.stringify(userData))
+      } else {
+        // Fallback si no se puede obtener el usuario
+        const userData = {
+          email: credentials.email,
+          full_name: 'Usuario',
+          role: 'user'
+        }
+        localStorage.setItem('user', JSON.stringify(userData))
+      }
+    } catch (error) {
+      console.error('Error getting user data:', error)
+      // Fallback
+      const userData = {
+        email: credentials.email,
+        full_name: 'Usuario',
+        role: 'user'
+      }
+      localStorage.setItem('user', JSON.stringify(userData))
+    }
+    
     return data
   },
 
   async logout() {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_data')
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('isAuthenticated')
   },
 
   async getCurrentUser() {
@@ -93,23 +131,32 @@ export const userService = {
     })
   },
 
-  async changePassword(currentPassword, newPassword) {
-    return apiRequest('/users/change-password', {
-      method: 'POST',
+  async changePassword(userId, currentPassword, newPassword) {
+    return apiRequest(`/users/${userId}/password`, {
+      method: 'PUT',
       body: JSON.stringify({
-        current_password: currentPassword,
+        old_password: currentPassword,
         new_password: newPassword
+      })
+    })
+  },
+
+  async changeEmail(userId, newEmail) {
+    return apiRequest(`/users/${userId}/email`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        new_email: newEmail
       })
     })
   },
 
   // Utilidades de autenticación
   isAuthenticated() {
-    return !!localStorage.getItem('auth_token')
+    return !!localStorage.getItem('token')
   },
 
   getUserData() {
-    const userData = localStorage.getItem('user_data')
+    const userData = localStorage.getItem('user')
     return userData ? JSON.parse(userData) : null
   },
 

@@ -60,6 +60,11 @@ class ClientCreate(BaseModel):
     colonia: Optional[str] = None
     zip_code: Optional[str] = None
     city: Optional[str] = None
+    # Campos opcionales para crear contacto automáticamente
+    contact_name: Optional[str] = None
+    contact_phone: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_rol: Optional[str] = None
     branches: Optional[List[BranchCreate]] = None
 
 

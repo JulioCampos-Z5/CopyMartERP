@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.auth.models import User
 from app.auth.schemas import (
-    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangeEmail, PermissionsResponse, Token
+    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangeEmail, PermissionsResponse, Token, UserUpdate
 )
 from app.auth.schemas import TokenData
 from app.auth.services import get_user_by_id, get_user_by_email, create_user, authenticate_user
@@ -30,6 +30,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 def list_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return db.query(User).all()
 
+@router.get("/me", response_model=UserResponse)
+def get_current_user_info(current_user: User = Depends(get_current_user)):
+    """Obtiene la información del usuario autenticado"""
+    return current_user
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     user = get_user_by_id(db, user_id)
@@ -40,6 +45,30 @@ def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = D
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_new_user(user: UserCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return create_user(db, user)
+
+@router.put("/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Actualizar solo los campos proporcionados
+    if user_update.full_name is not None:
+        user.full_name = user_update.full_name
+    if user_update.email is not None:
+        # Verificar que el email no esté en uso por otro usuario
+        existing_user = get_user_by_email(db, user_update.email)
+        if existing_user and existing_user.user_id != user_id:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        user.email = user_update.email
+    if user_update.department is not None:
+        user.department = user_update.department
+    if user_update.rol is not None:
+        user.rol = user_update.rol
+    
+    db.commit()
+    db.refresh(user)
+    return user
 
 @router.post("/login", response_model=Token)
 def login(data: LoginRequest, db: Session = Depends(get_db)):

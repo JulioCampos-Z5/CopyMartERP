@@ -11,7 +11,7 @@ from app.client.schemas import (
 )
 from app.client.services import ClientService, BranchService, AreaService
 
-router = APIRouter(prefix="/clients", tags=["Clients"])
+router = APIRouter()
 
 @router.post("/", response_model=ClientResponse, status_code=status.HTTP_201_CREATED)
 def create_client(

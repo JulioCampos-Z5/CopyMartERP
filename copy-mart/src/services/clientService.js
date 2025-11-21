@@ -3,7 +3,7 @@ const API_BASE_URL = 'http://localhost:8000'
 
 // Interceptor para incluir token en las peticiones
 const apiRequest = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('auth_token')
+  const token = localStorage.getItem('token')
   
   const config = {
     headers: {
@@ -35,14 +35,14 @@ const apiRequest = async (endpoint, options = {}) => {
 // Servicio de clientes
 export const clientService = {
   // CRUD de clientes principales
-  async getClients(page = 1, limit = 10, search = '') {
+  async getClients(skip = 0, limit = 100, isActive = null) {
     const params = new URLSearchParams({
-      page: page.toString(),
+      skip: skip.toString(),
       limit: limit.toString()
     })
     
-    if (search) {
-      params.append('search', search)
+    if (isActive !== null) {
+      params.append('is_active', isActive.toString())
     }
     
     return apiRequest(`/api/clients?${params}`)

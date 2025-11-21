@@ -3,7 +3,7 @@ const API_BASE_URL = 'http://localhost:8000'
 
 // Interceptor para incluir token en las peticiones
 const apiRequest = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('auth_token')
+  const token = localStorage.getItem('token')
   
   const config = {
     headers: {

@@ -179,56 +179,53 @@ export default {
           // Simular datos de usuario administrador
           const demoUser = {
             id: 1,
-            name: 'Administrador Demo',
+            full_name: 'Administrador Demo',
             email: 'admin@copymart.com',
             role: 'ADMIN',
             is_active: true
           }
           
-          // Simular token y datos
-          localStorage.setItem('auth_token', 'demo_token_' + Date.now())
-          localStorage.setItem('user_data', JSON.stringify(demoUser))
+          // Guardar token y datos (usando las mismas claves que el router guard)
+          localStorage.setItem('token', 'demo_token_' + Date.now())
+          localStorage.setItem('user', JSON.stringify(demoUser))
           localStorage.setItem('isAuthenticated', 'true')
           
-          alert('¡Bienvenido al modo demo!\nCredenciales: admin@copymart.com / admin123')
           this.$router.push('/dashboard')
           
         } else if (this.form.email === 'gerente@copymart.com' && this.form.password === 'gerente123') {
           // Simular datos de usuario gerente
           const demoUser = {
             id: 2,
-            name: 'Gerente Demo',
+            full_name: 'Gerente Demo',
             email: 'gerente@copymart.com',
             role: 'GERENTE',
             is_active: true
           }
           
-          localStorage.setItem('auth_token', 'demo_token_' + Date.now())
-          localStorage.setItem('user_data', JSON.stringify(demoUser))
+          localStorage.setItem('token', 'demo_token_' + Date.now())
+          localStorage.setItem('user', JSON.stringify(demoUser))
           localStorage.setItem('isAuthenticated', 'true')
           
-          alert('¡Bienvenido al modo demo!\nCredenciales: gerente@copymart.com / gerente123')
           this.$router.push('/dashboard')
           
         } else if (this.form.email === 'empleado@copymart.com' && this.form.password === 'empleado123') {
           // Simular datos de usuario empleado
           const demoUser = {
             id: 3,
-            name: 'Empleado Demo',
+            full_name: 'Empleado Demo',
             email: 'empleado@copymart.com',
             role: 'EMPLEADO',
             is_active: true
           }
           
-          localStorage.setItem('auth_token', 'demo_token_' + Date.now())
-          localStorage.setItem('user_data', JSON.stringify(demoUser))
+          localStorage.setItem('token', 'demo_token_' + Date.now())
+          localStorage.setItem('user', JSON.stringify(demoUser))
           localStorage.setItem('isAuthenticated', 'true')
           
-          alert('¡Bienvenido al modo demo!\nCredenciales: empleado@copymart.com / empleado123')
           this.$router.push('/dashboard')
           
         } else {
-          this.loginError = 'Credenciales incorrectas. Para el modo demo usa:\n• admin@copymart.com / admin123\n• gerente@copymart.com / gerente123\n• empleado@copymart.com / empleado123'
+          this.loginError = 'Credenciales incorrectas. Prueba con:\nadmin@copymart.com / admin123'
         }
       } finally {
         this.isLoading = false

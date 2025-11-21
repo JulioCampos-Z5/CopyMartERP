@@ -17,7 +17,9 @@ class ClientService:
 
     @staticmethod
     def create_client(db: Session, client_data: ClientCreate, user_id: int) -> Client:
-        # Validar contacto
+        contact_id = None
+        
+        # Si viene contact_id, validar que existe
         if client_data.contact_id:
             contact = db.query(Contact).filter(Contact.contact_id == client_data.contact_id).first()
             if not contact:
@@ -25,12 +27,27 @@ class ClientService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Contacto no encontrado"
                 )
+            contact_id = client_data.contact_id
+        
+        # Si vienen datos de contacto en el cliente, crear el contacto automáticamente
+        elif hasattr(client_data, 'contact_name') and client_data.contact_name:
+            new_contact = Contact(
+                name=client_data.contact_name,
+                phone=getattr(client_data, 'contact_phone', None),
+                email=getattr(client_data, 'contact_email', None),
+                company=client_data.name,
+                rol=getattr(client_data, 'contact_rol', None),
+                is_client=True
+            )
+            db.add(new_contact)
+            db.flush()
+            contact_id = new_contact.contact_id
 
         new_client = Client(
             name=client_data.name,
             comercial_name=client_data.comercial_name,
             rfc=client_data.rfc,
-            contact_id=client_data.contact_id,
+            contact_id=contact_id,
             user_id=user_id,
             address=client_data.address,
             colonia=client_data.colonia,

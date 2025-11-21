@@ -335,7 +335,16 @@
     <!-- Footer del sidebar -->
     <div :class="[isCollapsed ? 'p-2' : 'p-4', 'border-t border-gray-200']">
       <div :class="[isCollapsed ? 'flex-col space-y-2' : 'flex items-center justify-between']">
-        <div :class="[isCollapsed ? 'flex justify-center' : 'flex items-center']">
+        <!-- Botón de perfil -->
+        <router-link 
+          to="/perfil"
+          :class="[
+            isCollapsed ? 'flex justify-center w-full' : 'flex items-center flex-1',
+            'hover:bg-gray-50 rounded-md transition-colors duration-200',
+            isCollapsed ? 'p-2' : 'p-2'
+          ]"
+          :title="isCollapsed ? 'Ver mi perfil' : ''"
+        >
           <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
             <span class="text-white font-bold text-sm">{{ currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U' }}</span>
           </div>
@@ -343,13 +352,15 @@
             <p class="text-sm font-medium text-gray-700">{{ currentUser.name || 'Usuario' }}</p>
             <p class="text-xs text-gray-500">{{ currentUser.email || 'usuario@copymart.com' }}</p>
           </div>
-        </div>
+        </router-link>
+        
+        <!-- Botón de logout -->
         <button
           @click="logout"
-          :class="[isCollapsed ? 'mx-auto' : '', 'p-1 text-gray-400 hover:text-gray-600 transition-colors duration-200']"
+          :class="[isCollapsed ? 'mx-auto w-full' : '', 'p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors duration-200']"
           :title="'Cerrar sesión'"
         >
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
         </button>
@@ -385,7 +396,7 @@ export default {
     // Cargar usuario actual
     const loadCurrentUser = () => {
       try {
-        const userDataStr = localStorage.getItem('user_data') // Cambiado de 'user' a 'user_data' 
+        const userDataStr = localStorage.getItem('user')
         if (userDataStr) {
           const userData = JSON.parse(userDataStr)
           currentUser.value = {
@@ -413,6 +424,7 @@ export default {
       const routeTitles = {
         '/': 'Inicio',
         '/dashboard': 'Dashboard',
+        '/perfil': 'Mi Perfil',
         '/clientes': 'Gestión de Clientes',
         '/inventario': 'Inventario de Equipos',
         '/ventas': 'Ventas',
@@ -448,18 +460,20 @@ export default {
 
     const logout = async () => {
       try {
-        // Usar el userService para logout
-        const userService = await import('@/services/userService.js')
-        await userService.default.logout()
-      } catch (error) {
-        console.log('Error during logout, cleaning local storage manually')
-        // Limpiar manualmente si hay error
+        // Limpiar localStorage
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        localStorage.removeItem('isAuthenticated')
         localStorage.removeItem('auth_token')
         localStorage.removeItem('user_data')
-        localStorage.removeItem('isAuthenticated')
-      } finally {
+        
         // Redirigir al login
-        router.push('/login')
+        await router.push('/login')
+      } catch (error) {
+        console.error('Error durante logout:', error)
+        // Asegurar limpieza y redirección incluso si hay error
+        localStorage.clear()
+        await router.push('/login')
       }
     }
 

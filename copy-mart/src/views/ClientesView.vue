@@ -59,15 +59,15 @@
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RFC</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contacto</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Industria</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dirección</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ciudad</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sucursales</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="client in clients" :key="client.id" class="hover:bg-gray-50">
+              <tr v-for="client in clients" :key="client.client_id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
@@ -77,18 +77,19 @@
                     </div>
                     <div class="ml-4">
                       <div class="text-sm font-medium text-gray-900">{{ client.name }}</div>
-                      <div class="text-sm text-gray-500">{{ client.email }}</div>
+                      <div class="text-sm text-gray-500">{{ client.comercial_name || 'Sin nombre comercial' }}</div>
                     </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {{ client.rfc || 'N/A' }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ client.phone || 'N/A' }}
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  <div class="max-w-xs truncate">{{ client.address || 'N/A' }}</div>
+                  <div class="text-xs text-gray-500">{{ client.colonia || '' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ client.industry || 'N/A' }}
+                  {{ client.city || 'N/A' }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="client.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
@@ -98,31 +99,29 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                    {{ client.branches?.length || 0 }}
+                    {{ client.total_branches || 0 }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                  <button 
-                    @click="viewClient(client)"
-                    class="text-blue-600 hover:text-blue-900"
-                    title="Ver detalles"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  <button 
-                    @click="editClient(client)"
-                    class="text-yellow-600 hover:text-yellow-900"
-                    title="Editar"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button 
-                    @click="toggleClientStatus(client)"
-                    :class="client.is_active ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
-                    :title="client.is_active ? 'Desactivar' : 'Activar'"
-                  >
-                    <i :class="client.is_active ? 'fas fa-ban' : 'fas fa-check'"></i>
-                  </button>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex items-center gap-2">
+                    <button 
+                      @click="editClient(client)"
+                      class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                      title="Editar"
+                    >
+                      <i class="fas fa-edit mr-1"></i>
+                      Editar
+                    </button>
+                    <button 
+                      @click="toggleClientStatus(client)"
+                      :class="client.is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
+                      class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none"
+                      :title="client.is_active ? 'Desactivar' : 'Activar'"
+                    >
+                      <i :class="client.is_active ? 'fas fa-ban mr-1' : 'fas fa-check mr-1'"></i>
+                      {{ client.is_active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </div>
                 </td>
               </tr>
               <tr v-if="clients.length === 0">
@@ -200,82 +199,122 @@
             </h3>
             
             <form @submit.prevent="saveClient">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Empresa *</label>
-                  <input
-                    type="text"
-                    v-model="clientForm.name"
-                    required
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">RFC</label>
-                  <input
-                    type="text"
-                    v-model="clientForm.rfc"
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    v-model="clientForm.email"
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input
-                    type="tel"
-                    v-model="clientForm.phone"
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Sitio Web</label>
-                  <input
-                    type="url"
-                    v-model="clientForm.website"
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Industria</label>
-                  <select
-                    v-model="clientForm.industry"
-                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Seleccionar industria</option>
-                    <option value="Tecnología">Tecnología</option>
-                    <option value="Manufactura">Manufactura</option>
-                    <option value="Servicios">Servicios</option>
-                    <option value="Comercio">Comercio</option>
-                    <option value="Educación">Educación</option>
-                    <option value="Salud">Salud</option>
-                    <option value="Construcción">Construcción</option>
-                    <option value="Agricultura">Agricultura</option>
-                    <option value="Turismo">Turismo</option>
-                    <option value="Financiero">Financiero</option>
-                  </select>
+              <!-- Información General -->
+              <div class="mb-6">
+                <h4 class="text-md font-semibold text-gray-800 mb-3 border-b pb-2">Información General</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la Empresa *</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.name"
+                      required
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Comercial</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.comercial_name"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">RFC</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.rfc"
+                      maxlength="13"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.city"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                  </div>
+                  
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.address"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Colonia</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.colonia"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.zip_code"
+                      maxlength="5"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                  </div>
                 </div>
               </div>
-              
-              <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Notas</label>
-                <textarea
-                  v-model="clientForm.notes"
-                  rows="3"
-                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Información adicional sobre el cliente..."
-                ></textarea>
+
+              <!-- Información de Contacto -->
+              <div class="mb-6">
+                <h4 class="text-md font-semibold text-gray-800 mb-3 border-b pb-2">Información de Contacto</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Contacto</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.contact_name"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: Juan Pérez"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cargo/Puesto</label>
+                    <input
+                      type="text"
+                      v-model="clientForm.contact_rol"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: Gerente General"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input
+                      type="tel"
+                      v-model="clientForm.contact_phone"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: 555-1234"
+                    >
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      v-model="clientForm.contact_email"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ej: contacto@empresa.com"
+                    >
+                  </div>
+                </div>
               </div>
               
               <div class="mt-6 flex justify-end space-x-3">
@@ -323,48 +362,13 @@ export default {
   },
   data() {
     return {
-      clients: [
-        // Datos de ejemplo mientras no esté conectado el backend
-        {
-          id: 1,
-          name: 'Ejemplo Corp',
-          rfc: 'EJE123456789',
-          email: 'contacto@ejemplo.com',
-          phone: '555-1234',
-          website: 'www.ejemplo.com',
-          industry: 'Tecnología',
-          is_active: true,
-          branches: []
-        },
-        {
-          id: 2,
-          name: 'Servicios Integrales SA',
-          rfc: 'SIN987654321',
-          email: 'info@servicios.mx',
-          phone: '555-5678',
-          website: 'www.servicios.mx',
-          industry: 'Servicios',
-          is_active: true,
-          branches: [{ id: 1, name: 'Sucursal Centro' }]
-        },
-        {
-          id: 3,
-          name: 'Manufacturas del Norte',
-          rfc: 'MAN456789123',
-          email: 'ventas@manufacturasdn.com',
-          phone: '555-9012',
-          website: 'www.manufacturasdn.com',
-          industry: 'Manufactura',
-          is_active: false,
-          branches: []
-        }
-      ],
+      clients: [],
       searchQuery: '',
       industryFilter: '',
       statusFilter: '',
       currentPage: 1,
       itemsPerPage: 10,
-      totalItems: 3,
+      totalItems: 0,
       totalPages: 1,
       isLoading: false,
       showModal: false,
@@ -372,12 +376,16 @@ export default {
       selectedClient: null,
       clientForm: {
         name: '',
+        comercial_name: '',
         rfc: '',
-        email: '',
-        phone: '',
-        website: '',
-        industry: '',
-        notes: ''
+        address: '',
+        colonia: '',
+        zip_code: '',
+        city: '',
+        contact_name: '',
+        contact_phone: '',
+        contact_email: '',
+        contact_rol: ''
       }
     }
   },
@@ -401,22 +409,44 @@ export default {
     async loadClients() {
       try {
         this.isLoading = true
-        // Simulación de carga - cuando el backend esté listo, usar:
-        // const response = await clientService.getClients(this.currentPage, this.itemsPerPage, this.searchQuery)
-        // this.clients = response.items || response.data || []
-        // this.totalItems = response.total || 0
-        // this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage)
         
-        // Datos de simulación
-        setTimeout(() => {
-          this.totalItems = this.clients.length
-          this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage)
+        // Verificar si hay token antes de hacer la llamada
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.warn('No hay token de autenticación')
+          this.clients = []
           this.isLoading = false
-        }, 500)
+          return
+        }
+        
+        const response = await clientService.getClients(0, 100, this.statusFilter === 'active' ? true : this.statusFilter === 'inactive' ? false : null)
+        this.clients = response || []
+        
+        // Aplicar filtros locales
+        let filtered = [...this.clients]
+        
+        if (this.searchQuery) {
+          filtered = filtered.filter(c => 
+            c.name?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+            c.rfc?.toLowerCase().includes(this.searchQuery.toLowerCase())
+          )
+        }
+        
+        if (this.industryFilter) {
+          filtered = filtered.filter(c => c.industry === this.industryFilter)
+        }
+        
+        this.totalItems = filtered.length
+        this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage)
       } catch (error) {
         console.error('Error loading clients:', error)
+        this.clients = []
+        // No mostrar alert si es solo un problema de autenticación
+        if (!error.message?.includes('401') && !error.message?.includes('token')) {
+          alert('Error al cargar clientes: ' + error.message)
+        }
+      } finally {
         this.isLoading = false
-        // this.$notify (implementar notificaciones más adelante)
       }
     },
 
@@ -434,12 +464,16 @@ export default {
       this.isEditing = false
       this.clientForm = {
         name: '',
+        comercial_name: '',
         rfc: '',
-        email: '',
-        phone: '',
-        website: '',
-        industry: '',
-        notes: ''
+        address: '',
+        colonia: '',
+        zip_code: '',
+        city: '',
+        contact_name: '',
+        contact_phone: '',
+        contact_email: '',
+        contact_rol: ''
       }
       this.showModal = true
     },
@@ -447,7 +481,13 @@ export default {
     editClient(client) {
       this.isEditing = true
       this.selectedClient = client
-      this.clientForm = { ...client }
+      this.clientForm = {
+        ...client,
+        contact_name: client.contact?.name || '',
+        contact_phone: client.contact?.phone || '',
+        contact_email: client.contact?.email || '',
+        contact_rol: client.contact?.rol || ''
+      }
       this.showModal = true
     },
 
@@ -462,21 +502,10 @@ export default {
         this.isLoading = true
         
         if (this.isEditing) {
-          // Simular actualización
-          const index = this.clients.findIndex(c => c.id === this.selectedClient.id)
-          if (index !== -1) {
-            this.clients[index] = { ...this.clients[index], ...this.clientForm }
-          }
+          await clientService.updateClient(this.selectedClient.client_id, this.clientForm)
           alert('Cliente actualizado correctamente')
         } else {
-          // Simular creación
-          const newClient = {
-            id: Date.now(),
-            ...this.clientForm,
-            is_active: true,
-            branches: []
-          }
-          this.clients.push(newClient)
+          await clientService.createClient(this.clientForm)
           alert('Cliente creado correctamente')
         }
         
@@ -484,7 +513,7 @@ export default {
         await this.loadClients()
       } catch (error) {
         console.error('Error saving client:', error)
-        alert('Error al guardar el cliente')
+        alert('Error al guardar el cliente: ' + error.message)
       } finally {
         this.isLoading = false
       }
@@ -492,13 +521,14 @@ export default {
 
     async toggleClientStatus(client) {
       try {
-        client.is_active = !client.is_active
-        alert(`Cliente ${client.is_active ? 'activado' : 'desactivado'} correctamente`)
-        // Cuando el backend esté listo:
-        // await clientService.toggleClientStatus(client.id)
+        const newStatus = !client.is_active
+        await clientService.updateClient(client.client_id, { is_active: newStatus })
+        client.is_active = newStatus
+        alert(`Cliente ${newStatus ? 'activado' : 'desactivado'} correctamente`)
+        await this.loadClients()
       } catch (error) {
         console.error('Error toggling client status:', error)
-        alert('Error al cambiar el estado del cliente')
+        alert('Error al cambiar el estado del cliente: ' + error.message)
       }
     },
 
