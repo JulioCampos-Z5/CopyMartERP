@@ -1,8 +1,13 @@
 <template>
+<<<<<<< HEAD
   <div class="min-h-screen bg-gray-50">
     <AppNavigation />
     
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+=======
+  <BaseLayout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+>>>>>>> develop
       <!-- Header del Perfil -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Mi Perfil</h1>
@@ -17,14 +22,21 @@
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-lg font-semibold text-gray-900">Información Personal</h3>
               <button 
+<<<<<<< HEAD
                 @click="editingPersonal = !editingPersonal"
                 class="text-primary-600 hover:text-primary-700 text-sm font-medium"
+=======
+                type="button"
+                @click="editingPersonal = !editingPersonal"
+                class="text-blue-600 hover:text-blue-700 text-sm font-medium"
+>>>>>>> develop
               >
                 {{ editingPersonal ? 'Cancelar' : 'Editar' }}
               </button>
             </div>
 
             <form @submit.prevent="updatePersonalInfo" class="space-y-4">
+<<<<<<< HEAD
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
@@ -53,12 +65,20 @@
                 <input 
                   v-model="userInfo.email"
                   type="email" 
+=======
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+                <input 
+                  v-model="userInfo.full_name"
+                  type="text" 
+>>>>>>> develop
                   class="input-field"
                   :disabled="!editingPersonal"
                   required
                 >
               </div>
 
+<<<<<<< HEAD
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
@@ -96,6 +116,62 @@
                 </button>
                 <button type="submit" class="btn-primary">
                   Guardar Cambios
+=======
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <div class="flex gap-2">
+                  <input 
+                    v-model="userInfo.email"
+                    type="email" 
+                    class="input-field flex-1"
+                    disabled
+                  >
+                  <button 
+                    type="button"
+                    @click="openEmailModal"
+                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                  <input 
+                    v-model="userInfo.rol"
+                    type="text" 
+                    class="input-field"
+                    disabled
+                  >
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Departamento</label>
+                  <input 
+                    v-model="userInfo.department"
+                    type="text" 
+                    class="input-field"
+                    disabled
+                  >
+                </div>
+              </div>
+
+              <div v-if="editingPersonal" class="flex justify-end space-x-3 pt-4">
+                <button 
+                  type="button"
+                  @click="cancelPersonalEdit"
+                  class="btn-secondary"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  class="btn-primary"
+                  :disabled="isLoading"
+                >
+                  {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+>>>>>>> develop
                 </button>
               </div>
             </form>
@@ -144,8 +220,17 @@
               </div>
               
               <div class="flex justify-end pt-4">
+<<<<<<< HEAD
                 <button type="submit" class="btn-primary" :disabled="!isPasswordFormValid">
                   Cambiar Contraseña
+=======
+                <button 
+                  type="submit" 
+                  class="btn-primary" 
+                  :disabled="!isPasswordFormValid || isLoading"
+                >
+                  {{ isLoading ? 'Cambiando...' : 'Cambiar Contraseña' }}
+>>>>>>> develop
                 </button>
               </div>
             </form>
@@ -309,20 +394,77 @@
         </div>
       </div>
     </div>
+<<<<<<< HEAD
   </div>
 </template>
 
 <script>
 import AppNavigation from '../components/AppNavigation.vue'
+=======
+
+    <!-- Modal cambiar email -->
+    <div v-if="showEmailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Cambiar Email</h3>
+        <form @submit.prevent="changeEmail" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nuevo Email</label>
+            <input 
+              v-model="emailForm.newEmail"
+              type="email" 
+              class="input-field"
+              required
+            >
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Email</label>
+            <input 
+              v-model="emailForm.confirmEmail"
+              type="email" 
+              class="input-field"
+              required
+            >
+          </div>
+          <div v-if="emailForm.newEmail && emailForm.confirmEmail && emailForm.newEmail !== emailForm.confirmEmail" 
+               class="text-red-500 text-sm">
+            Los correos no coinciden
+          </div>
+          <div class="flex justify-end space-x-3 pt-4">
+            <button type="button" @click="showEmailModal = false" class="btn-secondary">
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              class="btn-primary"
+              :disabled="emailForm.newEmail !== emailForm.confirmEmail || isLoading"
+            >
+              {{ isLoading ? 'Cambiando...' : 'Cambiar Email' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </BaseLayout>
+</template>
+
+<script>
+import BaseLayout from '../components/BaseLayout.vue'
+import { userService } from '@/services/userService'
+>>>>>>> develop
 
 export default {
   name: 'PerfilView',
   components: {
+<<<<<<< HEAD
     AppNavigation
+=======
+    BaseLayout
+>>>>>>> develop
   },
   data() {
     return {
       editingPersonal: false,
+<<<<<<< HEAD
       userInfo: {
         firstName: 'Juan',
         lastName: 'Pérez',
@@ -330,6 +472,16 @@ export default {
         phone: '+52 55 1234-5678',
         position: 'Gerente de Ventas',
         address: 'Av. Principal 123, Col. Centro, Ciudad de México'
+=======
+      isLoading: false,
+      userId: null,
+      userInfo: {
+        full_name: '',
+        email: '',
+        rol: '',
+        department: '',
+        is_active: true
+>>>>>>> develop
       },
       originalUserInfo: {},
       passwordForm: {
@@ -337,6 +489,14 @@ export default {
         newPassword: '',
         confirmPassword: ''
       },
+<<<<<<< HEAD
+=======
+      emailForm: {
+        newEmail: '',
+        confirmEmail: ''
+      },
+      showEmailModal: false,
+>>>>>>> develop
       preferences: {
         emailNotifications: true,
         inventoryAlerts: true,
@@ -344,9 +504,15 @@ export default {
         timezone: 'America/Mexico_City'
       },
       userStats: {
+<<<<<<< HEAD
         salesCount: 247,
         customersServed: 89,
         lastLogin: new Date('2025-11-05T14:30:00')
+=======
+        salesCount: 0,
+        customersServed: 0,
+        lastLogin: new Date()
+>>>>>>> develop
       },
       recentActivity: [
         {
@@ -398,6 +564,7 @@ export default {
     }
   },
   methods: {
+<<<<<<< HEAD
     updatePersonalInfo() {
       this.showConfirmation(
         'Actualizar Información',
@@ -407,6 +574,85 @@ export default {
           console.log('Información personal actualizada:', this.userInfo)
           this.editingPersonal = false
           this.showSuccessMessage('Información actualizada correctamente')
+=======
+    async loadUserData() {
+      try {
+        this.isLoading = true
+        
+        // Intentar obtener datos del usuario actual desde el backend
+        try {
+          const userFromBackend = await userService.getCurrentUser()
+          this.userId = userFromBackend.user_id || userFromBackend.id
+          this.userInfo = {
+            full_name: userFromBackend.full_name || '',
+            email: userFromBackend.email || '',
+            rol: userFromBackend.rol || '',
+            department: userFromBackend.department || '',
+            is_active: userFromBackend.is_active !== false
+          }
+          this.originalUserInfo = { ...this.userInfo }
+          
+          // Actualizar localStorage con los datos completos
+          localStorage.setItem('user', JSON.stringify(userFromBackend))
+        } catch (error) {
+          console.error('Error loading user from backend:', error)
+          
+          // Fallback: usar datos de localStorage
+          const storedUser = localStorage.getItem('user')
+          if (storedUser) {
+            const userData = JSON.parse(storedUser)
+            this.userId = userData.user_id || userData.id
+            this.userInfo = {
+              full_name: userData.full_name || '',
+              email: userData.email || '',
+              rol: userData.role || userData.rol || '',
+              department: userData.department || '',
+              is_active: userData.is_active !== false
+            }
+            this.originalUserInfo = { ...this.userInfo }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error)
+        alert('Error al cargar los datos del usuario')
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    async updatePersonalInfo() {
+      if (!this.userId) {
+        alert('No se puede actualizar: Usuario no identificado')
+        return
+      }
+
+      this.showConfirmation(
+        'Actualizar Información',
+        '¿Estás seguro que deseas actualizar tu información personal?',
+        async () => {
+          try {
+            this.isLoading = true
+            
+            // Actualizar en el backend
+            const updatedUser = await userService.updateUser(this.userId, {
+              full_name: this.userInfo.full_name
+            })
+            
+            // Actualizar localStorage con los datos del backend
+            const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+            const mergedUser = { ...storedUser, ...updatedUser }
+            localStorage.setItem('user', JSON.stringify(mergedUser))
+            
+            this.originalUserInfo = { ...this.userInfo }
+            this.editingPersonal = false
+            this.showSuccessMessage('Información actualizada correctamente')
+          } catch (error) {
+            console.error('Error updating user:', error)
+            alert('Error al actualizar la información: ' + error.message)
+          } finally {
+            this.isLoading = false
+          }
+>>>>>>> develop
         }
       )
     },
@@ -416,6 +662,7 @@ export default {
       this.editingPersonal = false
     },
     
+<<<<<<< HEAD
     changePassword() {
       this.showConfirmation(
         'Cambiar Contraseña',
@@ -436,6 +683,91 @@ export default {
     savePreferences() {
       // Aquí iría la lógica para guardar las preferencias
       console.log('Preferencias guardadas:', this.preferences)
+=======
+    async changePassword() {
+      if (!this.userId) {
+        alert('No se puede cambiar contraseña: Usuario no identificado')
+        return
+      }
+
+      if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
+        alert('Las contraseñas no coinciden')
+        return
+      }
+
+      this.showConfirmation(
+        'Cambiar Contraseña',
+        '¿Estás seguro que deseas cambiar tu contraseña?',
+        async () => {
+          try {
+            this.isLoading = true
+            await userService.changePassword(
+              this.userId,
+              this.passwordForm.currentPassword,
+              this.passwordForm.newPassword
+            )
+            
+            this.passwordForm = {
+              currentPassword: '',
+              newPassword: '',
+              confirmPassword: ''
+            }
+            this.showSuccessMessage('Contraseña actualizada correctamente')
+          } catch (error) {
+            console.error('Error changing password:', error)
+            alert('Error al cambiar la contraseña: ' + error.message)
+          } finally {
+            this.isLoading = false
+          }
+        }
+      )
+    },
+
+    openEmailModal() {
+      this.emailForm = {
+        newEmail: '',
+        confirmEmail: ''
+      }
+      this.showEmailModal = true
+    },
+
+    async changeEmail() {
+      if (!this.userId) {
+        alert('No se puede cambiar email: Usuario no identificado')
+        return
+      }
+
+      if (this.emailForm.newEmail !== this.emailForm.confirmEmail) {
+        alert('Los correos no coinciden')
+        return
+      }
+
+      try {
+        this.isLoading = true
+        await userService.changeEmail(this.userId, this.emailForm.newEmail)
+        
+        this.userInfo.email = this.emailForm.newEmail
+        this.originalUserInfo.email = this.emailForm.newEmail
+        
+        // Actualizar localStorage
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+        storedUser.email = this.emailForm.newEmail
+        localStorage.setItem('user', JSON.stringify(storedUser))
+        
+        this.showEmailModal = false
+        this.showSuccessMessage('Email actualizado correctamente')
+      } catch (error) {
+        console.error('Error changing email:', error)
+        alert('Error al cambiar el email: ' + error.message)
+      } finally {
+        this.isLoading = false
+      }
+    },
+    
+    savePreferences() {
+      // Guardar preferencias en localStorage
+      localStorage.setItem('userPreferences', JSON.stringify(this.preferences))
+>>>>>>> develop
       this.showSuccessMessage('Preferencias guardadas correctamente')
     },
     
@@ -444,9 +776,21 @@ export default {
         'Exportar Datos',
         'Se descargará un archivo con todos tus datos. ¿Continuar?',
         () => {
+<<<<<<< HEAD
           // Aquí iría la lógica para exportar datos
           console.log('Exportando datos del usuario...')
           this.showSuccessMessage('Los datos se están preparando para descarga')
+=======
+          const dataStr = JSON.stringify(this.userInfo, null, 2)
+          const dataBlob = new Blob([dataStr], { type: 'application/json' })
+          const url = URL.createObjectURL(dataBlob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `perfil-${this.userInfo.email}-${new Date().toISOString()}.json`
+          link.click()
+          URL.revokeObjectURL(url)
+          this.showSuccessMessage('Datos exportados correctamente')
+>>>>>>> develop
         }
       )
     },
@@ -456,9 +800,26 @@ export default {
         'Respaldar Datos',
         'Se creará un respaldo de tu información. ¿Continuar?',
         () => {
+<<<<<<< HEAD
           // Aquí iría la lógica para crear respaldo
           console.log('Creando respaldo...')
           this.showSuccessMessage('El respaldo se ha iniciado')
+=======
+          const backup = {
+            userInfo: this.userInfo,
+            preferences: this.preferences,
+            exportDate: new Date().toISOString()
+          }
+          const dataStr = JSON.stringify(backup, null, 2)
+          const dataBlob = new Blob([dataStr], { type: 'application/json' })
+          const url = URL.createObjectURL(dataBlob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `backup-perfil-${new Date().toISOString()}.json`
+          link.click()
+          URL.revokeObjectURL(url)
+          this.showSuccessMessage('Respaldo creado correctamente')
+>>>>>>> develop
         }
       )
     },
@@ -511,8 +872,19 @@ export default {
   },
   
   mounted() {
+<<<<<<< HEAD
     // Guardar una copia de la información original para poder cancelar ediciones
     this.originalUserInfo = { ...this.userInfo }
+=======
+    // Cargar preferencias guardadas
+    const savedPreferences = localStorage.getItem('userPreferences')
+    if (savedPreferences) {
+      this.preferences = { ...this.preferences, ...JSON.parse(savedPreferences) }
+    }
+    
+    // Cargar datos del usuario
+    this.loadUserData()
+>>>>>>> develop
   }
 }
 </script>

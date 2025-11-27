@@ -107,7 +107,11 @@
 </template>
 
 <script>
+<<<<<<< HEAD
 import { usePermissions } from '../composables/usePermissions'
+=======
+import userService from '@/services/userService.js'
+>>>>>>> develop
 
 export default {
   name: 'LoginForm',
@@ -165,9 +169,13 @@ export default {
       this.loginError = ''
       
       try {
-        // Simular llamada a API
-        const result = await this.simulateLogin()
+        // Intentar login real con userService
+        const response = await userService.login({
+          email: this.form.email,
+          password: this.form.password
+        })
         
+<<<<<<< HEAD
         // Guardar estado de autenticación
         localStorage.setItem('isAuthenticated', 'true')
         
@@ -175,12 +183,72 @@ export default {
         this.setUser(result.user)
         
         // Redirigir al dashboard
+=======
+        // Si el login es exitoso, redirigir al dashboard
+        console.log('Login successful:', response)
+>>>>>>> develop
         this.$router.push('/dashboard')
+        
       } catch (error) {
-        this.loginError = error.message
+        console.log('Login failed, using demo mode')
+        
+        // Simulación de login para desarrollo
+        if (this.form.email === 'admin@copymart.com' && this.form.password === 'admin123') {
+          // Simular datos de usuario administrador
+          const demoUser = {
+            id: 1,
+            full_name: 'Administrador Demo',
+            email: 'admin@copymart.com',
+            role: 'ADMIN',
+            is_active: true
+          }
+          
+          // Guardar token y datos (usando las mismas claves que el router guard)
+          localStorage.setItem('token', 'demo_token_' + Date.now())
+          localStorage.setItem('user', JSON.stringify(demoUser))
+          localStorage.setItem('isAuthenticated', 'true')
+          
+          this.$router.push('/dashboard')
+          
+        } else if (this.form.email === 'gerente@copymart.com' && this.form.password === 'gerente123') {
+          // Simular datos de usuario gerente
+          const demoUser = {
+            id: 2,
+            full_name: 'Gerente Demo',
+            email: 'gerente@copymart.com',
+            role: 'GERENTE',
+            is_active: true
+          }
+          
+          localStorage.setItem('token', 'demo_token_' + Date.now())
+          localStorage.setItem('user', JSON.stringify(demoUser))
+          localStorage.setItem('isAuthenticated', 'true')
+          
+          this.$router.push('/dashboard')
+          
+        } else if (this.form.email === 'empleado@copymart.com' && this.form.password === 'empleado123') {
+          // Simular datos de usuario empleado
+          const demoUser = {
+            id: 3,
+            full_name: 'Empleado Demo',
+            email: 'empleado@copymart.com',
+            role: 'EMPLEADO',
+            is_active: true
+          }
+          
+          localStorage.setItem('token', 'demo_token_' + Date.now())
+          localStorage.setItem('user', JSON.stringify(demoUser))
+          localStorage.setItem('isAuthenticated', 'true')
+          
+          this.$router.push('/dashboard')
+          
+        } else {
+          this.loginError = 'Credenciales incorrectas. Prueba con:\nadmin@copymart.com / admin123'
+        }
       } finally {
         this.isLoading = false
       }
+<<<<<<< HEAD
     },
     
     async simulateLogin() {
@@ -257,6 +325,15 @@ export default {
           }
         }, 1500)
       })
+=======
+    }
+  },
+  
+  mounted() {
+    // Verificar si ya está autenticado
+    if (userService.isAuthenticated()) {
+      this.$router.push('/dashboard')
+>>>>>>> develop
     }
   }
 }

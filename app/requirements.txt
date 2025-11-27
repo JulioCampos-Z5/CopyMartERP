@@ -1,5 +1,6 @@
 SQLAlchemy
-psycopg2-binary
+pymysql
+# psycopg2-binary  # Para PostgreSQL
 fastapi
 uvicorn
 email-validator

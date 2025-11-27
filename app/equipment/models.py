@@ -18,20 +18,30 @@ class LocationStatus(str, Enum):
 class Brand(Base):
     __tablename__ = "brands"
     brand_id = Column(Integer, primary_key=True, index=True)
+<<<<<<< HEAD
     name = Column(String, nullable=False)
     prefix = Column(String, nullable=False)
+=======
+    name = Column(String(255), nullable=False)
+    prefix = Column(String(50), nullable=False)
+>>>>>>> develop
     equipments = relationship("Equipment", back_populates="brand")
 
 class Supplier(Base): 
     __tablename__ = "suppliers"
     supplier_id = Column(Integer, primary_key=True, index=True)
+<<<<<<< HEAD
     name = Column(String, nullable=False)
+=======
+    name = Column(String(255), nullable=False)
+>>>>>>> develop
     equipments = relationship("Equipment", back_populates="supplier")
 
 class Equipment(Base):
     __tablename__ = "items"
 
     item_id = Column(Integer, primary_key=True, index=True)
+<<<<<<< HEAD
     sku = Column(String, index=True)
     brand_id = Column(Integer, ForeignKey("brands.brand_id"), index=True)
     model = Column(String, nullable=False)
@@ -40,6 +50,16 @@ class Equipment(Base):
     type = Column(SQLEnum(TypeColor), nullable=False)
     supplier_id = Column(Integer, ForeignKey("suppliers.supplier_id"), index=True)
     invoice = Column(String, nullable=True)
+=======
+    sku = Column(String(100), index=True)
+    brand_id = Column(Integer, ForeignKey("brands.brand_id"), index=True)
+    model = Column(String(255), nullable=False)
+    serie = Column(String(255), unique=True, nullable=False)
+    model_toner = Column(String(255), nullable=False)
+    type = Column(SQLEnum(TypeColor), nullable=False)
+    supplier_id = Column(Integer, ForeignKey("suppliers.supplier_id"), index=True)
+    invoice = Column(String(100), nullable=True)
+>>>>>>> develop
     cost = Column(DECIMAL(10,2), nullable=True)
     location_status = Column(SQLEnum(LocationStatus), nullable=False, default=LocationStatus.BODEGA)
     comments = Column(Text, nullable=True)
