@@ -7,9 +7,8 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "dev": "vite",
     "backend": "cd .. && uvicorn app.main:app --reload",
-    "frontend": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },

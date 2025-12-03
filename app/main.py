@@ -12,6 +12,7 @@ from app.auth import models as auth_models
 from app.client import models as client_models
 from app.contact import models as contact_models
 from app.equipment import models as equipment_models
+from app.rent import models as rent_models
 
 app = FastAPI(title="API de Usuarios")
 

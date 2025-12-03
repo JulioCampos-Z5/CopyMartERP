@@ -1,16 +1,17 @@
 from passlib.context import CryptContext
 from jose import JWTError, jwt 
 from datetime import datetime, timedelta
+from typing import Optional
 from fastapi import HTTPException, status
 from app.auth.schemas import TokenData
-from app.auth.models import RolEnum, DepartmentEnum
+from app.auth.models import RolEnum
 
 SECRET_KEY = "JindnsniuNkna"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 480
 
 pwd_context = CryptContext(
-    schemes=["argon2"],
+    schemes=["bcrypt"],
     deprecated="auto"
 )
 
@@ -20,7 +21,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})  
@@ -30,16 +31,14 @@ def decode_token(token: str) -> TokenData:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])  
         user_id = payload.get("user_id")
-        rol = payload.get("rol")
-        department = payload.get("department") 
+        role = payload.get("role")
 
         if user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token Invalid") 
 
         return TokenData(
             user_id=user_id,
-            rol=RolEnum(rol),
-            department=DepartmentEnum(department)
+            role=RolEnum(role) if role else None
         )
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token Invalid")

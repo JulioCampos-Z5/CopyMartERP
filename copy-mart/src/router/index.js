@@ -179,7 +179,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      redirect: '/dashboard'
+      redirect: '/login'
     }
   ],
 })
@@ -192,15 +192,15 @@ router.beforeEach((to, from, next) => {
   }
   
   // Verificar autenticación
+  const token = localStorage.getItem('token')
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
-  const hasToken = !!localStorage.getItem('token')
   
-  // Usuario está autenticado si tiene ambos
-  const userLoggedIn = isAuthenticated && hasToken
+  // Usuario está autenticado si tiene token válido
+  const userLoggedIn = token && isAuthenticated
   
   if (to.meta.requiresAuth && !userLoggedIn) {
     // Redirigir al login si la ruta requiere autenticación y no está autenticado
-    next('/login')
+    next({ path: '/login', query: { redirect: to.fullPath } })
   } else if (to.path === '/login' && userLoggedIn) {
     // Redirigir al dashboard si intenta ir al login estando ya autenticado
     next('/dashboard')

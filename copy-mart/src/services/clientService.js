@@ -20,6 +20,15 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
     
+    // Si es 401, limpiar sesión y redirigir al login
+    if (response.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('isAuthenticated')
+      window.location.href = '/login'
+      throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.')
+    }
+    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
       throw new Error(errorData.message || `Error ${response.status}`)
@@ -61,7 +70,7 @@ export const clientService = {
 
   async updateClient(id, clientData) {
     return apiRequest(`/api/clients/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(clientData)
     })
   },

@@ -58,8 +58,9 @@ class RentService:
                     detail=f"Área con ID {area_id} no encontrada"
                 )
             
-            # Validar que el área pertenece al cliente
-            if area.client_id != client_id:
+            # Validar que el área pertenece al cliente a través de la sucursal
+            area_branch = db.query(Branch).filter(Branch.branch_id == area.branch_id).first()
+            if area_branch and area_branch.client_id != client_id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"El área {area_id} no pertenece al cliente {client_id}"

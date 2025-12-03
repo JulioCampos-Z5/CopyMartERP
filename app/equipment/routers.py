@@ -10,10 +10,7 @@ from app.equipment.schemas import (
 from app.equipment.services import create_brand, create_supplier, create_equipment, update_equipment_status
 from app.core.database import get_db
 
-router = APIRouter(
-    prefix="/equipment",
-    tags=["Equipment"]
-)
+router = APIRouter()
 
 # BRAND 
 @router.post("/brands/", response_model=BrandRead)
@@ -34,18 +31,18 @@ def list_suppliers(db: Session = Depends(get_db)):
     return db.query(Supplier).all()
 
 # EQUIPMENT 
-@router.post("/equipment/", response_model=EquipmentRead)
+@router.post("/", response_model=EquipmentRead)
 def add_equipment(equipment: EquipmentCreate, db: Session = Depends(get_db)):
     try:
         return create_equipment(db, equipment)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/equipment/", response_model=List[EquipmentRead])
+@router.get("/", response_model=List[EquipmentRead])
 def list_equipment(db: Session = Depends(get_db)):
     return db.query(Equipment).all()
 
-@router.patch("/equipment/{item_id}/status", response_model=EquipmentRead)
+@router.patch("/{item_id}/status", response_model=EquipmentRead)
 def change_equipment_status(item_id: int, update: EquipmentUpdate, db: Session = Depends(get_db)):
     if not update.location_status:
         raise HTTPException(status_code=400, detail="Status is required")

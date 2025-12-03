@@ -55,7 +55,6 @@ class ClientCreate(BaseModel):
     name: str
     comercial_name: Optional[str] = None
     rfc: Optional[str] = None
-    contact_id: Optional[int] = None
     address: Optional[str] = None
     colonia: Optional[str] = None
     zip_code: Optional[str] = None
@@ -72,7 +71,6 @@ class ClientUpdate(BaseModel):
     name: Optional[str] = None
     comercial_name: Optional[str] = None
     rfc: Optional[str] = None
-    contact_id: Optional[int] = None
     address: Optional[str] = None
     colonia: Optional[str] = None
     zip_code: Optional[str] = None

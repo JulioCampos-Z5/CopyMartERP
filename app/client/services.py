@@ -1,3 +1,15 @@
+"""
+Servicios de Cliente (ClientService)
+=====================================
+Contiene la lógica de negocio para operaciones CRUD de clientes,
+sucursales y áreas.
+
+Cambios realizados (Dic 2025):
+- Simplificada la creación de contactos usando acceso directo a atributos Pydantic
+- Removido uso de hasattr() y getattr() innecesarios
+- El contacto se crea después del cliente para tener el client_id disponible
+- Se actualiza contact_id en el cliente después de crear el contacto
+"""
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 from typing import List, Optional
@@ -11,43 +23,24 @@ from app.client.models import Client, Branch, Area
 from app.contact.models import Contact
 
 
-
-## Crear un cliente con domicilio, sucursales y areas
 class ClientService:
+    """
+    Servicio para gestionar clientes.
+    
+    Métodos:
+    - create_client: Crea cliente con contacto y sucursales opcionales
+    - get_client_by_id: Obtiene cliente con sus relaciones
+    - get_all_clients: Lista clientes con paginación
+    - update_client: Actualiza datos del cliente
+    - delete_client: Desactiva cliente (soft delete)
+    """
 
     @staticmethod
     def create_client(db: Session, client_data: ClientCreate, user_id: int) -> Client:
-        contact_id = None
-        
-        # Si viene contact_id, validar que existe
-        if client_data.contact_id:
-            contact = db.query(Contact).filter(Contact.contact_id == client_data.contact_id).first()
-            if not contact:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Contacto no encontrado"
-                )
-            contact_id = client_data.contact_id
-        
-        # Si vienen datos de contacto en el cliente, crear el contacto automáticamente
-        elif hasattr(client_data, 'contact_name') and client_data.contact_name:
-            new_contact = Contact(
-                name=client_data.contact_name,
-                phone=getattr(client_data, 'contact_phone', None),
-                email=getattr(client_data, 'contact_email', None),
-                company=client_data.name,
-                rol=getattr(client_data, 'contact_rol', None),
-                is_client=True
-            )
-            db.add(new_contact)
-            db.flush()
-            contact_id = new_contact.contact_id
-
         new_client = Client(
             name=client_data.name,
             comercial_name=client_data.comercial_name,
             rfc=client_data.rfc,
-            contact_id=contact_id,
             user_id=user_id,
             address=client_data.address,
             colonia=client_data.colonia,
@@ -56,6 +49,21 @@ class ClientService:
         )
         db.add(new_client)
         db.flush()
+
+        # Si vienen datos de contacto en el cliente, crear el contacto automáticamente
+        if client_data.contact_name:
+            new_contact = Contact(
+                client_id=new_client.client_id,
+                name=client_data.contact_name,
+                phone=client_data.contact_phone,
+                email=client_data.contact_email,
+                position=client_data.contact_rol,
+                is_primary=True
+            )
+            db.add(new_contact)
+            db.flush()
+            # Actualizar referencia en cliente
+            new_client.contact_id = new_contact.contact_id
 
         # Crea sucursales si vienen
         if client_data.branches:
@@ -86,7 +94,7 @@ class ClientService:
     def get_client_by_id(db: Session, client_id: int) -> Optional[Client]:
         return db.query(Client).options(
             joinedload(Client.branches).joinedload(Branch.areas),
-            joinedload(Client.contact)
+            joinedload(Client.contacts)
         ).filter(Client.client_id == client_id).first()
 
     @staticmethod
@@ -106,12 +114,6 @@ class ClientService:
 
         if not client:
             raise HTTPException(status_code=404, detail="Cliente no encontrado")
-
-        # Valida contacto si se actualiza
-        if client_data.contact_id is not None:
-            contact = db.query(Contact).filter(Contact.contact_id == client_data.contact_id).first()
-            if not contact:
-                raise HTTPException(status_code=404, detail="Contacto no encontrado")
 
         update_data = client_data.model_dump(exclude_unset=True)
 

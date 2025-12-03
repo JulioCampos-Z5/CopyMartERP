@@ -1,5 +1,14 @@
 <template>
   <BaseLayout>
+    <!-- Modal de Notificación -->
+    <NotificationModal
+      :visible="notification.visible"
+      :type="notification.type"
+      :title="notification.title"
+      :message="notification.message"
+      @close="notification.visible = false"
+    />
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex justify-between items-center mb-8">
         <div>
@@ -353,12 +362,14 @@
 
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
+import NotificationModal from '@/components/NotificationModal.vue'
 import { clientService } from '@/services/clientService'
 
 export default {
   name: 'ClientesView',
   components: {
-    BaseLayout
+    BaseLayout,
+    NotificationModal
   },
   data() {
     return {
@@ -374,6 +385,12 @@ export default {
       showModal: false,
       isEditing: false,
       selectedClient: null,
+      notification: {
+        visible: false,
+        type: 'info',
+        title: '',
+        message: ''
+      },
       clientForm: {
         name: '',
         comercial_name: '',
@@ -441,9 +458,9 @@ export default {
       } catch (error) {
         console.error('Error loading clients:', error)
         this.clients = []
-        // No mostrar alert si es solo un problema de autenticación
-        if (!error.message?.includes('401') && !error.message?.includes('token')) {
-          alert('Error al cargar clientes: ' + error.message)
+        // No mostrar notificación si es solo un problema de autenticación (ya redirige al login)
+        if (!error.message?.includes('Sesión expirada')) {
+          this.showNotification('error', 'Error', 'Error al cargar clientes: ' + error.message)
         }
       } finally {
         this.isLoading = false
@@ -493,7 +510,7 @@ export default {
 
     viewClient(client) {
       // Implementar vista de detalles más adelante
-      alert(`Ver detalles de: ${client.name}`)
+      this.showNotification('info', 'Información', `Ver detalles de: ${client.name}`)
       console.log('Viewing client:', client)
     },
 
@@ -503,17 +520,17 @@ export default {
         
         if (this.isEditing) {
           await clientService.updateClient(this.selectedClient.client_id, this.clientForm)
-          alert('Cliente actualizado correctamente')
+          this.showNotification('success', 'Éxito', 'Cliente actualizado correctamente')
         } else {
           await clientService.createClient(this.clientForm)
-          alert('Cliente creado correctamente')
+          this.showNotification('success', 'Éxito', 'Cliente creado correctamente')
         }
         
         this.closeModal()
         await this.loadClients()
       } catch (error) {
         console.error('Error saving client:', error)
-        alert('Error al guardar el cliente: ' + error.message)
+        this.showNotification('error', 'Error', 'Error al guardar el cliente: ' + error.message)
       } finally {
         this.isLoading = false
       }
@@ -524,11 +541,20 @@ export default {
         const newStatus = !client.is_active
         await clientService.updateClient(client.client_id, { is_active: newStatus })
         client.is_active = newStatus
-        alert(`Cliente ${newStatus ? 'activado' : 'desactivado'} correctamente`)
+        this.showNotification('success', 'Éxito', `Cliente ${newStatus ? 'activado' : 'desactivado'} correctamente`)
         await this.loadClients()
       } catch (error) {
         console.error('Error toggling client status:', error)
-        alert('Error al cambiar el estado del cliente: ' + error.message)
+        this.showNotification('error', 'Error', 'Error al cambiar el estado del cliente: ' + error.message)
+      }
+    },
+
+    showNotification(type, title, message) {
+      this.notification = {
+        visible: true,
+        type,
+        title,
+        message
       }
     },
 

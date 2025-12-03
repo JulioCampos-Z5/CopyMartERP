@@ -1,21 +1,22 @@
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
-from app.auth.models import RolEnum, DepartmentEnum
+from typing import Optional
+from app.auth.models import RolEnum
 
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str
-    department: DepartmentEnum
+    username: str
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=6)
-    rol: RolEnum = RolEnum.USUARIO
+    role: RolEnum = RolEnum.EMPLEADO
 
 class UserUpdate(BaseModel):
-    email: EmailStr | None = None
-    full_name: str | None = None
-    department: DepartmentEnum | None = None
-    rol: RolEnum | None = None
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    username: Optional[str] = None
+    role: Optional[RolEnum] = None
 
 class ChangePassword(BaseModel):
     new_password: str = Field(..., min_length=6, description="Nueva contraseña")    
@@ -27,9 +28,12 @@ class ChangePasswordMe(BaseModel):
 class ChangeEmail(BaseModel):
     new_email: EmailStr
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     user_id: int
-    rol: RolEnum
+    username: str
+    email: str
+    full_name: str
+    role: RolEnum
     is_active: bool
     created_at: datetime
 
@@ -38,12 +42,11 @@ class UserResponse(UserBase):
 
 class Token(BaseModel):
     access_token: str
-    token_type: str =  "bearer"
+    token_type: str = "bearer"
 
 class TokenData(BaseModel):
-    user_id: int | None = None
-    rol: RolEnum | None = None
-    department: DepartmentEnum | None = None
+    user_id: Optional[int] = None
+    role: Optional[RolEnum] = None
 
 class LoginRequest(BaseModel):
     email: str

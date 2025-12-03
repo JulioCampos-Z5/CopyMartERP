@@ -1,3 +1,31 @@
+"""
+Router de Clientes
+==================
+Endpoints para gestión de clientes, sucursales y áreas.
+
+Endpoints disponibles:
+- POST   /                     - Crear cliente
+- GET    /                     - Listar clientes
+- GET    /{client_id}          - Obtener cliente por ID
+- PATCH  /{client_id}          - Actualizar cliente (usa PATCH, no PUT)
+- DELETE /{client_id}          - Eliminar cliente (soft delete)
+
+Sucursales:
+- POST   /{client_id}/branches         - Crear sucursal
+- GET    /{client_id}/branches         - Listar sucursales
+- GET    /branches/{branch_id}         - Obtener sucursal
+- PATCH  /branches/{branch_id}         - Actualizar sucursal
+- DELETE /branches/{branch_id}         - Eliminar sucursal
+
+Áreas:
+- POST   /branches/{branch_id}/areas   - Crear área
+- GET    /branches/{branch_id}/areas   - Listar áreas
+- GET    /areas/{area_id}              - Obtener área
+- PATCH  /areas/{area_id}              - Actualizar área
+- DELETE /areas/{area_id}              - Eliminar área
+
+Nota: Todos los endpoints requieren autenticación (Bearer token)
+"""
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional

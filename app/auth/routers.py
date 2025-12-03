@@ -61,10 +61,10 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
         if existing_user and existing_user.user_id != user_id:
             raise HTTPException(status_code=400, detail="Email already registered")
         user.email = user_update.email
-    if user_update.department is not None:
-        user.department = user_update.department
-    if user_update.rol is not None:
-        user.rol = user_update.rol
+    if user_update.username is not None:
+        user.username = user_update.username
+    if user_update.role is not None:
+        user.role = user_update.role
     
     db.commit()
     db.refresh(user)
@@ -78,8 +78,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     
     token_data = {
         "user_id": user.user_id,
-        "rol": user.rol.value,
-        "department": user.department.value
+        "role": user.role.value
     }
     access_token = create_access_token(data=token_data)
     
@@ -92,7 +91,7 @@ def change_password(user_id: int, payload: ChangePasswordMe, db: Session = Depen
         raise HTTPException(status_code=404, detail="User not found")
     if not authenticate_user(db, user.email, payload.old_password):
         raise HTTPException(status_code=403, detail="Current password incorrect")
-    user.password = get_password_hash(payload.new_password)
+    user.hashed_password = get_password_hash(payload.new_password)
     db.commit()
     return
 
@@ -124,16 +123,16 @@ def get_permissions(user_id: int, db: Session = Depends(get_db), current_user: U
 # ELIMINAR O AGREGAR MANUALMENTE EN EL DATABASE
 @router.post("/create-admin-test", status_code=201)
 def create_admin_test(db: Session = Depends(get_db)):
-    from app.auth.models import RolEnum, DepartmentEnum
-    existing_admin = db.query(User).filter(User.rol == RolEnum.ADMINISTRADOR).first()
+    from app.auth.models import RolEnum
+    existing_admin = db.query(User).filter(User.role == RolEnum.ADMIN).first()
     if existing_admin:
         return {"message": "Administrator already exists", "email": existing_admin.email}
     admin_user = User(
+        username="admin",
         email="admin@copymart.com",
         full_name="Administrador CopyMart",
-        password=get_password_hash("admin123"),
-        rol=RolEnum.ADMINISTRADOR,
-        department=DepartmentEnum.ADMINISTRACION,
+        hashed_password=get_password_hash("admin123"),
+        role=RolEnum.ADMIN,
         is_active=True,
     )
     db.add(admin_user)
@@ -143,6 +142,5 @@ def create_admin_test(db: Session = Depends(get_db)):
         "message": "Administrator created successfully",
         "email": admin_user.email,
         "full_name": admin_user.full_name,
-        "rol": admin_user.rol,
-        "department": admin_user.department
+        "role": admin_user.role
     }

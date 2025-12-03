@@ -20,6 +20,15 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
     
+    // Si es 401, limpiar sesión y redirigir al login
+    if (response.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('isAuthenticated')
+      window.location.href = '/login'
+      throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.')
+    }
+    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
       throw new Error(errorData.message || `Error ${response.status}`)
@@ -51,11 +60,8 @@ export const EquipmentStatus = {
 // Servicio de equipos
 export const equipmentService = {
   // CRUD de equipos
-  async getEquipment(page = 1, limit = 10, filters = {}) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString()
-    })
+  async getEquipment(filters = {}) {
+    const params = new URLSearchParams()
     
     // Agregar filtros opcionales
     Object.keys(filters).forEach(key => {
@@ -64,7 +70,8 @@ export const equipmentService = {
       }
     })
     
-    return apiRequest(`/api/equipment?${params}`)
+    const queryString = params.toString()
+    return apiRequest(queryString ? `/api/equipment?${queryString}` : '/api/equipment')
   },
 
   async getEquipmentById(id) {
