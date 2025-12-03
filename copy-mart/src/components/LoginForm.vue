@@ -3,7 +3,9 @@
     <div class="max-w-md w-full space-y-8">
       <div class="card">
         <div class="text-center mb-8">
-          <h2 class="text-3xl font-bold text-gray-900 mb-2">CopyMart ERP</h2>
+          <div class="flex justify-center mb-4">
+            <img src="/Logo.svg" alt="CopyMart ERP" class="h-20 w-auto">
+          </div>
           <p class="text-gray-600">Inicia sesión en tu cuenta</p>
         </div>
         
