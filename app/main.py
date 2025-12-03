@@ -1,16 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.auth.routers import router as user_router
-<<<<<<< HEAD
 from app.equipment.routers import router as equipment_router
+from app.rent.routers import router as rent_router
 from app.client.routers import router as client_router
 from fastapi.middleware.cors import CORSMiddleware
 
-=======
-from app.client.routers import router as client_router
-from app.contact.routers import router as contact_router
-from app.equipment.routers import router as equipment_router
->>>>>>> develop
 from app.core.database import Base, engine
 
 # Importar TODOS los modelos para que se registren con SQLAlchemy
@@ -35,14 +30,10 @@ app.add_middleware(
 )
 
 app.include_router(user_router)
-<<<<<<< HEAD
 app.include_router(equipment_router)
 app.include_router(client_router)
-=======
-app.include_router(client_router, prefix="/api/clients", tags=["clients"])
-app.include_router(contact_router, prefix="/api/contacts", tags=["contacts"])
-app.include_router(equipment_router, prefix="/api/equipment", tags=["equipment"])
->>>>>>> develop
+app.include_router(rent_router)
+
 
 @app.get("/")
 def root():
