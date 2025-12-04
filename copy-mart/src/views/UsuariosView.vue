@@ -101,9 +101,9 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Rol</label>
               <select v-model="selectedRole" class="input-field">
                 <option value="">Todos los roles</option>
-                <option value="admin">Administrador</option>
-                <option value="manager">Gerente</option>
-                <option value="employee">Empleado</option>
+                <option value="ADMINISTRADOR">Administrador</option>
+                <option value="GERENCIA">Gerente</option>
+                <option value="USUARIO">Usuario</option>
               </select>
             </div>
             
@@ -135,7 +135,7 @@
                   Estado
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Último acceso
+                  Creado
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
@@ -143,41 +143,54 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="user in filteredUsers" :key="user.id" class="hover:bg-gray-50">
+              <tr v-if="isLoading">
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                  Cargando usuarios...
+                </td>
+              </tr>
+              <tr v-else-if="filteredUsers.length === 0">
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                  No se encontraron usuarios
+                </td>
+              </tr>
+              <tr v-for="user in filteredUsers" :key="user.user_id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="h-10 w-10 flex-shrink-0">
                       <div class="h-10 w-10 bg-primary-600 rounded-full flex items-center justify-center">
-                        <span class="text-sm font-medium text-white">{{ getUserInitials(user.name) }}</span>
+                        <span class="text-sm font-medium text-white">{{ getUserInitials(user.full_name) }}</span>
                       </div>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+                      <div class="text-sm font-medium text-gray-900">{{ user.full_name }}</div>
                       <div class="text-sm text-gray-500">{{ user.email }}</div>
-                      <div class="text-sm text-gray-500">{{ user.phone }}</div>
+                      <div class="text-xs text-gray-400">@{{ user.username }}</div>
                     </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="[
                     'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                    user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                    user.role === 'manager' ? 'bg-blue-100 text-blue-800' :
+                    user.rol === 'ADMINISTRADOR' ? 'bg-red-100 text-red-800' :
+                    user.rol === 'GERENCIA' ? 'bg-blue-100 text-blue-800' :
                     'bg-gray-100 text-gray-800'
                   ]">
-                    {{ getRoleDisplayName(user.role) }}
+                    {{ getRoleDisplayName(user.rol) }}
                   </span>
+                  <div v-if="user.department" class="text-xs text-gray-500 mt-1">
+                    {{ getDepartmentDisplayName(user.department) }}
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="[
                     'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                    user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   ]">
-                    {{ user.status === 'active' ? 'Activo' : 'Inactivo' }}
+                    {{ user.is_active ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ formatDate(user.lastLogin) }}
+                  {{ formatDate(user.created_at) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
@@ -193,12 +206,12 @@
                       @click="toggleUserStatus(user)"
                       :class="[
                         'p-1 rounded',
-                        user.status === 'active' 
+                        user.is_active 
                           ? 'text-red-600 hover:text-red-900 hover:bg-red-50' 
                           : 'text-green-600 hover:text-green-900 hover:bg-green-50'
                       ]"
                     >
-                      <svg v-if="user.status === 'active'" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg v-if="user.is_active" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
                       </svg>
                       <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,13 +280,24 @@
           <form @submit.prevent="showCreateModal ? createUser() : updateUser()">
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre de usuario</label>
                 <input
-                  v-model="userForm.name"
+                  v-model="userForm.username"
                   type="text"
                   required
                   class="input-field"
-                  placeholder="Ej: Juan Pérez"
+                  placeholder="Ej: jperez"
+                >
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo</label>
+                <input
+                  v-model="userForm.full_name"
+                  type="text"
+                  required
+                  class="input-field"
+                  placeholder="Ej: Juan Pérez García"
                 >
               </div>
               
@@ -289,22 +313,23 @@
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
-                <input
-                  v-model="userForm.phone"
-                  type="tel"
-                  class="input-field"
-                  placeholder="+52 55 1234-5678"
-                >
-              </div>
-              
-              <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Rol</label>
-                <select v-model="userForm.role" required class="input-field">
+                <select v-model="userForm.rol" required class="input-field">
                   <option value="">Seleccionar rol</option>
-                  <option value="admin">Administrador</option>
-                  <option value="manager">Gerente</option>
-                  <option value="employee">Empleado</option>
+                  <option value="ADMINISTRADOR">Administrador</option>
+                  <option value="GERENCIA">Gerente</option>
+                  <option value="USUARIO">Usuario</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Departamento</label>
+                <select v-model="userForm.department" class="input-field">
+                  <option value="">Sin departamento</option>
+                  <option value="RH">Recursos Humanos</option>
+                  <option value="ADMINISTRACION">Administración</option>
+                  <option value="COMERCIAL">Comercial</option>
+                  <option value="OPERACIONES">Operaciones</option>
                 </select>
               </div>
               
@@ -321,11 +346,10 @@
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                <select v-model="userForm.status" required class="input-field">
-                  <option value="active">Activo</option>
-                  <option value="inactive">Inactivo</option>
-                </select>
+                <label class="flex items-center">
+                  <input type="checkbox" v-model="userForm.is_active" class="mr-2">
+                  <span class="text-sm font-medium text-gray-700">Usuario activo</span>
+                </label>
               </div>
             </div>
             
@@ -346,6 +370,7 @@
 
 <script>
 import AppNavigation from '../components/AppNavigation.vue'
+import userService from '../services/userService'
 
 export default {
   name: 'UsuariosView',
@@ -360,66 +385,17 @@ export default {
       showCreateModal: false,
       showEditModal: false,
       editingUser: null,
+      isLoading: false,
       userForm: {
-        name: '',
+        username: '',
+        full_name: '',
         email: '',
-        phone: '',
-        role: '',
+        rol: '',
+        department: '',
         password: '',
-        status: 'active'
+        is_active: true
       },
-      users: [
-        {
-          id: 1,
-          name: 'Juan Pérez García',
-          email: 'juan.perez@copymart.com',
-          phone: '+52 55 1234-5678',
-          role: 'admin',
-          status: 'active',
-          lastLogin: new Date('2025-11-06T09:30:00'),
-          createdAt: new Date('2025-01-15')
-        },
-        {
-          id: 2,
-          name: 'María González López',
-          email: 'maria.gonzalez@copymart.com',
-          phone: '+52 55 2345-6789',
-          role: 'manager',
-          status: 'active',
-          lastLogin: new Date('2025-11-05T16:45:00'),
-          createdAt: new Date('2025-02-10')
-        },
-        {
-          id: 3,
-          name: 'Carlos Rodríguez Hernández',
-          email: 'carlos.rodriguez@copymart.com',
-          phone: '+52 55 3456-7890',
-          role: 'employee',
-          status: 'active',
-          lastLogin: new Date('2025-11-06T08:15:00'),
-          createdAt: new Date('2025-03-05')
-        },
-        {
-          id: 4,
-          name: 'Ana Martínez Silva',
-          email: 'ana.martinez@copymart.com',
-          phone: '+52 55 4567-8901',
-          role: 'employee',
-          status: 'inactive',
-          lastLogin: new Date('2025-10-30T14:20:00'),
-          createdAt: new Date('2025-04-12')
-        },
-        {
-          id: 5,
-          name: 'Luis Torres Ramírez',
-          email: 'luis.torres@copymart.com',
-          phone: '+52 55 5678-9012',
-          role: 'manager',
-          status: 'active',
-          lastLogin: new Date('2025-11-05T17:30:00'),
-          createdAt: new Date('2025-05-20')
-        }
-      ]
+      users: []
     }
   },
   computed: {
@@ -427,44 +403,75 @@ export default {
       return this.users.length
     },
     activeUsers() {
-      return this.users.filter(user => user.status === 'active').length
+      return this.users.filter(user => user.is_active).length
     },
     inactiveUsers() {
-      return this.users.filter(user => user.status === 'inactive').length
+      return this.users.filter(user => !user.is_active).length
     },
     adminUsers() {
-      return this.users.filter(user => user.role === 'admin').length
+      return this.users.filter(user => user.rol === 'ADMINISTRADOR').length
     },
     filteredUsers() {
       return this.users.filter(user => {
         const matchesSearch = !this.searchQuery || 
-          user.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          user.full_name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           user.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          user.phone.includes(this.searchQuery)
+          (user.username && user.username.toLowerCase().includes(this.searchQuery.toLowerCase()))
         
-        const matchesRole = !this.selectedRole || user.role === this.selectedRole
-        const matchesStatus = !this.selectedStatus || user.status === this.selectedStatus
+        const matchesRole = !this.selectedRole || user.rol === this.selectedRole
+        const matchesStatus = !this.selectedStatus || 
+          (this.selectedStatus === 'active' && user.is_active) ||
+          (this.selectedStatus === 'inactive' && !user.is_active)
         
         return matchesSearch && matchesRole && matchesStatus
       })
     }
   },
+  async mounted() {
+    await this.loadUsers()
+  },
   methods: {
+    async loadUsers() {
+      this.isLoading = true
+      try {
+        const response = await userService.getUsers()
+        this.users = response || []
+      } catch (error) {
+        console.error('Error cargando usuarios:', error)
+        this.showErrorMessage('Error al cargar los usuarios')
+      } finally {
+        this.isLoading = false
+      }
+    },
+
     getUserInitials(name) {
+      if (!name) return '??'
       return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
     },
     
     getRoleDisplayName(role) {
       const roles = {
-        admin: 'Administrador',
-        manager: 'Gerente',
-        employee: 'Empleado'
+        'ADMINISTRADOR': 'Administrador',
+        'GERENCIA': 'Gerente',
+        'USUARIO': 'Usuario'
       }
       return roles[role] || role
     },
+
+    getDepartmentDisplayName(department) {
+      const departments = {
+        'RH': 'Recursos Humanos',
+        'ADMINISTRACION': 'Administración',
+        'COMERCIAL': 'Comercial',
+        'OPERACIONES': 'Operaciones'
+      }
+      return departments[department] || department
+    },
     
     formatDate(date) {
-      return date.toLocaleDateString('es-ES', {
+      if (!date) return 'Nunca'
+      const d = new Date(date)
+      return d.toLocaleDateString('es-ES', {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -476,60 +483,89 @@ export default {
     editUser(user) {
       this.editingUser = user
       this.userForm = {
-        name: user.name,
+        username: user.username || '',
+        full_name: user.full_name,
         email: user.email,
-        phone: user.phone,
-        role: user.role,
-        status: user.status,
+        rol: user.rol,
+        department: user.department || '',
+        is_active: user.is_active,
         password: ''
       }
       this.showEditModal = true
     },
     
-    createUser() {
-      const newUser = {
-        id: Math.max(...this.users.map(u => u.id)) + 1,
-        name: this.userForm.name,
-        email: this.userForm.email,
-        phone: this.userForm.phone,
-        role: this.userForm.role,
-        status: this.userForm.status,
-        lastLogin: null,
-        createdAt: new Date()
+    async createUser() {
+      this.isLoading = true
+      try {
+        const userData = {
+          username: this.userForm.username,
+          full_name: this.userForm.full_name,
+          email: this.userForm.email,
+          password: this.userForm.password,
+          rol: this.userForm.rol,
+          department: this.userForm.department || null,
+          is_active: this.userForm.is_active
+        }
+        
+        await userService.createUser(userData)
+        await this.loadUsers()
+        this.closeModal()
+        this.showSuccessMessage('Usuario creado exitosamente')
+      } catch (error) {
+        console.error('Error creando usuario:', error)
+        this.showErrorMessage('Error al crear el usuario: ' + error.message)
+      } finally {
+        this.isLoading = false
       }
-      
-      this.users.push(newUser)
-      this.closeModal()
-      this.showSuccessMessage('Usuario creado exitosamente')
     },
     
-    updateUser() {
-      if (this.editingUser) {
-        Object.assign(this.editingUser, {
-          name: this.userForm.name,
+    async updateUser() {
+      if (!this.editingUser) return
+      
+      this.isLoading = true
+      try {
+        const userData = {
+          username: this.userForm.username,
+          full_name: this.userForm.full_name,
           email: this.userForm.email,
-          phone: this.userForm.phone,
-          role: this.userForm.role,
-          status: this.userForm.status
-        })
+          rol: this.userForm.rol,
+          department: this.userForm.department || null,
+          is_active: this.userForm.is_active
+        }
         
+        await userService.updateUser(this.editingUser.user_id, userData)
+        await this.loadUsers()
         this.closeModal()
         this.showSuccessMessage('Usuario actualizado exitosamente')
+      } catch (error) {
+        console.error('Error actualizando usuario:', error)
+        this.showErrorMessage('Error al actualizar el usuario: ' + error.message)
+      } finally {
+        this.isLoading = false
       }
     },
     
-    toggleUserStatus(user) {
-      user.status = user.status === 'active' ? 'inactive' : 'active'
-      const action = user.status === 'active' ? 'activado' : 'desactivado'
-      this.showSuccessMessage(`Usuario ${action} exitosamente`)
+    async toggleUserStatus(user) {
+      try {
+        await userService.toggleUserStatus(user.user_id)
+        await this.loadUsers()
+        const action = !user.is_active ? 'activado' : 'desactivado'
+        this.showSuccessMessage(`Usuario ${action} exitosamente`)
+      } catch (error) {
+        console.error('Error cambiando estado:', error)
+        this.showErrorMessage('Error al cambiar el estado del usuario')
+      }
     },
     
-    deleteUser(user) {
-      if (confirm(`¿Estás seguro que deseas eliminar el usuario "${user.name}"?`)) {
-        const index = this.users.indexOf(user)
-        if (index > -1) {
-          this.users.splice(index, 1)
+    async deleteUser(user) {
+      if (confirm(`¿Estás seguro que deseas eliminar el usuario "${user.full_name}"?`)) {
+        try {
+          await userService.deleteUser(user.user_id)
+          await this.loadUsers()
           this.showSuccessMessage('Usuario eliminado exitosamente')
+        } catch (error) {
+          console.error('Error eliminando usuario:', error)
+          this.showErrorMessage('Error al eliminar el usuario')
         }
       }
     },
@@ -539,18 +575,22 @@ export default {
       this.showEditModal = false
       this.editingUser = null
       this.userForm = {
-        name: '',
+        username: '',
+        full_name: '',
         email: '',
-        phone: '',
-        role: '',
+        rol: '',
+        department: '',
         password: '',
-        status: 'active'
+        is_active: true
       }
     },
     
     showSuccessMessage(message) {
-      // En una aplicación real, aquí mostrarías un toast o notificación
       alert(message)
+    },
+
+    showErrorMessage(message) {
+      alert('Error: ' + message)
     }
   }
 }

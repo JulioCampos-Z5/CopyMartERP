@@ -480,93 +480,33 @@ export default {
   },
   data() {
     return {
-      equipment: [
-        // Datos de ejemplo
-        {
-          id: 1,
-          serial_number: 'HP001234',
-          model: 'LaserJet Pro M404dn',
-          brand_name: 'HP',
-          brand_id: 1,
-          equipment_type: 'IMPRESORA',
-          status: 'ACTIVO',
-          client_assigned: 'Ejemplo Corp',
-          location: 'Oficina Principal - Piso 2',
-          purchase_date: '2023-01-15',
-          purchase_price: 8500.00,
-          warranty_months: 12,
-          is_rental: false,
-          specifications: 'Impresión dúplex automática, 256MB RAM, velocidad 38 ppm'
-        },
-        {
-          id: 2,
-          serial_number: 'CN002567',
-          model: 'imageRUNNER 2530i',
-          brand_name: 'Canon',
-          brand_id: 2,
-          equipment_type: 'MULTIFUNCIONAL',
-          status: 'MANTENIMIENTO',
-          client_assigned: 'Servicios Integrales SA',
-          location: 'Departamento de Contabilidad',
-          purchase_date: '2023-03-20',
-          purchase_price: 15000.00,
-          warranty_months: 24,
-          is_rental: true,
-          rental_price: 1200.00,
-          specifications: 'Impresión, copia, escaneo, fax. 30 ppm, ADF de 50 hojas'
-        },
-        {
-          id: 3,
-          serial_number: 'EP003890',
-          model: 'WorkForce Pro WF-3720',
-          brand_name: 'Epson',
-          brand_id: 3,
-          equipment_type: 'MULTIFUNCIONAL',
-          status: 'ACTIVO',
-          client_assigned: null,
-          location: 'Almacén',
-          purchase_date: '2023-05-10',
-          purchase_price: 4500.00,
-          warranty_months: 12,
-          is_rental: false,
-          specifications: 'Inyección de tinta, impresión a doble cara, WiFi'
-        }
-      ],
-      brands: [
-        { id: 1, name: 'HP' },
-        { id: 2, name: 'Canon' },
-        { id: 3, name: 'Epson' },
-        { id: 4, name: 'Brother' },
-        { id: 5, name: 'Xerox' },
-        { id: 6, name: 'Kyocera' }
-      ],
+      equipment: [],
+      brands: [],
+      suppliers: [],
       searchQuery: '',
       typeFilter: '',
       statusFilter: '',
       brandFilter: '',
       currentPage: 1,
       itemsPerPage: 10,
-      totalItems: 3,
+      totalItems: 0,
       totalPages: 1,
       isLoading: false,
       showModal: false,
       isEditing: false,
       selectedEquipment: null,
       equipmentForm: {
-        serial_number: '',
+        serie: '',
         model: '',
-        equipment_type: '',
+        model_toner: '',
+        type: '',
         brand_id: '',
-        status: 'ACTIVO',
-        client_assigned: '',
-        location: '',
-        purchase_date: '',
-        purchase_price: '',
-        warranty_months: '',
-        is_rental: false,
-        rental_price: '',
-        specifications: '',
-        notes: ''
+        supplier_id: '',
+        location_status: 'bodega',
+        invoice: '',
+        cost: null,
+        comments: '',
+        is_active: true
       }
     }
   },
@@ -574,10 +514,24 @@ export default {
     stats() {
       return {
         total: this.equipment.length,
-        active: this.equipment.filter(e => e.status === 'ACTIVO').length,
-        maintenance: this.equipment.filter(e => e.status === 'MANTENIMIENTO').length,
-        outOfService: this.equipment.filter(e => e.status === 'FUERA_SERVICIO').length
+        active: this.equipment.filter(e => e.location_status === 'asignado').length,
+        maintenance: this.equipment.filter(e => e.location_status === 'taller').length,
+        outOfService: this.equipment.filter(e => e.location_status === 'bodega').length
       }
+    },
+    filteredEquipment() {
+      return this.equipment.filter(e => {
+        const matchSearch = !this.searchQuery || 
+          e.model?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          e.serie?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          e.sku?.toLowerCase().includes(this.searchQuery.toLowerCase())
+        
+        const matchType = !this.typeFilter || e.type === this.typeFilter
+        const matchStatus = !this.statusFilter || e.location_status === this.statusFilter
+        const matchBrand = !this.brandFilter || e.brand_id == this.brandFilter
+        
+        return matchSearch && matchType && matchStatus && matchBrand
+      })
     },
     visiblePages() {
       const pages = []
@@ -592,61 +546,61 @@ export default {
     }
   },
   async mounted() {
-    await this.loadEquipment()
+    await this.loadData()
   },
   methods: {
-    async loadEquipment() {
+    async loadData() {
       try {
         this.isLoading = true
-        // Simulación de carga - cuando el backend esté listo, usar:
-        // const response = await equipmentService.getEquipment(this.currentPage, this.itemsPerPage, {
-        //   search: this.searchQuery,
-        //   type: this.typeFilter,
-        //   status: this.statusFilter,
-        //   brand: this.brandFilter
-        // })
-        // this.equipment = response.items || response.data || []
-        // this.totalItems = response.total || 0
-        // this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage)
-        
-        setTimeout(() => {
-          this.totalItems = this.equipment.length
-          this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage)
-          this.isLoading = false
-        }, 500)
+        const [equipmentData, brandsData, suppliersData] = await Promise.all([
+          equipmentService.getEquipment(),
+          equipmentService.getBrands(),
+          equipmentService.getSuppliers()
+        ])
+        this.equipment = equipmentData || []
+        this.brands = brandsData || []
+        this.suppliers = suppliersData || []
+        this.totalItems = this.equipment.length
+        this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage)
       } catch (error) {
         console.error('Error loading equipment:', error)
+        alert('Error al cargar los equipos')
+      } finally {
         this.isLoading = false
       }
     },
 
+    async loadEquipment() {
+      await this.loadData()
+    },
+
     async searchEquipment() {
       this.currentPage = 1
-      await this.loadEquipment()
     },
 
     async applyFilters() {
       this.currentPage = 1
-      await this.loadEquipment()
+    },
+
+    getBrandName(brandId) {
+      const brand = this.brands.find(b => b.brand_id === brandId)
+      return brand ? brand.name : '-'
     },
 
     openCreateModal() {
       this.isEditing = false
       this.equipmentForm = {
-        serial_number: '',
+        serie: '',
         model: '',
-        equipment_type: '',
+        model_toner: '',
+        type: '',
         brand_id: '',
-        status: 'ACTIVO',
-        client_assigned: '',
-        location: '',
-        purchase_date: '',
-        purchase_price: '',
-        warranty_months: '',
-        is_rental: false,
-        rental_price: '',
-        specifications: '',
-        notes: ''
+        supplier_id: '',
+        location_status: 'bodega',
+        invoice: '',
+        cost: null,
+        comments: '',
+        is_active: true
       }
       this.showModal = true
     },
@@ -654,53 +608,61 @@ export default {
     editEquipment(equipment) {
       this.isEditing = true
       this.selectedEquipment = equipment
-      this.equipmentForm = { ...equipment }
+      this.equipmentForm = {
+        serie: equipment.serie,
+        model: equipment.model,
+        model_toner: equipment.model_toner,
+        type: equipment.type,
+        brand_id: equipment.brand_id,
+        supplier_id: equipment.supplier_id,
+        location_status: equipment.location_status,
+        invoice: equipment.invoice || '',
+        cost: equipment.cost,
+        comments: equipment.comments || '',
+        is_active: equipment.is_active
+      }
       this.showModal = true
     },
 
     viewEquipment(equipment) {
-      alert(`Ver detalles de: ${equipment.model} (${equipment.serial_number})`)
-      console.log('Viewing equipment:', equipment)
+      alert(`Equipo: ${equipment.model}\nSerie: ${equipment.serie}\nSKU: ${equipment.sku}\nTipo: ${equipment.type}\nTóner: ${equipment.model_toner}`)
     },
 
     scheduleMaintenanceModal(equipment) {
       alert(`Programar mantenimiento para: ${equipment.model}`)
-      console.log('Schedule maintenance for:', equipment)
     },
 
     async saveEquipment() {
       try {
         this.isLoading = true
         
+        const data = {
+          brand_id: parseInt(this.equipmentForm.brand_id),
+          model: this.equipmentForm.model,
+          serie: this.equipmentForm.serie,
+          model_toner: this.equipmentForm.model_toner,
+          type: this.equipmentForm.type,
+          supplier_id: parseInt(this.equipmentForm.supplier_id),
+          invoice: this.equipmentForm.invoice || null,
+          cost: this.equipmentForm.cost ? parseFloat(this.equipmentForm.cost) : null,
+          location_status: this.equipmentForm.location_status,
+          comments: this.equipmentForm.comments || null,
+          is_active: this.equipmentForm.is_active
+        }
+        
         if (this.isEditing) {
-          // Simular actualización
-          const index = this.equipment.findIndex(e => e.id === this.selectedEquipment.id)
-          if (index !== -1) {
-            this.equipment[index] = { ...this.equipment[index], ...this.equipmentForm }
-            // Agregar brand_name basado en brand_id
-            const brand = this.brands.find(b => b.id == this.equipmentForm.brand_id)
-            if (brand) {
-              this.equipment[index].brand_name = brand.name
-            }
-          }
+          await equipmentService.updateEquipment(this.selectedEquipment.item_id, data)
           alert('Equipo actualizado correctamente')
         } else {
-          // Simular creación
-          const brand = this.brands.find(b => b.id == this.equipmentForm.brand_id)
-          const newEquipment = {
-            id: Date.now(),
-            ...this.equipmentForm,
-            brand_name: brand ? brand.name : 'Desconocida'
-          }
-          this.equipment.push(newEquipment)
+          await equipmentService.createEquipment(data)
           alert('Equipo creado correctamente')
         }
         
         this.closeModal()
-        await this.loadEquipment()
+        await this.loadData()
       } catch (error) {
         console.error('Error saving equipment:', error)
-        alert('Error al guardar el equipo')
+        alert('Error al guardar el equipo: ' + error.message)
       } finally {
         this.isLoading = false
       }
@@ -708,11 +670,10 @@ export default {
 
     async toggleEquipmentStatus(equipment) {
       try {
-        const newStatus = equipment.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO'
-        equipment.status = newStatus
-        alert(`Equipo ${newStatus === 'ACTIVO' ? 'activado' : 'desactivado'} correctamente`)
-        // Cuando el backend esté listo:
-        // await equipmentService.updateEquipmentStatus(equipment.id, newStatus)
+        const newStatus = equipment.location_status === 'asignado' ? 'bodega' : 'asignado'
+        await equipmentService.updateEquipmentStatus(equipment.item_id, newStatus)
+        await this.loadData()
+        alert(`Equipo movido a ${newStatus === 'bodega' ? 'Bodega' : 'Asignado'}`)
       } catch (error) {
         console.error('Error toggling equipment status:', error)
         alert('Error al cambiar el estado del equipo')
@@ -728,42 +689,38 @@ export default {
     // Métodos de utilidad
     getEquipmentIcon(type) {
       const icons = {
-        'IMPRESORA': 'fas fa-print',
-        'COPIADORA': 'fas fa-copy',
-        'MULTIFUNCIONAL': 'fas fa-desktop',
-        'ESCANER': 'fas fa-scanner',
-        'PLOTTER': 'fas fa-drafting-compass'
+        'monocromo': 'fas fa-print',
+        'color': 'fas fa-palette'
       }
       return icons[type] || 'fas fa-desktop'
     },
 
     getEquipmentTypeLabel(type) {
       const labels = {
-        'IMPRESORA': 'Impresora',
-        'COPIADORA': 'Copiadora',
-        'MULTIFUNCIONAL': 'Multifuncional',
-        'ESCANER': 'Escáner',
-        'PLOTTER': 'Plotter'
+        'monocromo': 'Monocromo',
+        'color': 'Color'
       }
       return labels[type] || type
     },
 
     getEquipmentStatusLabel(status) {
       const labels = {
-        'ACTIVO': 'Activo',
-        'INACTIVO': 'Inactivo',
-        'MANTENIMIENTO': 'En Mantenimiento',
-        'FUERA_SERVICIO': 'Fuera de Servicio'
+        'bodega': 'En Bodega',
+        'asignado': 'Asignado',
+        'taller': 'En Taller',
+        'vendido': 'Vendido',
+        'desconocido': 'Desconocido'
       }
       return labels[status] || status
     },
 
     getEquipmentStatusColor(status) {
       const colors = {
-        'ACTIVO': 'bg-green-100 text-green-800',
-        'INACTIVO': 'bg-gray-100 text-gray-800',
-        'MANTENIMIENTO': 'bg-yellow-100 text-yellow-800',
-        'FUERA_SERVICIO': 'bg-red-100 text-red-800'
+        'bodega': 'bg-blue-100 text-blue-800',
+        'asignado': 'bg-green-100 text-green-800',
+        'taller': 'bg-yellow-100 text-yellow-800',
+        'vendido': 'bg-purple-100 text-purple-800',
+        'desconocido': 'bg-gray-100 text-gray-800'
       }
       return colors[status] || 'bg-gray-100 text-gray-800'
     },

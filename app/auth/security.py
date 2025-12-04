@@ -11,7 +11,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 480
 
 pwd_context = CryptContext(
-    schemes=["bcrypt"],
+    schemes=["argon2", "bcrypt"],
     deprecated="auto"
 )
 
@@ -31,14 +31,14 @@ def decode_token(token: str) -> TokenData:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])  
         user_id = payload.get("user_id")
-        role = payload.get("role")
+        rol = payload.get("rol")
 
         if user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token Invalid") 
 
         return TokenData(
             user_id=user_id,
-            role=RolEnum(role) if role else None
+            rol=RolEnum(rol) if rol else None
         )
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token Invalid")

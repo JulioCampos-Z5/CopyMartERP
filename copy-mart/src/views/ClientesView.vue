@@ -503,7 +503,7 @@ export default {
         contact_name: client.contact?.name || '',
         contact_phone: client.contact?.phone || '',
         contact_email: client.contact?.email || '',
-        contact_rol: client.contact?.rol || ''
+        contact_rol: client.contact?.position || ''
       }
       this.showModal = true
     },

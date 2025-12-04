@@ -94,9 +94,20 @@ class ClientResponse(BaseModel):
         from_attributes = True
 
 
+class ContactInfo(BaseModel):
+    contact_id: int
+    name: str
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    position: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
+
 class ClientListResponse(BaseModel):
     client_id: int
     name: str
+    comercial_name: Optional[str] = None
     rfc: Optional[str]
     address: Optional[str]
     colonia: Optional[str]
@@ -106,5 +117,7 @@ class ClientListResponse(BaseModel):
     total_branches: int
     total_areas: int
     created_at: datetime
+    contact: Optional[ContactInfo] = None
+    
     class Config:
         from_attributes = True

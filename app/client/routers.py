@@ -33,7 +33,7 @@ from typing import List, Optional
 from app.core.database import get_db
 from app.auth.routers import get_current_user
 from app.client.schemas import (
-    ClientCreate, ClientUpdate, ClientResponse, ClientListResponse,
+    ClientCreate, ClientUpdate, ClientResponse, ClientListResponse, ContactInfo,
     BranchCreate, BranchUpdate, BranchResponse,
     AreaCreate, AreaUpdate, AreaResponse
 )
@@ -69,10 +69,27 @@ def get_all_clients(
         for b in c.branches:
             total_areas += len(b.areas)
 
+        # Obtener contacto principal
+        contact_info = None
+        if c.contacts:
+            # Buscar el contacto principal (is_primary=True) o el primero
+            primary_contact = next((ct for ct in c.contacts if ct.is_primary), None)
+            if not primary_contact and c.contacts:
+                primary_contact = c.contacts[0]
+            if primary_contact:
+                contact_info = ContactInfo(
+                    contact_id=primary_contact.contact_id,
+                    name=primary_contact.name,
+                    phone=primary_contact.phone,
+                    email=primary_contact.email,
+                    position=primary_contact.position
+                )
+
         result.append(
             ClientListResponse(
                 client_id=c.client_id,
                 name=c.name,
+                comercial_name=c.comercial_name,
                 rfc=c.rfc,
 
                 address=c.address,
@@ -83,7 +100,8 @@ def get_all_clients(
                 is_active=c.is_active,
                 created_at=c.created_at,
                 total_branches=len(c.branches),
-                total_areas=total_areas
+                total_areas=total_areas,
+                contact=contact_info
             )
         )
 

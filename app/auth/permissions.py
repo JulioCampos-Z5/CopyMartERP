@@ -3,15 +3,15 @@ from app.auth.models import User, RolEnum
 
 # Módulos accesibles según el rol
 MODULE_PERMISSIONS = {
-    RolEnum.ADMIN: {
+    RolEnum.ADMINISTRADOR: {
         "modules": ["rh", "ventas", "inventario", "rentas", "finance", "atencion_clientes", "soporte", "operaciones", "usuarios"],
         "read_only": []
     },
-    RolEnum.GERENTE: {
+    RolEnum.GERENCIA: {
         "modules": ["ventas", "inventario", "rentas", "finance", "atencion_clientes", "operaciones"],
         "read_only": ["rh"]
     },
-    RolEnum.EMPLEADO: {
+    RolEnum.USUARIO: {
         "modules": ["ventas", "atencion_clientes"],
         "read_only": ["inventario"]
     },
@@ -19,39 +19,39 @@ MODULE_PERMISSIONS = {
 
 
 def can_create(user: User) -> bool:
-    return user.role in [RolEnum.ADMIN, RolEnum.GERENTE]
+    return user.rol in [RolEnum.ADMINISTRADOR, RolEnum.GERENCIA]
 
 def can_edit(user: User) -> bool:
-    return user.role in [RolEnum.ADMIN, RolEnum.GERENTE]
+    return user.rol in [RolEnum.ADMINISTRADOR, RolEnum.GERENCIA]
 
 def can_delete(user: User) -> bool:
-    return user.role in [RolEnum.ADMIN, RolEnum.GERENTE]
+    return user.rol in [RolEnum.ADMINISTRADOR, RolEnum.GERENCIA]
 
 def can_view_module(user: User, module: str) -> bool:
-    permission = MODULE_PERMISSIONS.get(user.role, {"modules": [], "read_only": []})
+    permission = MODULE_PERMISSIONS.get(user.rol, {"modules": [], "read_only": []})
     return module in permission["modules"] or module in permission.get("read_only", [])
 
 def can_edit_module(user: User, module: str) -> bool:
-    if user.role == RolEnum.EMPLEADO:
+    if user.rol == RolEnum.USUARIO:
         return False
     return True
 
 def get_accesible_modules(user: User) -> list[str]:
-    permission = MODULE_PERMISSIONS.get(user.role, {"modules": [], "read_only": []})
+    permission = MODULE_PERMISSIONS.get(user.rol, {"modules": [], "read_only": []})
     return permission["modules"] + permission.get("read_only", [])
 
 def can_create_rol(creator: User, rol_to_create: RolEnum) -> bool:
-    if creator.role == RolEnum.ADMIN:
-        return rol_to_create in [RolEnum.GERENTE, RolEnum.EMPLEADO]
-    elif creator.role == RolEnum.GERENTE:
-        return rol_to_create == RolEnum.EMPLEADO
+    if creator.rol == RolEnum.ADMINISTRADOR:
+        return rol_to_create in [RolEnum.GERENCIA, RolEnum.USUARIO]
+    elif creator.rol == RolEnum.GERENCIA:
+        return rol_to_create == RolEnum.USUARIO
     return False
 
 def can_modify_user(modifier: User, target: User) -> bool:
-    if modifier.role == RolEnum.ADMIN:
-        return target.role in [RolEnum.GERENTE, RolEnum.EMPLEADO]
-    elif modifier.role == RolEnum.GERENTE:
-        return target.role == RolEnum.EMPLEADO
+    if modifier.rol == RolEnum.ADMINISTRADOR:
+        return target.rol in [RolEnum.GERENCIA, RolEnum.USUARIO]
+    elif modifier.rol == RolEnum.GERENCIA:
+        return target.rol == RolEnum.USUARIO
     return False
 
 def can_modify_password(modifier: User, target: User) -> bool:

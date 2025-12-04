@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
-from app.auth.models import RolEnum
+from app.auth.models import RolEnum, DepartmentEnum
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -10,13 +10,15 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=6)
-    role: RolEnum = RolEnum.EMPLEADO
+    rol: RolEnum = RolEnum.USUARIO
+    department: DepartmentEnum = DepartmentEnum.ADMINISTRACION
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
     username: Optional[str] = None
-    role: Optional[RolEnum] = None
+    rol: Optional[RolEnum] = None
+    department: Optional[DepartmentEnum] = None
 
 class ChangePassword(BaseModel):
     new_password: str = Field(..., min_length=6, description="Nueva contraseña")    
@@ -33,7 +35,8 @@ class UserResponse(BaseModel):
     username: str
     email: str
     full_name: str
-    role: RolEnum
+    rol: RolEnum
+    department: DepartmentEnum
     is_active: bool
     created_at: datetime
 
@@ -46,7 +49,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     user_id: Optional[int] = None
-    role: Optional[RolEnum] = None
+    rol: Optional[RolEnum] = None
 
 class LoginRequest(BaseModel):
     email: str

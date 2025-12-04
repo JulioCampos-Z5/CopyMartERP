@@ -29,9 +29,14 @@ const apiRequest = async (endpoint, options = {}) => {
       throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.')
     }
     
+    // Para DELETE que retorna 204
+    if (response.status === 204) {
+      return true
+    }
+    
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
-      throw new Error(errorData.message || `Error ${response.status}`)
+      const errorData = await response.json().catch(() => ({ detail: 'Error desconocido' }))
+      throw new Error(errorData.detail || errorData.message || `Error ${response.status}`)
     }
     
     return await response.json()
@@ -41,37 +46,25 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 }
 
-// Enums para equipos
-export const EquipmentType = {
-  IMPRESORA: 'IMPRESORA',
-  COPIADORA: 'COPIADORA',
-  MULTIFUNCIONAL: 'MULTIFUNCIONAL',
-  ESCANER: 'ESCANER',
-  PLOTTER: 'PLOTTER'
+// Enums para equipos (deben coincidir con el backend)
+export const TypeColor = {
+  MONOCROMO: 'monocromo',
+  COLOR: 'color'
 }
 
-export const EquipmentStatus = {
-  ACTIVO: 'ACTIVO',
-  INACTIVO: 'INACTIVO',
-  MANTENIMIENTO: 'MANTENIMIENTO',
-  FUERA_SERVICIO: 'FUERA_SERVICIO'
+export const LocationStatus = {
+  BODEGA: 'bodega',
+  ASIGNADO: 'asignado',
+  VENDIDO: 'vendido',
+  TALLER: 'taller',
+  DESCONOCIDO: 'desconocido'
 }
 
 // Servicio de equipos
 export const equipmentService = {
   // CRUD de equipos
-  async getEquipment(filters = {}) {
-    const params = new URLSearchParams()
-    
-    // Agregar filtros opcionales
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) {
-        params.append(key, filters[key])
-      }
-    })
-    
-    const queryString = params.toString()
-    return apiRequest(queryString ? `/api/equipment?${queryString}` : '/api/equipment')
+  async getEquipment() {
+    return apiRequest('/api/equipment/')
   },
 
   async getEquipmentById(id) {
@@ -79,7 +72,7 @@ export const equipmentService = {
   },
 
   async createEquipment(equipmentData) {
-    return apiRequest('/api/equipment', {
+    return apiRequest('/api/equipment/', {
       method: 'POST',
       body: JSON.stringify(equipmentData)
     })
@@ -92,165 +85,70 @@ export const equipmentService = {
     })
   },
 
+  async updateEquipmentStatus(id, status) {
+    return apiRequest(`/api/equipment/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ location_status: status })
+    })
+  },
+
   async deleteEquipment(id) {
     return apiRequest(`/api/equipment/${id}`, {
       method: 'DELETE'
     })
   },
 
-  async toggleEquipmentStatus(id) {
-    return apiRequest(`/api/equipment/${id}/toggle-status`, {
-      method: 'PATCH'
-    })
-  },
-
-  async updateEquipmentStatus(id, status) {
-    return apiRequest(`/api/equipment/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status })
-    })
-  },
-
-  // Métodos de filtrado y búsqueda
-  async searchEquipment(query) {
-    return apiRequest(`/api/equipment/search?q=${encodeURIComponent(query)}`)
-  },
-
-  async getEquipmentByType(type) {
-    return apiRequest(`/api/equipment/by-type/${type}`)
-  },
-
-  async getEquipmentByStatus(status) {
-    return apiRequest(`/api/equipment/by-status/${status}`)
-  },
-
-  async getEquipmentByBrand(brandId) {
-    return apiRequest(`/api/equipment/by-brand/${brandId}`)
-  },
-
-  async getEquipmentByClient(clientName) {
-    return apiRequest(`/api/equipment/by-client?client=${encodeURIComponent(clientName)}`)
-  },
-
-  // Mantenimiento
-  async scheduleMaintenanceMaintenance(id, maintenanceData) {
-    return apiRequest(`/api/equipment/${id}/maintenance`, {
-      method: 'POST',
-      body: JSON.stringify(maintenanceData)
-    })
-  },
-
-  async getMaintenanceHistory(id) {
-    return apiRequest(`/api/equipment/${id}/maintenance-history`)
-  },
-
-  async getEquipmentDueMaintenance() {
-    return apiRequest('/api/equipment/maintenance-due')
-  },
-
   // CRUD de marcas
   async getBrands() {
-    return apiRequest('/api/equipment/brands')
-  },
-
-  async getBrandById(id) {
-    return apiRequest(`/api/equipment/brands/${id}`)
+    return apiRequest('/api/equipment/brands/')
   },
 
   async createBrand(brandData) {
-    return apiRequest('/api/equipment/brands', {
+    return apiRequest('/api/equipment/brands/', {
       method: 'POST',
       body: JSON.stringify(brandData)
-    })
-  },
-
-  async updateBrand(id, brandData) {
-    return apiRequest(`/api/equipment/brands/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(brandData)
-    })
-  },
-
-  async deleteBrand(id) {
-    return apiRequest(`/api/equipment/brands/${id}`, {
-      method: 'DELETE'
     })
   },
 
   // CRUD de proveedores
   async getSuppliers() {
-    return apiRequest('/api/equipment/suppliers')
-  },
-
-  async getSupplierById(id) {
-    return apiRequest(`/api/equipment/suppliers/${id}`)
+    return apiRequest('/api/equipment/suppliers/')
   },
 
   async createSupplier(supplierData) {
-    return apiRequest('/api/equipment/suppliers', {
+    return apiRequest('/api/equipment/suppliers/', {
       method: 'POST',
       body: JSON.stringify(supplierData)
     })
   },
 
-  async updateSupplier(id, supplierData) {
-    return apiRequest(`/api/equipment/suppliers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(supplierData)
-    })
-  },
-
-  async deleteSupplier(id) {
-    return apiRequest(`/api/equipment/suppliers/${id}`, {
-      method: 'DELETE'
-    })
-  },
-
-  // Estadísticas y reportes
-  async getEquipmentStats() {
-    return apiRequest('/api/equipment/stats')
-  },
-
-  async getEquipmentByLocation() {
-    return apiRequest('/api/equipment/by-location')
-  },
-
-  async getWarrantyExpiring(days = 30) {
-    return apiRequest(`/api/equipment/warranty-expiring?days=${days}`)
-  },
-
-  async getRentalEquipment() {
-    return apiRequest('/api/equipment/rentals')
-  },
-
   // Utilidades
-  getEquipmentTypeLabel(type) {
+  getTypeLabel(type) {
     const labels = {
-      [EquipmentType.IMPRESORA]: 'Impresora',
-      [EquipmentType.COPIADORA]: 'Copiadora',
-      [EquipmentType.MULTIFUNCIONAL]: 'Multifuncional',
-      [EquipmentType.ESCANER]: 'Escáner',
-      [EquipmentType.PLOTTER]: 'Plotter'
+      [TypeColor.MONOCROMO]: 'Monocromo',
+      [TypeColor.COLOR]: 'Color'
     }
     return labels[type] || type
   },
 
-  getEquipmentStatusLabel(status) {
+  getLocationStatusLabel(status) {
     const labels = {
-      [EquipmentStatus.ACTIVO]: 'Activo',
-      [EquipmentStatus.INACTIVO]: 'Inactivo',
-      [EquipmentStatus.MANTENIMIENTO]: 'En Mantenimiento',
-      [EquipmentStatus.FUERA_SERVICIO]: 'Fuera de Servicio'
+      [LocationStatus.BODEGA]: 'En Bodega',
+      [LocationStatus.ASIGNADO]: 'Asignado',
+      [LocationStatus.VENDIDO]: 'Vendido',
+      [LocationStatus.TALLER]: 'En Taller',
+      [LocationStatus.DESCONOCIDO]: 'Desconocido'
     }
     return labels[status] || status
   },
 
-  getEquipmentStatusColor(status) {
+  getLocationStatusColor(status) {
     const colors = {
-      [EquipmentStatus.ACTIVO]: 'text-green-600 bg-green-100',
-      [EquipmentStatus.INACTIVO]: 'text-gray-600 bg-gray-100',
-      [EquipmentStatus.MANTENIMIENTO]: 'text-yellow-600 bg-yellow-100',
-      [EquipmentStatus.FUERA_SERVICIO]: 'text-red-600 bg-red-100'
+      [LocationStatus.BODEGA]: 'text-blue-600 bg-blue-100',
+      [LocationStatus.ASIGNADO]: 'text-green-600 bg-green-100',
+      [LocationStatus.VENDIDO]: 'text-purple-600 bg-purple-100',
+      [LocationStatus.TALLER]: 'text-yellow-600 bg-yellow-100',
+      [LocationStatus.DESCONOCIDO]: 'text-gray-600 bg-gray-100'
     }
     return colors[status] || 'text-gray-600 bg-gray-100'
   }

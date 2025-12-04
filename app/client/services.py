@@ -101,7 +101,10 @@ class ClientService:
     def get_all_clients(db: Session, skip: int = 0, limit: int = 100,
                         is_active: Optional[bool] = None) -> List[Client]:
 
-        query = db.query(Client).options(joinedload(Client.branches))
+        query = db.query(Client).options(
+            joinedload(Client.branches).joinedload(Branch.areas),
+            joinedload(Client.contacts)
+        )
 
         if is_active is not None:
             query = query.filter(Client.is_active == is_active)

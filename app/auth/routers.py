@@ -63,8 +63,10 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
         user.email = user_update.email
     if user_update.username is not None:
         user.username = user_update.username
-    if user_update.role is not None:
-        user.role = user_update.role
+    if user_update.rol is not None:
+        user.rol = user_update.rol
+    if user_update.department is not None:
+        user.department = user_update.department
     
     db.commit()
     db.refresh(user)
@@ -78,7 +80,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     
     token_data = {
         "user_id": user.user_id,
-        "role": user.role.value
+        "rol": user.rol.value
     }
     access_token = create_access_token(data=token_data)
     
@@ -91,7 +93,7 @@ def change_password(user_id: int, payload: ChangePasswordMe, db: Session = Depen
         raise HTTPException(status_code=404, detail="User not found")
     if not authenticate_user(db, user.email, payload.old_password):
         raise HTTPException(status_code=403, detail="Current password incorrect")
-    user.hashed_password = get_password_hash(payload.new_password)
+    user.password = get_password_hash(payload.new_password)
     db.commit()
     return
 
@@ -105,6 +107,30 @@ def change_email(user_id: int, payload: ChangeEmail, db: Session = Depends(get_d
     user.email = payload.new_email
     db.commit()
     return
+
+
+@router.patch("/{user_id}/toggle-status", response_model=UserResponse)
+def toggle_user_status(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Activa o desactiva un usuario"""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = not user.is_active
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Elimina un usuario (soft delete - lo desactiva)"""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = False
+    db.commit()
+    return None
+
 
 @router.get("/{user_id}/permissions", response_model=PermissionsResponse)
 def get_permissions(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -123,16 +149,17 @@ def get_permissions(user_id: int, db: Session = Depends(get_db), current_user: U
 # ELIMINAR O AGREGAR MANUALMENTE EN EL DATABASE
 @router.post("/create-admin-test", status_code=201)
 def create_admin_test(db: Session = Depends(get_db)):
-    from app.auth.models import RolEnum
-    existing_admin = db.query(User).filter(User.role == RolEnum.ADMIN).first()
+    from app.auth.models import RolEnum, DepartmentEnum
+    existing_admin = db.query(User).filter(User.rol == RolEnum.ADMINISTRADOR).first()
     if existing_admin:
         return {"message": "Administrator already exists", "email": existing_admin.email}
     admin_user = User(
         username="admin",
         email="admin@copymart.com",
         full_name="Administrador CopyMart",
-        hashed_password=get_password_hash("admin123"),
-        role=RolEnum.ADMIN,
+        password=get_password_hash("admin123"),
+        rol=RolEnum.ADMINISTRADOR,
+        department=DepartmentEnum.ADMINISTRACION,
         is_active=True,
     )
     db.add(admin_user)
@@ -142,5 +169,5 @@ def create_admin_test(db: Session = Depends(get_db)):
         "message": "Administrator created successfully",
         "email": admin_user.email,
         "full_name": admin_user.full_name,
-        "role": admin_user.role
+        "rol": admin_user.rol
     }

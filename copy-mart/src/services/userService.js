@@ -135,8 +135,32 @@ export const userService = {
   },
 
   async deleteUser(id) {
-    return apiRequest(`/users/${id}`, {
-      method: 'DELETE'
+    const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    
+    if (response.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('isAuthenticated')
+      window.location.href = '/login'
+      throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.')
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
+      throw new Error(errorData.message || `Error ${response.status}`)
+    }
+    
+    return true
+  },
+
+  async toggleUserStatus(id) {
+    return apiRequest(`/users/${id}/toggle-status`, {
+      method: 'PATCH'
     })
   },
 

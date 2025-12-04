@@ -498,4 +498,177 @@ Desarrollado para CopyMart - Sistema de Gestión Empresarial
 
 ---
 
-**Última actualización:** 21 de noviembre de 2025
+**Última actualización:** 3 de diciembre de 2025
+
+---
+
+## 🆕 Changelog - Versión 2.0.0 (3 de diciembre de 2025)
+
+### Módulos Conectados al Backend
+
+Se realizó una revisión completa de la integración frontend-backend. A continuación el estado actual:
+
+| Módulo | Vista | Conectado | Notas |
+|--------|-------|-----------|-------|
+| **Almacén** | AlmacenView.vue | ✅ | CRUD completo de equipos, marcas y proveedores |
+| **Rentas** | RentasView.vue | ✅ | Gestión de contratos de renta |
+| **Recursos Humanos** | RHView.vue | ✅ | Gestión completa de usuarios |
+| **Cobranza** | CobranzaView.vue | ❌ | Solo datos estáticos (pendiente) |
+| **Compras** | ComprasView.vue | ❌ | Solo datos estáticos (pendiente) |
+| **Facturación** | FacturacionView.vue | ❌ | Solo datos estáticos (pendiente) |
+| **Atención Clientes** | AtencionClientesView.vue | ❌ | Solo datos estáticos (pendiente) |
+| **Ventas** | VentasView.vue | ❌ | Módulo en desarrollo |
+| **Órdenes Servicio** | OrdenesServicioView.vue | ❌ | Solo datos estáticos (pendiente) |
+| **Rutas** | RutasView.vue | ❌ | Solo datos estáticos (pendiente) |
+| **TI** | TIView.vue | ❌ | Solo datos estáticos (pendiente) |
+
+---
+
+### Backend - Módulo de Equipos (app/equipment/)
+
+#### 1. Routers Actualizados (`routers.py`)
+- **Documentación completa** con docstrings en todos los endpoints
+- **Endpoints de Marcas:**
+  - `POST /api/equipment/brands/` - Crear marca (requiere name y prefix)
+  - `GET /api/equipment/brands/` - Listar marcas
+- **Endpoints de Proveedores:**
+  - `POST /api/equipment/suppliers/` - Crear proveedor
+  - `GET /api/equipment/suppliers/` - Listar proveedores
+- **Endpoints de Equipos:**
+  - `POST /api/equipment/` - Crear equipo (genera SKU automático)
+  - `GET /api/equipment/` - Listar equipos
+  - `GET /api/equipment/{id}` - Obtener equipo
+  - `PUT /api/equipment/{id}` - Actualizar equipo completo
+  - `PATCH /api/equipment/{id}/status` - Cambiar ubicación
+
+#### 2. Servicios Mejorados (`services.py`)
+- **`create_brand()`**: Crea marca con prefijo normalizado (minúsculas)
+- **`create_supplier()`**: Crea proveedor simple
+- **`create_equipment()`**: 
+  - Genera SKU automático: `{prefijo}{número}` (ej: hp01, canon02)
+  - Calcula número secuencial por marca
+- **`update_equipment()`**: Actualiza todos los campos (SKU inmutable)
+- **`update_equipment_status()`**: Cambio rápido de ubicación
+
+#### 3. Schemas Documentados (`schemas.py`)
+- **Enums:**
+  - `TypeColor`: monocromo, color
+  - `LocationStatus`: bodega, asignado, vendido, taller, desconocido
+- **Schemas de Marcas:** BrandCreate (name + prefix), BrandRead
+- **Schemas de Proveedores:** SupplierCreate (name), SupplierRead
+- **Schemas de Equipos:** EquipmentCreate, EquipmentRead, StatusUpdate
+
+---
+
+### Backend - Módulo de Usuarios (app/auth/)
+
+#### Endpoints Agregados:
+- `PATCH /users/{id}/toggle-status` - Activar/desactivar usuario
+- `DELETE /users/{id}` - Soft delete (desactiva usuario)
+
+---
+
+### Frontend - Control de Almacén (AlmacenView.vue)
+
+#### Nuevas Funcionalidades:
+1. **Botón "Marcas"**
+   - Modal para registrar nuevas marcas
+   - Campos: Nombre de marca + Prefijo para SKU
+   - Lista de marcas existentes
+
+2. **Botón "Proveedores"**
+   - Modal para registrar nuevos proveedores
+   - Campo: Nombre del proveedor
+   - Lista de proveedores existentes
+
+3. **Gestión de Equipos Completa**
+   - Crear, editar, ver detalles
+   - Cambio rápido de ubicación
+   - Filtros por marca, tipo y ubicación
+   - Estadísticas en tiempo real
+
+---
+
+### Frontend - Recursos Humanos (RHView.vue)
+
+#### Funcionalidades Implementadas:
+- CRUD completo de usuarios
+- Estadísticas: total, activos, inactivos, administradores
+- Filtros por departamento y estado
+- Búsqueda por nombre, email o usuario
+- Modal de crear/editar usuario
+- Activar/desactivar usuarios
+- Eliminar usuarios (soft delete)
+
+---
+
+### Frontend - Servicios Actualizados
+
+#### equipmentService.js
+```javascript
+// Rutas corregidas con prefijo /api/equipment
+getEquipment()      -> GET /api/equipment/
+getBrands()         -> GET /api/equipment/brands/
+getSuppliers()      -> GET /api/equipment/suppliers/
+createEquipment()   -> POST /api/equipment/
+createBrand()       -> POST /api/equipment/brands/
+createSupplier()    -> POST /api/equipment/suppliers/
+updateEquipment()   -> PUT /api/equipment/{id}
+updateEquipmentStatus() -> PATCH /api/equipment/{id}/status
+```
+
+#### userService.js
+```javascript
+toggleUserStatus()  -> PATCH /users/{id}/toggle-status
+deleteUser()        -> DELETE /users/{id}
+```
+
+---
+
+### Correcciones de Errores
+
+1. **Error 404 en equipos** - Corregido: Las rutas ahora usan `/api/equipment/` (faltaba prefijo `/api`)
+
+2. **Error 422 al crear marca** - Corregido: Schema `BrandCreate` requiere campo `prefix` (para SKU)
+
+3. **Datos estáticos** - Eliminados datos mock en:
+   - AlmacenView.vue (ahora usa backend)
+   - RHView.vue (ahora usa backend)
+
+---
+
+### Estructura de Tablas en Base de Datos
+
+```
+copymart/
+├── users        (32 KB)  - Usuarios del sistema ✅
+├── clients      (48 KB)  - Clientes ✅
+├── contacts     (80 KB)  - Contactos ✅
+├── branches     (48 KB)  - Sucursales ✅
+├── areas        (48 KB)  - Áreas ✅
+├── items        (96 KB)  - Equipos/Inventario ✅
+├── brands       (32 KB)  - Marcas de equipos ✅
+├── suppliers    (32 KB)  - Proveedores ✅
+└── rents        (128 KB) - Contratos de renta ✅
+```
+
+---
+
+### Próximos Pasos (Pendientes)
+
+1. **Backend por implementar:**
+   - Módulo de Cobranza (facturas, pagos)
+   - Módulo de Órdenes de Servicio
+   - Módulo de Rutas/Logística
+   - Módulo de Tickets TI
+
+2. **Frontend por conectar:**
+   - CobranzaView.vue
+   - ComprasView.vue
+   - FacturacionView.vue
+   - OrdenesServicioView.vue
+   - RutasView.vue
+   - TIView.vue
+   - AtencionClientesView.vue
+
+---

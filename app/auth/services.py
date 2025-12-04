@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from typing import Optional
-from app.auth.models import User, RolEnum
+from app.auth.models import User, RolEnum, DepartmentEnum
 from app.auth.schemas import UserCreate
 from app.auth.security import verify_password, get_password_hash
 
@@ -13,7 +13,7 @@ def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     user = get_user_by_email(db, email)
-    if not user or not verify_password(password, user.hashed_password) or not user.is_active:
+    if not user or not verify_password(password, user.password) or not user.is_active:
         return None
     return user 
 
@@ -24,9 +24,10 @@ def create_user(db: Session, user: UserCreate) -> User:
     db_user = User(
         email=user.email,
         username=user.username,
-        hashed_password=get_password_hash(user.password),
+        password=get_password_hash(user.password),
         full_name=user.full_name,
-        role=user.role
+        rol=user.rol,
+        department=user.department
     )
 
     db.add(db_user)
