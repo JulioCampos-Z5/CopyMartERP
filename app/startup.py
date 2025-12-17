@@ -61,6 +61,27 @@ try:
 except ImportError as e:
     print(f"⚠ Router de equipment no disponible: {e}")
 
+try:
+    from sale.routers import router as sale_router
+    app.include_router(sale_router)
+    print("✓ Router de ventas incluido")
+except ImportError as e:
+    print(f"⚠ Router de sales no disponible: {e}")
+
+try:
+    from rent.routers import router as rent_router
+    app.include_router(rent_router)
+    print("✓ Router de rentas incluido")
+except ImportError as e:
+    print(f"⚠ Router de rents no disponible: {e}")
+
+try:
+    from billing.routers import router as billing_router
+    app.include_router(billing_router)
+    print("✓ Router de facturación incluido")
+except ImportError as e:
+    print(f"⚠ Router de billings no disponible: {e}")
+
 @app.get("/")
 def root():
     return {"message": "CopyMart ERP API funcionando correctamente"}

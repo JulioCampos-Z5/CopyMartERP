@@ -1,10 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
-<<<<<<< HEAD
-import { usePermissions } from '../composables/usePermissions'
-=======
->>>>>>> develop
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,77 +27,16 @@ const router = createRouter({
         title: 'Dashboard - CopyMart ERP'
       }
     },
+    // Rutas del área Comercial
     {
       path: '/ventas',
       name: 'Ventas',
-<<<<<<< HEAD
-      component: () => import('../views/VentasView.vue'),
-      meta: { 
-        requiresAuth: true,
-        requiredModule: 'ventas',
-=======
       component: () => import('../views/Comercial/VentasView.vue'),
       meta: { 
         requiresAuth: true,
->>>>>>> develop
         title: 'Ventas - CopyMart ERP'
       }
     },
-    {
-      path: '/inventario',
-      name: 'Inventario',
-      component: () => import('../views/InventarioView.vue'),
-      meta: { 
-        requiresAuth: true,
-<<<<<<< HEAD
-        requiredModule: 'inventario',
-=======
->>>>>>> develop
-        title: 'Inventario - CopyMart ERP'
-      }
-    },
-    {
-      path: '/clientes',
-      name: 'Clientes',
-      component: () => import('../views/ClientesView.vue'),
-      meta: { 
-        requiresAuth: true,
-<<<<<<< HEAD
-        requiredModule: 'clientes',
-=======
->>>>>>> develop
-        title: 'Clientes - CopyMart ERP'
-      }
-    },
-    {
-      path: '/usuarios',
-      name: 'Usuarios',
-      component: () => import('../views/UsuariosView.vue'),
-      meta: { 
-        requiresAuth: true,
-<<<<<<< HEAD
-        requiredModule: 'usuarios',
-=======
->>>>>>> develop
-        title: 'Usuarios - CopyMart ERP'
-      }
-    },
-    {
-      path: '/reportes',
-      name: 'Reportes',
-      component: () => import('../views/ReportesView.vue'),
-      meta: { 
-        requiresAuth: true,
-<<<<<<< HEAD
-        requiredModule: 'reportes',
-        title: 'Reportes - CopyMart ERP'
-      }
-    },
-=======
-        title: 'Reportes - CopyMart ERP'
-      }
-    },
-    // Rutas del área Comercial
     {
       path: '/rentas',
       name: 'Rentas',
@@ -118,6 +53,24 @@ const router = createRouter({
       meta: { 
         requiresAuth: true,
         title: 'Atención a Clientes - CopyMart ERP'
+      }
+    },
+    {
+      path: '/clientes',
+      name: 'Clientes',
+      component: () => import('../views/Comercial/ClientesView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Clientes - CopyMart ERP'
+      }
+    },
+    {
+      path: '/produccion',
+      name: 'Produccion',
+      component: () => import('../views/Comercial/ProduccionView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Producción - CopyMart ERP'
       }
     },
     // Rutas del área Administración
@@ -155,6 +108,15 @@ const router = createRouter({
       meta: { 
         requiresAuth: true,
         title: 'Sistema de Facturación - CopyMart ERP'
+      }
+    },
+    {
+      path: '/inventario',
+      name: 'Inventario',
+      component: () => import('../views/Administracion/InventarioView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Inventario - CopyMart ERP'
       }
     },
     // Ruta de Recursos Humanos
@@ -196,7 +158,6 @@ const router = createRouter({
         title: 'Tecnologías de la Información - CopyMart ERP'
       }
     },
->>>>>>> develop
     {
       path: '/perfil',
       name: 'Perfil',
@@ -214,11 +175,7 @@ const router = createRouter({
   ],
 })
 
-<<<<<<< HEAD
-// Guard de navegación para autenticación y permisos
-=======
 // Guard de navegación para autenticación
->>>>>>> develop
 router.beforeEach((to, from, next) => {
   // Cambiar el título de la página
   if (to.meta.title) {
@@ -227,34 +184,6 @@ router.beforeEach((to, from, next) => {
   
   // Verificar autenticación
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
-<<<<<<< HEAD
-  
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirigir al login si la ruta requiere autenticación
-    next('/login')
-    return
-  }
-  
-  if (to.name === 'Login' && isAuthenticated) {
-    // Redirigir al dashboard si ya está autenticado
-    next('/dashboard')
-    return
-  }
-  
-  // Verificar permisos de módulo si la ruta lo requiere
-  if (to.meta.requiredModule && isAuthenticated) {
-    const { canAccessModule } = usePermissions()
-    
-    if (!canAccessModule(to.meta.requiredModule)) {
-      // Si no tiene permisos, redirigir al dashboard con mensaje
-      console.warn(`Acceso denegado al módulo: ${to.meta.requiredModule}`)
-      next('/dashboard')
-      return
-    }
-  }
-  
-  next()
-=======
   const hasToken = !!localStorage.getItem('token')
   
   // Usuario está autenticado si tiene ambos
@@ -269,7 +198,6 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
->>>>>>> develop
 })
 
 export default router

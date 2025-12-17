@@ -1,36 +1,4 @@
-// Configuración base de la API
-const API_BASE_URL = 'http://localhost:8000'
-
-// Interceptor para incluir token en las peticiones
-const apiRequest = async (endpoint, options = {}) => {
-  const token = localStorage.getItem('token')
-  
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    },
-    ...options
-  }
-  
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }))
-      throw new Error(errorData.message || `Error ${response.status}`)
-    }
-    
-    return await response.json()
-  } catch (error) {
-    console.error('API Request Error:', error)
-    throw error
-  }
-}
+import { apiRequest, API_ENDPOINTS, buildUrlWithParams } from '@/config/api'
 
 // Enums para equipos
 export const EquipmentType = {
@@ -52,168 +20,156 @@ export const EquipmentStatus = {
 export const equipmentService = {
   // CRUD de equipos
   async getEquipment(page = 1, limit = 10, filters = {}) {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString()
-    })
-    
-    // Agregar filtros opcionales
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) {
-        params.append(key, filters[key])
-      }
-    })
-    
-    return apiRequest(`/api/equipment?${params}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/`)
   },
 
   async getEquipmentById(id) {
-    return apiRequest(`/api/equipment/${id}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/${id}`)
   },
 
   async createEquipment(equipmentData) {
-    return apiRequest('/api/equipment', {
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/`, {
       method: 'POST',
       body: JSON.stringify(equipmentData)
     })
   },
 
   async updateEquipment(id, equipmentData) {
-    return apiRequest(`/api/equipment/${id}`, {
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/${id}/`, {
       method: 'PUT',
       body: JSON.stringify(equipmentData)
     })
   },
 
   async deleteEquipment(id) {
-    return apiRequest(`/api/equipment/${id}`, {
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/${id}/`, {
       method: 'DELETE'
     })
   },
 
   async toggleEquipmentStatus(id) {
-    return apiRequest(`/api/equipment/${id}/toggle-status`, {
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/${id}/toggle-status`, {
       method: 'PATCH'
     })
   },
 
   async updateEquipmentStatus(id, status) {
-    return apiRequest(`/api/equipment/${id}/status`, {
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/${id}/status`, {
       method: 'PATCH',
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ location_status: status })
     })
   },
 
   // Métodos de filtrado y búsqueda
   async searchEquipment(query) {
-    return apiRequest(`/api/equipment/search?q=${encodeURIComponent(query)}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/search?q=${encodeURIComponent(query)}`)
   },
 
   async getEquipmentByType(type) {
-    return apiRequest(`/api/equipment/by-type/${type}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/by-type/${type}`)
   },
 
   async getEquipmentByStatus(status) {
-    return apiRequest(`/api/equipment/by-status/${status}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/by-status/${status}`)
   },
 
   async getEquipmentByBrand(brandId) {
-    return apiRequest(`/api/equipment/by-brand/${brandId}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/by-brand/${brandId}`)
   },
 
   async getEquipmentByClient(clientName) {
-    return apiRequest(`/api/equipment/by-client?client=${encodeURIComponent(clientName)}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/by-client?client=${encodeURIComponent(clientName)}`)
   },
 
   // Mantenimiento
   async scheduleMaintenanceMaintenance(id, maintenanceData) {
-    return apiRequest(`/api/equipment/${id}/maintenance`, {
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/${id}/maintenance`, {
       method: 'POST',
       body: JSON.stringify(maintenanceData)
     })
   },
 
   async getMaintenanceHistory(id) {
-    return apiRequest(`/api/equipment/${id}/maintenance-history`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/${id}/maintenance-history`)
   },
 
   async getEquipmentDueMaintenance() {
-    return apiRequest('/api/equipment/maintenance-due')
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/maintenance-due`)
   },
 
   // CRUD de marcas
   async getBrands() {
-    return apiRequest('/api/equipment/brands')
+    return apiRequest(`${API_ENDPOINTS.BRANDS}/`)
   },
 
   async getBrandById(id) {
-    return apiRequest(`/api/equipment/brands/${id}`)
+    return apiRequest(`${API_ENDPOINTS.BRANDS}/${id}/`)
   },
 
   async createBrand(brandData) {
-    return apiRequest('/api/equipment/brands', {
+    return apiRequest(`${API_ENDPOINTS.BRANDS}/`, {
       method: 'POST',
       body: JSON.stringify(brandData)
     })
   },
 
   async updateBrand(id, brandData) {
-    return apiRequest(`/api/equipment/brands/${id}`, {
+    return apiRequest(`${API_ENDPOINTS.BRANDS}/${id}/`, {
       method: 'PUT',
       body: JSON.stringify(brandData)
     })
   },
 
   async deleteBrand(id) {
-    return apiRequest(`/api/equipment/brands/${id}`, {
+    return apiRequest(`${API_ENDPOINTS.BRANDS}/${id}/`, {
       method: 'DELETE'
     })
   },
 
   // CRUD de proveedores
   async getSuppliers() {
-    return apiRequest('/api/equipment/suppliers')
+    return apiRequest(`${API_ENDPOINTS.SUPPLIERS}/`)
   },
 
   async getSupplierById(id) {
-    return apiRequest(`/api/equipment/suppliers/${id}`)
+    return apiRequest(`${API_ENDPOINTS.SUPPLIERS}/${id}/`)
   },
 
   async createSupplier(supplierData) {
-    return apiRequest('/api/equipment/suppliers', {
+    return apiRequest(`${API_ENDPOINTS.SUPPLIERS}/`, {
       method: 'POST',
       body: JSON.stringify(supplierData)
     })
   },
 
   async updateSupplier(id, supplierData) {
-    return apiRequest(`/api/equipment/suppliers/${id}`, {
+    return apiRequest(`${API_ENDPOINTS.SUPPLIERS}/${id}/`, {
       method: 'PUT',
       body: JSON.stringify(supplierData)
     })
   },
 
   async deleteSupplier(id) {
-    return apiRequest(`/api/equipment/suppliers/${id}`, {
+    return apiRequest(`${API_ENDPOINTS.SUPPLIERS}/${id}/`, {
       method: 'DELETE'
     })
   },
 
   // Estadísticas y reportes
   async getEquipmentStats() {
-    return apiRequest('/api/equipment/stats')
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/stats`)
   },
 
   async getEquipmentByLocation() {
-    return apiRequest('/api/equipment/by-location')
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/by-location`)
   },
 
   async getWarrantyExpiring(days = 30) {
-    return apiRequest(`/api/equipment/warranty-expiring?days=${days}`)
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/warranty-expiring?days=${days}`)
   },
 
   async getRentalEquipment() {
-    return apiRequest('/api/equipment/rentals')
+    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/rentals`)
   },
 
   // Utilidades

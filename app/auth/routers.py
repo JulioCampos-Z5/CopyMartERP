@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.auth.models import User
-from app.auth.schemas import (
+from auth.models import User
+from auth.schemas import (
     UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangeEmail, PermissionsResponse, Token, UserUpdate
 )
-from app.auth.schemas import TokenData
-from app.auth.services import get_user_by_id, get_user_by_email, create_user, authenticate_user
-from app.auth.permissions import can_create, can_edit, can_delete, get_accesible_modules
-from app.auth.security import get_password_hash, create_access_token, decode_token
-from app.core.database import get_db
+from auth.schemas import TokenData
+from auth.services import get_user_by_id, get_user_by_email, create_user, authenticate_user
+from auth.permissions import can_create, can_edit, can_delete, get_accesible_modules
+from auth.security import get_password_hash, create_access_token, decode_token
+from core.database import get_db
 from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter(
@@ -124,7 +124,7 @@ def get_permissions(user_id: int, db: Session = Depends(get_db), current_user: U
 # ELIMINAR O AGREGAR MANUALMENTE EN EL DATABASE
 @router.post("/create-admin-test", status_code=201)
 def create_admin_test(db: Session = Depends(get_db)):
-    from app.auth.models import RolEnum, DepartmentEnum
+    from auth.models import RolEnum, DepartmentEnum
     existing_admin = db.query(User).filter(User.rol == RolEnum.ADMINISTRADOR).first()
     if existing_admin:
         return {"message": "Administrator already exists", "email": existing_admin.email}

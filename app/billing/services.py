@@ -4,8 +4,8 @@ from fastapi import HTTPException, status
 from typing import List, Optional
 from datetime import datetime, date
 
-from app.billing.models import Billing, BillingStatus, BillingType
-from app.billing.schemas import (
+from billing.models import Billing, BillingStatus, BillingType
+from billing.schemas import (
     BillingCreate, 
     BillingUpdate, 
     BillingResponse, 
@@ -14,9 +14,9 @@ from app.billing.schemas import (
     BillingPayment,
     BillingStats
 )
-from app.rent.models import Rent, ContractStatus as RentContractStatus
-from app.sale.models import Sale, SaleStatus
-from app.client.models import Client
+from rent.models import Rent, ContractStatus as RentContractStatus
+from sale.models import Sale, SaleStatus
+from client.models import Client
 
 
 class BillingService:

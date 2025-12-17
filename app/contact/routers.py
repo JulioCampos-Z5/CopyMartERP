@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from app.core.database import get_db
-from app.contact.schemas import ContactCreate, ContactRead
-from app.contact import services
+from core.database import get_db
+from contact.schemas import ContactCreate, ContactRead
+from contact import services
 
 router = APIRouter(
     prefix="/contacts",
@@ -43,3 +43,4 @@ def change_contact_status(contact_id: int, is_active: bool, db: Session = Depend
     if not updated:
         raise HTTPException(status_code=404, detail="Contact not found")
     return updated
+

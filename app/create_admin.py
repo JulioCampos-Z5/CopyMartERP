@@ -1,6 +1,6 @@
-from app.core.database import SessionLocal
-from app.auth.models import User, RolEnum, DepartmentEnum
-from app.auth.security import get_password_hash
+from core.database import SessionLocal
+from auth.models import User, RolEnum, DepartmentEnum
+from auth.security import get_password_hash
 
 def create_admin():
     db = SessionLocal()
@@ -40,3 +40,4 @@ def create_admin():
 
 if __name__ == "__main__":
     create_admin()
+

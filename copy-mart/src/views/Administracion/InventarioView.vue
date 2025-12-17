@@ -78,6 +78,12 @@
               </svg>
               Agregar Equipo
             </button>
+            <button @click="openBrandModal" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              Registrar Marca
+            </button>
             <button @click="loadEquipment" class="btn-secondary">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -117,11 +123,11 @@
               <table class="min-w-full table-auto">
                 <thead>
                   <tr class="bg-gray-50">
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Serie</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                   </tr>
@@ -132,20 +138,20 @@
                       No hay equipos registrados
                     </td>
                   </tr>
-                  <tr v-for="item in filteredEquipment" :key="item.equipment_id">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.equipment_id }}</td>
+                  <tr v-for="item in filteredEquipment" :key="item.item_id">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.sku }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ getBrandName(item.brand_id) }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.model }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.brand || '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.serial_number || '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.category || '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.serie }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.type }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(item.status)]">
-                        {{ item.status || 'disponible' }}
+                      <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(item.location_status)]">
+                        {{ item.location_status }}
                       </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button @click="editEquipment(item)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                      <button @click="deleteEquipment(item.equipment_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
+                      <button @click="deleteEquipment(item.item_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
                 </tbody>
@@ -172,43 +178,63 @@
         <form @submit.prevent="showCreateModal ? createEquipment() : updateEquipment()" class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Marca *</label>
+              <select v-model="equipmentForm.brand_id" required class="input-field">
+                <option :value="null">Seleccionar marca...</option>
+                <option v-for="brand in brands" :key="brand.brand_id" :value="brand.brand_id">
+                  {{ brand.name }}
+                </option>
+              </select>
+            </div>
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Modelo *</label>
               <input v-model="equipmentForm.model" type="text" required class="input-field">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-              <input v-model="equipmentForm.brand" type="text" class="input-field">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Número de Serie *</label>
+              <input v-model="equipmentForm.serie" type="text" required class="input-field">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Número de Serie</label>
-              <input v-model="equipmentForm.serial_number" type="text" class="input-field">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Modelo de Toner *</label>
+              <input v-model="equipmentForm.model_toner" type="text" required class="input-field">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-              <select v-model="equipmentForm.category" class="input-field">
-                <option value="">Seleccionar...</option>
-                <option value="copiadoras">Copiadoras</option>
-                <option value="impresoras">Impresoras</option>
-                <option value="multifuncionales">Multifuncionales</option>
-                <option value="consumibles">Consumibles</option>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+              <select v-model="equipmentForm.type" required class="input-field">
+                <option value="monocromo">Monocromo</option>
+                <option value="color">Color</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-              <select v-model="equipmentForm.status" class="input-field">
-                <option value="disponible">Disponible</option>
-                <option value="rentado">En Renta</option>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label>
+              <select v-model="equipmentForm.supplier_id" required class="input-field">
+                <option :value="null">Seleccionar proveedor...</option>
+                <option v-for="supplier in suppliers" :key="supplier.supplier_id" :value="supplier.supplier_id">
+                  {{ supplier.name }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Factura</label>
+              <input v-model="equipmentForm.invoice" type="text" class="input-field">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Costo</label>
+              <input v-model="equipmentForm.cost" type="number" step="0.01" class="input-field">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Estado de Ubicación *</label>
+              <select v-model="equipmentForm.location_status" required class="input-field">
+                <option value="bodega">Bodega</option>
+                <option value="asignado">Asignado</option>
                 <option value="vendido">Vendido</option>
-                <option value="mantenimiento">Mantenimiento</option>
+                <option value="taller">Taller</option>
+                <option value="desconocido">Desconocido</option>
               </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Precio de Compra</label>
-              <input v-model="equipmentForm.purchase_price" type="number" step="0.01" class="input-field">
             </div>
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-              <textarea v-model="equipmentForm.description" rows="3" class="input-field"></textarea>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
+              <textarea v-model="equipmentForm.comments" rows="3" class="input-field"></textarea>
             </div>
           </div>
           <div class="mt-6 flex justify-end gap-3">
@@ -220,6 +246,79 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Brand Modal -->
+    <div v-if="showBrandModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-semibold text-gray-900">Gestión de Marcas</h3>
+            <button @click="closeBrandModal" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <!-- Lista de Marcas -->
+          <div class="mb-6">
+            <h4 class="text-lg font-medium text-gray-900 mb-4">Marcas Registradas</h4>
+            <div v-if="loadingBrands" class="text-center py-4">
+              <p class="text-gray-500">Cargando marcas...</p>
+            </div>
+            <div v-else-if="brands.length === 0" class="text-center py-8 bg-gray-50 rounded-lg">
+              <p class="text-gray-500">No hay marcas registradas</p>
+            </div>
+            <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div v-for="brand in brands" :key="brand.brand_id" 
+                   class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+                <span class="text-sm font-medium text-gray-900">{{ brand.name }}</span>
+                <button @click="deleteBrand(brand.brand_id)" 
+                        class="text-red-500 hover:text-red-700">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulario para Nueva Marca -->
+          <div class="border-t pt-6">
+            <h4 class="text-lg font-medium text-gray-900 mb-4">Registrar Nueva Marca</h4>
+            <form @submit.prevent="createBrand" class="grid grid-cols-2 gap-3">
+              <input v-model="brandForm.name" 
+                     type="text" 
+                     required 
+                     placeholder="Nombre de la marca (Ej: Canon, HP, Xerox...)" 
+                     class="input-field">
+              <input v-model="brandForm.prefix" 
+                     type="text" 
+                     required 
+                     placeholder="Prefijo (Ej: CAN, HP, XER...)" 
+                     class="input-field">
+              <button type="submit" 
+                      class="col-span-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 whitespace-nowrap">\n                Agregar Marca
+                <span class="flex items-center">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Agregar
+                </span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="p-6 border-t flex justify-end">
+          <button @click="closeBrandModal" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -237,21 +336,32 @@ export default {
   data() {
     return {
       equipment: [],
+      brands: [],
       loading: false,
+      loadingBrands: false,
       error: null,
       showCreateModal: false,
       showEditModal: false,
+      showBrandModal: false,
       filterCategory: '',
       filterStatus: '',
       equipmentForm: {
+        brand_id: null,
         model: '',
-        brand: '',
-        serial_number: '',
-        category: '',
-        status: 'disponible',
-        purchase_price: 0,
-        description: ''
+        serie: '',
+        model_toner: '',
+        type: 'monocromo',
+        supplier_id: null,
+        invoice: '',
+        cost: null,
+        location_status: 'bodega',
+        comments: ''
       },
+      brandForm: {
+        name: '',
+        prefix: ''
+      },
+      suppliers: [],
       editingEquipmentId: null
     }
   },
@@ -266,14 +376,16 @@ export default {
     stats() {
       return {
         total: this.equipment.length,
-        available: this.equipment.filter(e => e.status === 'disponible').length,
-        rented: this.equipment.filter(e => e.status === 'rentado').length,
-        sold: this.equipment.filter(e => e.status === 'vendido').length
+        available: this.equipment.filter(e => e.location_status === 'bodega').length,
+        rented: this.equipment.filter(e => e.location_status === 'asignado').length,
+        sold: this.equipment.filter(e => e.location_status === 'vendido').length
       }
     }
   },
   async mounted() {
     await this.loadEquipment()
+    await this.loadBrands()
+    await this.loadSuppliers()
   },
   methods: {
     async loadEquipment() {
@@ -289,6 +401,14 @@ export default {
       }
     },
     
+    async loadSuppliers() {
+      try {
+        this.suppliers = await equipmentService.getSuppliers()
+      } catch (err) {
+        console.error('Error loading suppliers:', err)
+      }
+    },
+    
     async createEquipment() {
       try {
         await equipmentService.createEquipment(this.equipmentForm)
@@ -301,18 +421,24 @@ export default {
     },
     
     editEquipment(item) {
-      this.editingEquipmentId = item.equipment_id
+      console.log('Editing equipment:', item)
+      console.log('Item ID:', item.item_id)
+      this.editingEquipmentId = item.item_id
       this.equipmentForm = { ...item }
       this.showEditModal = true
+      console.log('editingEquipmentId set to:', this.editingEquipmentId)
     },
     
     async updateEquipment() {
+      console.log('Updating equipment with ID:', this.editingEquipmentId)
+      console.log('Form data:', this.equipmentForm)
       try {
         await equipmentService.updateEquipment(this.editingEquipmentId, this.equipmentForm)
         await this.loadEquipment()
         this.closeModal()
         alert('Equipo actualizado exitosamente')
       } catch (err) {
+        console.error('Update error:', err)
         alert('Error al actualizar equipo: ' + err.message)
       }
     },
@@ -334,24 +460,77 @@ export default {
       this.showEditModal = false
       this.editingEquipmentId = null
       this.equipmentForm = {
+        brand_id: null,
         model: '',
-        brand: '',
-        serial_number: '',
-        category: '',
-        status: 'disponible',
-        purchase_price: 0,
-        description: ''
+        serie: '',
+        model_toner: '',
+        type: 'monocromo',
+        supplier_id: null,
+        invoice: '',
+        cost: null,
+        location_status: 'bodega',
+        comments: ''
       }
     },
     
     getStatusClass(status) {
       const classes = {
-        'disponible': 'bg-green-100 text-green-800',
-        'rentado': 'bg-blue-100 text-blue-800',
+        'bodega': 'bg-green-100 text-green-800',
+        'asignado': 'bg-blue-100 text-blue-800',
         'vendido': 'bg-gray-100 text-gray-800',
-        'mantenimiento': 'bg-yellow-100 text-yellow-800'
+        'taller': 'bg-yellow-100 text-yellow-800',
+        'desconocido': 'bg-red-100 text-red-800'
       }
       return classes[status] || 'bg-gray-100 text-gray-800'
+    },
+    
+    getBrandName(brandId) {
+      const brand = this.brands.find(b => b.brand_id === brandId)
+      return brand ? brand.name : '-'
+    },
+    
+    async createBrand() {
+      try {
+        await equipmentService.createBrand(this.brandForm)
+        this.brandForm = { name: '', prefix: '' }
+        await this.loadBrands()
+        alert('Marca registrada exitosamente')
+      } catch (err) {
+        alert('Error al registrar marca: ' + err.message)
+      }
+    },
+    
+    async loadBrands() {
+      this.loadingBrands = true
+      try {
+        this.brands = await equipmentService.getBrands()
+      } catch (err) {
+        console.error('Error loading brands:', err)
+      } finally {
+        this.loadingBrands = false
+      }
+    },
+    
+    async deleteBrand(brandId) {
+      if (!confirm('¿Está seguro de eliminar esta marca?')) return
+      
+      try {
+        await equipmentService.deleteBrand(brandId)
+        await this.loadBrands()
+        alert('Marca eliminada exitosamente')
+      } catch (err) {
+        alert('Error al eliminar marca: ' + err.message)
+      }
+    },
+    
+    async openBrandModal() {
+      this.showBrandModal = true
+      await this.loadBrands()
+    },
+    
+    closeBrandModal() {
+      this.showBrandModal = false
+      this.brandForm = { name: '' }
     }
   }
 }

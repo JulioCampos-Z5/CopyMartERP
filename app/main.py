@@ -1,18 +1,22 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.auth.routers import router as user_router
-from app.equipment.routers import router as equipment_router
-from app.rent.routers import router as rent_router
-from app.client.routers import router as client_router
-from fastapi.middleware.cors import CORSMiddleware
+from auth.routers import router as user_router
+from equipment.routers import router as equipment_router
+from rent.routers import router as rent_router
+from sale.routers import router as sale_router
+from billing.routers import router as billing_router
+from client.routers import router as client_router
 
-from app.core.database import Base, engine
+from core.database import Base, engine
 
 # Importar TODOS los modelos para que se registren con SQLAlchemy
-from app.auth import models as auth_models
-from app.client import models as client_models
-from app.contact import models as contact_models
-from app.equipment import models as equipment_models
+from auth import models as auth_models
+from client import models as client_models
+from contact import models as contact_models
+from equipment import models as equipment_models
+from rent import models as rent_models
+from sale import models as sale_models
+from billing import models as billing_models
 
 app = FastAPI(title="API de Usuarios")
 
@@ -29,10 +33,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user_router)
-app.include_router(equipment_router)
-app.include_router(client_router)
-app.include_router(rent_router)
+app.include_router(user_router, prefix="/api")
+app.include_router(equipment_router, prefix="/api")
+app.include_router(client_router, prefix="/api/clients", tags=["clients"])
+app.include_router(rent_router, prefix="/api")
+app.include_router(sale_router, prefix="/api")
+app.include_router(billing_router, prefix="/api")
 
 
 @app.get("/")
