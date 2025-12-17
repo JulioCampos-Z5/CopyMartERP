@@ -17,14 +17,14 @@ export const API_ENDPOINTS = {
   // Clientes y relaciones - Prefijo: /api/clients
   CLIENTS: '/api/clients',
   
-  // Equipos - La ruta completa es /api/equipment/equipment/equipment/
-  EQUIPMENT: '/api/equipment/equipment/equipment',
+  // Equipos - La ruta completa es /api/equipment/equipment/
+  EQUIPMENT: '/api/equipment/equipment',
   
-  // Marcas de equipos - /api/equipment/equipment/brands
-  BRANDS: '/api/equipment/equipment/brands',
+  // Marcas de equipos - /api/equipment/brands
+  BRANDS: '/api/equipment/brands',
   
-  // Proveedores de equipos - /api/equipment/equipment/suppliers
-  SUPPLIERS: '/api/equipment/equipment/suppliers',
+  // Proveedores de equipos - /api/equipment/suppliers
+  SUPPLIERS: '/api/equipment/suppliers',
   
   // Rentas - Prefijo: /api/rents
   RENTS: '/api/rents',

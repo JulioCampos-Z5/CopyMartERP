@@ -20,7 +20,10 @@ export const EquipmentStatus = {
 export const equipmentService = {
   // CRUD de equipos
   async getEquipment(page = 1, limit = 10, filters = {}) {
-    return apiRequest(`${API_ENDPOINTS.EQUIPMENT}/`)
+    const url = `${API_ENDPOINTS.EQUIPMENT}/`
+    console.log('🔧 getEquipment - API_ENDPOINTS.EQUIPMENT:', API_ENDPOINTS.EQUIPMENT)
+    console.log('🔧 getEquipment - URL final:', url)
+    return apiRequest(url)
   },
 
   async getEquipmentById(id) {
