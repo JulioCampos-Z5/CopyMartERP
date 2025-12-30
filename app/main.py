@@ -4,6 +4,8 @@ from app.auth.routers import router as user_router
 from app.equipment.routers import router as equipment_router
 from app.rent.routers import router as rent_router
 from app.client.routers import router as client_router
+from app.rent.routers import router as rent_routers
+from app.sparepart.routers import router as sparepart_routers
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
@@ -33,6 +35,8 @@ app.include_router(user_router)
 app.include_router(equipment_router)
 app.include_router(client_router)
 app.include_router(rent_router)
+app.include_router(sparepart_routers)
+
 
 
 @app.get("/")
