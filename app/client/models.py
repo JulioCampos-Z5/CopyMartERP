@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from core.database import Base
 from datetime import datetime
-from app.auth.models import User
+from auth.models import User
 
 class Client(Base):
     __tablename__ = "clients"

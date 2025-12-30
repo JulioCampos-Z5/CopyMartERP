@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.contact.models import Contact
-from app.contact.schemas import ContactCreate, ContactUpdate
+from contact.models import Contact
+from contact.schemas import ContactCreate, ContactUpdate
 from datetime import datetime
 
 def get_contacts(db: Session):
@@ -42,3 +42,4 @@ def change_status(db: Session, contact_id: int, is_active: bool):
     db.commit()
     db.refresh(db_contact)
     return db_contact
+

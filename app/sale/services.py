@@ -4,10 +4,10 @@ from fastapi import HTTPException, status
 from typing import List, Optional
 from datetime import datetime
 
-from app.sale.models import Sale, SaleStatus
-from app.sale.schemas import SaleCreate, SaleUpdate, SaleResponse, SaleFilter
-from app.client.models import Client, Branch, Area
-from app.equipment.models import Equipment, LocationStatus
+from sale.models import Sale, SaleStatus
+from sale.schemas import SaleCreate, SaleUpdate, SaleResponse, SaleFilter
+from client.models import Client, Branch, Area
+from equipment.models import Equipment, LocationStatus
 
 
 class SaleService:

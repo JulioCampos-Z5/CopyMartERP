@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.core.database import Base
+from core.database import Base
 
 class Contact(Base):
     __tablename__ = "contacts"
@@ -17,3 +17,4 @@ class Contact(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     client = relationship("Client", back_populates="contact")
+

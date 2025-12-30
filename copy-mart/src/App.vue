@@ -1,12 +1,18 @@
 <template>
   <div id="app">
     <RouterView />
+    <ApiStatus />
   </div>
 </template>
 
 <script>
+import ApiStatus from '@/components/ApiStatus.vue'
+
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    ApiStatus
+  }
 }
 </script>
 

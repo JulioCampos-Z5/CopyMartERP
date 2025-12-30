@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
-from app.auth.models import RolEnum, DepartmentEnum
+from auth.models import RolEnum, DepartmentEnum
 
 class UserBase(BaseModel):
     email: EmailStr
