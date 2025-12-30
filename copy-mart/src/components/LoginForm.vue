@@ -3,7 +3,9 @@
     <div class="max-w-md w-full space-y-8">
       <div class="card">
         <div class="text-center mb-8">
-          <h2 class="text-3xl font-bold text-gray-900 mb-2">CopyMart ERP</h2>
+          <div class="flex justify-center mb-4">
+            <img src="/Logo.svg" alt="CopyMart ERP" class="h-20 w-auto">
+          </div>
           <p class="text-gray-600">Inicia sesión en tu cuenta</p>
         </div>
         
@@ -107,18 +109,10 @@
 </template>
 
 <script>
-<<<<<<< HEAD
-import { usePermissions } from '../composables/usePermissions'
-=======
 import userService from '@/services/userService.js'
->>>>>>> develop
 
 export default {
   name: 'LoginForm',
-  setup() {
-    const { setUser } = usePermissions()
-    return { setUser }
-  },
   data() {
     return {
       form: {
@@ -175,18 +169,8 @@ export default {
           password: this.form.password
         })
         
-<<<<<<< HEAD
-        // Guardar estado de autenticación
-        localStorage.setItem('isAuthenticated', 'true')
-        
-        // Guardar datos del usuario con permisos usando el composable
-        this.setUser(result.user)
-        
-        // Redirigir al dashboard
-=======
         // Si el login es exitoso, redirigir al dashboard
         console.log('Login successful:', response)
->>>>>>> develop
         this.$router.push('/dashboard')
         
       } catch (error) {
@@ -248,84 +232,6 @@ export default {
       } finally {
         this.isLoading = false
       }
-<<<<<<< HEAD
-    },
-    
-    async simulateLogin() {
-      // Simulación de diferentes tipos de usuarios
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // Usuario Admin
-          if (this.form.email === 'admin@copymart.com' && this.form.password === 'admin123') {
-            resolve({ 
-              success: true, 
-              user: { 
-                user_id: 1,
-                email: this.form.email, 
-                full_name: 'Administrador',
-                rol: 'administrador',
-                department: 'administracion'
-              } 
-            })
-          }
-          // Usuario Gerente
-          else if (this.form.email === 'gerente@copymart.com' && this.form.password === 'gerente123') {
-            resolve({ 
-              success: true, 
-              user: { 
-                user_id: 2,
-                email: this.form.email, 
-                full_name: 'Gerente General',
-                rol: 'gerencia',
-                department: 'comercial'
-              } 
-            })
-          }
-          // Usuario Comercial
-          else if (this.form.email === 'vendedor@copymart.com' && this.form.password === 'vendedor123') {
-            resolve({ 
-              success: true, 
-              user: { 
-                user_id: 3,
-                email: this.form.email, 
-                full_name: 'Vendedor',
-                rol: 'usuario',
-                department: 'comercial'
-              } 
-            })
-          }
-          // Usuario Operaciones
-          else if (this.form.email === 'operador@copymart.com' && this.form.password === 'operador123') {
-            resolve({ 
-              success: true, 
-              user: { 
-                user_id: 4,
-                email: this.form.email, 
-                full_name: 'Operador',
-                rol: 'usuario',
-                department: 'operaciones'
-              } 
-            })
-          }
-          // Usuario RH
-          else if (this.form.email === 'rh@copymart.com' && this.form.password === 'rh123') {
-            resolve({ 
-              success: true, 
-              user: { 
-                user_id: 5,
-                email: this.form.email, 
-                full_name: 'Recursos Humanos',
-                rol: 'usuario',
-                department: 'rh'
-              } 
-            })
-          }
-          else {
-            reject(new Error('Credenciales incorrectas. Prueba: admin@copymart.com / admin123'))
-          }
-        }, 1500)
-      })
-=======
     }
   },
   
@@ -333,7 +239,6 @@ export default {
     // Verificar si ya está autenticado
     if (userService.isAuthenticated()) {
       this.$router.push('/dashboard')
->>>>>>> develop
     }
   }
 }

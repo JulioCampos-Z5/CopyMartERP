@@ -5,24 +5,24 @@ from datetime import datetime
 from enum import Enum
 
 
-class ContractStatus(str, Enum):
+class SaleStatus(str, Enum):
     PENDIENTE = "pendiente"
-    SIN_FIRMAR = "sin_firmar"
-    VIGENTE = "vigente"
-    VENCIDO = "vencido"
+    CONFIRMADA = "confirmada"
+    ENTREGADA = "entregada"
+    CANCELADA = "cancelada"
 
 
-class Rent(Base):
-    __tablename__ = "rents"
+class Sale(Base):
+    __tablename__ = "sales"
     
-    rent_id = Column(Integer, primary_key=True, index=True)
+    sale_id = Column(Integer, primary_key=True, index=True)
     client_id = Column(Integer, ForeignKey("clients.client_id"), nullable=False, index=True)
     branch_id = Column(Integer, ForeignKey("branches.branch_id"), nullable=True, index=True)
     area_id = Column(Integer, ForeignKey("areas.area_id"), nullable=True, index=True)
     item_id = Column(Integer, ForeignKey("items.item_id"), nullable=False, index=True)
-    contract_number = Column(String, unique=True, nullable=True, index=True)
-    contract_status = Column(SQLEnum(ContractStatus), nullable=False, default=ContractStatus.PENDIENTE)
-    rent = Column(DECIMAL(10, 2), nullable=False)
+    invoice_number = Column(String(50), unique=True, nullable=True, index=True)
+    sale_status = Column(SQLEnum(SaleStatus), nullable=False, default=SaleStatus.PENDIENTE)
+    sale_price = Column(DECIMAL(10, 2), nullable=False)
     is_foreign = Column(Boolean, default=False)  
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)

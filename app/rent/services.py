@@ -4,10 +4,10 @@ from fastapi import HTTPException, status
 from typing import List, Optional
 from datetime import datetime
 
-from app.rent.models import Rent, ContractStatus
-from app.rent.schemas import RentCreate, RentUpdate, RentResponse, RentFilter
-from app.client.models import Client, Branch, Area
-from app.equipment.models import Equipment, LocationStatus
+from rent.models import Rent, ContractStatus
+from rent.schemas import RentCreate, RentUpdate, RentResponse, RentFilter
+from client.models import Client, Branch, Area
+from equipment.models import Equipment, LocationStatus
 
 
 class RentService:

@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from typing import Optional
-from app.auth.models import User, RolEnum, DepartmentEnum
-from app.auth.schemas import UserCreate
-from app.auth.security import verify_password, get_password_hash
+from auth.models import User, RolEnum, DepartmentEnum
+from auth.schemas import UserCreate
+from auth.security import verify_password, get_password_hash
 
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
