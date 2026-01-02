@@ -51,4 +51,3 @@ class Area(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     branch = relationship("Branch", back_populates="areas")
-

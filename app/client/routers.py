@@ -207,4 +207,3 @@ def delete_area(
 ):
     AreaService.delete_area(db, area_id)
     return None
-
