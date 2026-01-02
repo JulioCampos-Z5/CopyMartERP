@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
     <AppNavigation />
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -131,8 +131,9 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ client.name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ client.rfc || '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div>{{ client.email || '-' }}</div>
-                      <div>{{ client.phone || '-' }}</div>
+                      <div class="font-medium text-gray-800">{{ client.contact_name || '-' }}</div>
+                      <div class="text-gray-500">{{ client.contact_email || '-' }}</div>
+                      <div class="text-gray-500">{{ client.contact_phone || client.contact_rol || '-' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ client.client_type || '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -167,50 +168,62 @@
           </div>
         </div>
         <form @submit.prevent="showCreateModal ? createClient() : updateClient()" class="p-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón Social *</label>
-              <input v-model="clientForm.name" type="text" required class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">RFC</label>
-              <input v-model="clientForm.rfc" type="text" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input v-model="clientForm.email" type="email" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-              <input v-model="clientForm.phone" type="tel" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Cliente</label>
-              <select v-model="clientForm.client_type" class="input-field">
-                <option value="empresa">Empresa</option>
-                <option value="persona">Persona Física</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-              <input v-model="clientForm.address" type="text" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-              <input v-model="clientForm.city" type="text" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-              <input v-model="clientForm.state" type="text" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
-              <input v-model="clientForm.postal_code" type="text" class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Crédito</label>
-              <input v-model="clientForm.credit_limit" type="number" step="0.01" class="input-field">
-            </div>
+          <div class="space-y-8">
+            <section>
+              <h4 class="text-sm font-semibold text-gray-800 mb-3">Datos del Cliente</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón Social *</label>
+                  <input v-model="clientForm.name" type="text" required class="input-field">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">RFC</label>
+                  <input v-model="clientForm.rfc" type="text" class="input-field">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                  <input v-model="clientForm.address" type="text" class="input-field">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                  <input v-model="clientForm.city" type="text" class="input-field">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                  <input v-model="clientForm.state" type="text" class="input-field">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+                  <input v-model="clientForm.postal_code" type="text" class="input-field">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Crédito</label>
+                  <input v-model="clientForm.credit_limit" type="number" step="0.01" class="input-field">
+                </div>
+              </div>
+            </section>
+
+            <section class="pt-4 border-t border-gray-200">
+              <h4 class="text-sm font-semibold text-gray-800 mb-3">Datos de Contacto</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de Contacto</label>
+                  <input v-model="clientForm.contact_name" type="text" class="input-field" placeholder="Nombre del contacto principal">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Puesto / Rol</label>
+                  <input v-model="clientForm.contact_rol" type="text" class="input-field" placeholder="Ej. Compras, TI">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input v-model="clientForm.contact_email" type="email" class="input-field">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <input v-model="clientForm.contact_phone" type="tel" class="input-field">
+                </div>
+              </div>
+            </section>
           </div>
           <div class="mt-6 flex justify-end gap-3">
             <button type="button" @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
@@ -221,6 +234,48 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div v-if="showMessageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold" :class="messageType === 'success' ? 'text-green-800' : 'text-red-800'">
+              {{ messageTitle }}
+            </h3>
+            <button @click="closeMessageModal" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <p class="text-gray-700 mb-6">{{ messageText }}</p>
+          <div class="flex justify-end">
+            <button @click="closeMessageModal" :class="['px-4 py-2 rounded-lg text-white font-medium', messageType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']">
+              Aceptar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirmar eliminación</h3>
+          <p class="text-gray-700 mb-6">¿Está seguro de que desea eliminar este cliente? Esta acción no se puede deshacer.</p>
+          <div class="flex justify-end gap-3">
+            <button @click="cancelDelete" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button @click="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+              Eliminar
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -247,16 +302,25 @@ export default {
       clientForm: {
         name: '',
         rfc: '',
-        email: '',
-        phone: '',
         address: '',
         city: '',
         state: '',
         postal_code: '',
         client_type: 'empresa',
-        credit_limit: 0
+        credit_limit: 0,
+        contact_name: '',
+        contact_email: '',
+        contact_phone: '',
+        contact_rol: ''
       },
-      editingClientId: null
+      editingClientId: null,
+      showMessageModal: false,
+      messageType: 'success',
+      messageTitle: '',
+      messageText: '',
+      showDeleteConfirm: false,
+      deleteClientId: null,
+      messageTimeout: null
     }
   },
   computed: {
@@ -265,7 +329,10 @@ export default {
         const matchesSearch = !this.searchQuery || 
           client.name?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
           client.rfc?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          client.email?.toLowerCase().includes(this.searchQuery.toLowerCase())
+          client.email?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          client.contact_name?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          client.contact_email?.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          client.contact_phone?.toLowerCase().includes(this.searchQuery.toLowerCase())
         
         const matchesStatus = !this.filterStatus || client.status === this.filterStatus
         
@@ -285,11 +352,29 @@ export default {
     await this.loadClients()
   },
   methods: {
+    normalizeContact(client) {
+      // Usa campos planos, luego el contacto principal, luego el primero de la lista
+      const primary = client.contact || client.primary_contact || (client.contacts && client.contacts[0]) || {}
+      return {
+        contact_name: client.contact_name || primary.name || '',
+        contact_email: client.contact_email || primary.email || '',
+        contact_phone: client.contact_phone || primary.phone || '',
+        contact_rol: client.contact_rol || primary.rol || ''
+      }
+    },
+
     async loadClients() {
       this.loading = true
       this.error = null
       try {
-        this.clients = await clientService.getClients()
+        const clients = await clientService.getClients()
+        console.log('API clients raw:', clients)
+        this.clients = clients.map(c => ({
+          ...c,
+          ...this.normalizeContact(c),
+          client_type: c.client_type || (c.comercial_name ? 'empresa' : 'persona'),
+          status: c.is_active ? 'activo' : 'inactivo'
+        }))
       } catch (err) {
         this.error = 'Error al cargar clientes: ' + err.message
         console.error('Error loading clients:', err)
@@ -300,42 +385,120 @@ export default {
     
     async createClient() {
       try {
-        await clientService.createClient(this.clientForm)
+        const payload = {
+          name: this.clientForm.name,
+          rfc: this.clientForm.rfc,
+          address: this.clientForm.address,
+          city: this.clientForm.city,
+          state: this.clientForm.state,
+          zip_code: this.clientForm.postal_code,
+          comercial_name: this.clientForm.client_type === 'empresa' ? this.clientForm.name : null,
+          credit_limit: this.clientForm.credit_limit,
+          contact_name: this.clientForm.contact_name || this.clientForm.name,
+          contact_email: this.clientForm.contact_email,
+          contact_phone: this.clientForm.contact_phone,
+          contact_rol: this.clientForm.contact_rol
+        }
+
+        console.log('Create payload:', payload)
+
+        await clientService.createClient(payload)
         await this.loadClients()
         this.closeModal()
-        alert('Cliente creado exitosamente')
+        this.showMessage('success', 'Éxito', 'Cliente creado exitosamente')
       } catch (err) {
-        alert('Error al crear cliente: ' + err.message)
+        this.showMessage('error', 'Error', 'Error al crear cliente: ' + err.message)
       }
     },
     
     editClient(client) {
       this.editingClientId = client.client_id
-      this.clientForm = { ...client }
+      const normalized = this.normalizeContact(client)
+      this.clientForm = {
+        name: client.name || '',
+        rfc: client.rfc || '',
+        address: client.address || '',
+        city: client.city || '',
+        state: client.state || '',
+        postal_code: client.postal_code || client.zip_code || '',
+        client_type: client.client_type || (client.comercial_name ? 'empresa' : 'persona'),
+        credit_limit: client.credit_limit ?? 0,
+        ...normalized
+      }
       this.showEditModal = true
     },
     
     async updateClient() {
       try {
-        await clientService.updateClient(this.editingClientId, this.clientForm)
+        const payload = {
+          name: this.clientForm.name,
+          rfc: this.clientForm.rfc,
+          address: this.clientForm.address,
+          city: this.clientForm.city,
+          state: this.clientForm.state,
+          zip_code: this.clientForm.postal_code,
+          comercial_name: this.clientForm.client_type === 'empresa' ? this.clientForm.name : null,
+          credit_limit: this.clientForm.credit_limit,
+          contact_name: this.clientForm.contact_name || this.clientForm.name,
+          contact_email: this.clientForm.contact_email,
+          contact_phone: this.clientForm.contact_phone,
+          contact_rol: this.clientForm.contact_rol
+        }
+
+        console.log('Update payload:', payload)
+
+        await clientService.updateClient(this.editingClientId, payload)
         await this.loadClients()
         this.closeModal()
-        alert('Cliente actualizado exitosamente')
+        this.showMessage('success', 'Éxito', 'Cliente actualizado exitosamente')
       } catch (err) {
-        alert('Error al actualizar cliente: ' + err.message)
+        this.showMessage('error', 'Error', 'Error al actualizar cliente: ' + err.message)
       }
     },
     
-    async deleteClient(clientId) {
-      if (!confirm('¿Está seguro de eliminar este cliente?')) return
-      
+    deleteClient(clientId) {
+      this.deleteClientId = clientId
+      this.showDeleteConfirm = true
+    },
+
+    async confirmDelete() {
       try {
-        await clientService.deleteClient(clientId)
+        console.log('Eliminando cliente ID:', this.deleteClientId)
+        await clientService.deleteClient(this.deleteClientId)
+        console.log('Cliente eliminado exitosamente')
         await this.loadClients()
-        alert('Cliente eliminado exitosamente')
+        this.showDeleteConfirm = false
+        this.deleteClientId = null
+        this.showMessage('success', 'Éxito', 'Cliente eliminado exitosamente')
       } catch (err) {
-        alert('Error al eliminar cliente: ' + err.message)
+        console.error('Error al eliminar:', err)
+        this.showDeleteConfirm = false
+        this.deleteClientId = null
+        this.showMessage('error', 'Error', 'Error al eliminar cliente: ' + err.message)
       }
+    },
+
+    cancelDelete() {
+      this.showDeleteConfirm = false
+      this.deleteClientId = null
+    },
+
+    showMessage(type, title, text) {
+      this.messageType = type
+      this.messageTitle = title
+      this.messageText = text
+      this.showMessageModal = true
+
+      // Auto-close after 2.5 seconds
+      if (this.messageTimeout) clearTimeout(this.messageTimeout)
+      this.messageTimeout = setTimeout(() => {
+        this.closeMessageModal()
+      }, 2500)
+    },
+
+    closeMessageModal() {
+      if (this.messageTimeout) clearTimeout(this.messageTimeout)
+      this.showMessageModal = false
     },
     
     closeModal() {
@@ -345,14 +508,16 @@ export default {
       this.clientForm = {
         name: '',
         rfc: '',
-        email: '',
-        phone: '',
         address: '',
         city: '',
         state: '',
         postal_code: '',
         client_type: 'empresa',
-        credit_limit: 0
+        credit_limit: 0,
+        contact_name: '',
+        contact_email: '',
+        contact_phone: '',
+        contact_rol: ''
       }
     }
   }

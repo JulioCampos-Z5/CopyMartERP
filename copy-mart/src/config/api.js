@@ -6,6 +6,8 @@
  * utilidades para hacer peticiones HTTP al backend.
  */
 
+import axios from 'axios'
+
 // URL base del backend
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -39,60 +41,56 @@ export const API_ENDPOINTS = {
   CONTACTS: '/api/contacts'
 }
 
-/**
- * Realiza una petición HTTP al backend con autenticación automática
- * @param {string} endpoint - Ruta del endpoint (puede usar API_ENDPOINTS)
- * @param {Object} options - Opciones de fetch (method, body, headers, etc.)
- * @param {boolean} skipAuth - Si es true, no incluye el token de autenticación
- * @returns {Promise<any>} - Respuesta JSON del servidor
- */
-export async function apiRequest(endpoint, options = {}, skipAuth = false) {
-  const token = localStorage.getItem('token')
-  
-  const config = {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    }
+// Cliente Axios con manejo de token y errores
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
   }
-  
-  // Añadir token de autenticación si está disponible y no se omite
-  if (token && !skipAuth) {
+})
+
+// Interceptor para agregar Authorization automáticamente
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token && !config.skipAuth) {
     config.headers.Authorization = `Bearer ${token}`
   }
-  
-  try {
-    const url = `${API_BASE_URL}${endpoint}`
-    const response = await fetch(url, config)
-    
-    // Manejar errores HTTP
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ 
-        detail: `Error ${response.status}: ${response.statusText}` 
-      }))
-      
-      // Lanzar error con el mensaje del servidor o mensaje por defecto
-      throw new Error(errorData.detail || errorData.message || `Error ${response.status}`)
-    }
-    
-    // Si la respuesta es 204 No Content, no hay body que parsear
-    if (response.status === 204) {
-      return null
-    }
-    
-    return await response.json()
-  } catch (error) {
-    // Log del error para debugging
-    console.error('API Request Error:', {
-      endpoint,
-      error: error.message,
-      options
-    })
-    
-    // Re-lanzar el error para que el llamador lo maneje
-    throw error
+  return config
+})
+
+// Interceptor de respuesta para normalizar errores
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status
+    const detail = error.response?.data?.detail || error.message
+    const formattedError = new Error(detail || `Error ${status || ''}`.trim())
+    formattedError.status = status
+    throw formattedError
   }
+)
+
+/**
+ * Realiza una petición HTTP al backend con axios
+ * @param {string} endpoint - Ruta del endpoint (puede usar API_ENDPOINTS)
+ * @param {Object} options - Opciones de axios (method, data/body, params, headers)
+ * @param {boolean} skipAuth - Si es true, no incluye el token de autenticación
+ * @returns {Promise<any>} - Datos de la respuesta
+ */
+export async function apiRequest(endpoint, options = {}, skipAuth = false) {
+  const { body, data, ...rest } = options
+  const payload = data ?? (typeof body === 'string' ? JSON.parse(body) : body)
+
+  const response = await apiClient.request({
+    url: endpoint,
+    method: options.method || 'GET',
+    data: payload,
+    params: options.params,
+    headers: options.headers,
+    skipAuth
+  })
+
+  return response.data
 }
 
 /**

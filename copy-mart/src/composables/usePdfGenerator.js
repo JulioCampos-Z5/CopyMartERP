@@ -162,122 +162,223 @@ export const usePdfGenerator = () => {
 
   // Función para generar facturas/recibos con vista previa
   const generateInvoicePdf = (invoiceData, filename = 'factura.pdf', showPreview = false) => {
-    try {
-      const pdf = new jsPDF()
-      
-      // Header de la empresa
-      pdf.setFontSize(18)
-      pdf.setTextColor(40, 40, 40)
-      pdf.text('CopyMart', 20, 30)
-      
-      pdf.setFontSize(10)
-      pdf.text('Servicios de Copiado e Impresión', 20, 38)
-      pdf.text('RFC: COPY123456789', 20, 45)
-      pdf.text('Tel: +52 55 1234-5678', 20, 52)
-      
-      // Datos de la factura
-      pdf.setFontSize(14)
-      pdf.text('FACTURA', 150, 30)
-      
-      pdf.setFontSize(10)
-      pdf.text(`Folio: ${invoiceData.folio || 'F-' + Date.now()}`, 150, 40)
-      pdf.text(`Fecha: ${invoiceData.fecha || new Date().toLocaleDateString('es-ES')}`, 150, 47)
-      
-      // Datos del cliente
-      pdf.setFontSize(12)
-      pdf.text('FACTURAR A:', 20, 70)
-      pdf.setFontSize(10)
-      pdf.text(invoiceData.cliente.nombre, 20, 80)
-      pdf.text(invoiceData.cliente.email, 20, 87)
-      if (invoiceData.cliente.telefono) {
-        pdf.text(invoiceData.cliente.telefono, 20, 94)
-      }
-      
-      // Tabla de productos/servicios
-      let yPos = 110
-      
-      // Headers de la tabla
-      pdf.setFillColor(240, 240, 240)
-      pdf.rect(20, yPos, 170, 10, 'F')
-      
-      pdf.setFontSize(9)
-      pdf.setTextColor(40, 40, 40)
-      pdf.text('Descripción', 25, yPos + 7)
-      pdf.text('Cantidad', 110, yPos + 7)
-      pdf.text('Precio Unit.', 135, yPos + 7)
-      pdf.text('Total', 165, yPos + 7)
-      
-      yPos += 15
-      
-      // Items
-      let subtotal = 0
-      invoiceData.items.forEach((item, index) => {
-        const total = item.cantidad * item.precio
-        subtotal += total
+    return new Promise((resolve, reject) => {
+      try {
+        // Crear elemento HTML para la factura
+        const invoiceHtml = document.createElement('div')
+        invoiceHtml.id = 'invoice-html-temp'
+        invoiceHtml.style.cssText = 'width: 210mm; height: 297mm; padding: 15mm; background: white; font-family: Arial, sans-serif; position: absolute; left: -9999px; box-sizing: border-box;'
         
-        pdf.text(item.descripcion, 25, yPos)
-        pdf.text(item.cantidad.toString(), 115, yPos)
-        pdf.text(`$${item.precio.toFixed(2)}`, 140, yPos)
-        pdf.text(`$${total.toFixed(2)}`, 165, yPos)
+        const iva = invoiceData.items.reduce((sum, item) => sum + (item.cantidad * item.precio), 0) * 0.16
+        const subtotal = invoiceData.items.reduce((sum, item) => sum + (item.cantidad * item.precio), 0)
+        const total = subtotal + iva
         
-        yPos += 10
+        invoiceHtml.innerHTML = `
+          <style>
+            body { margin: 0; padding: 0; }
+            .invoice-container { font-size: 11px; color: #333; }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+            .company-info h1 { margin: 0; font-size: 24px; color: #1f4e0e; font-weight: bold; }
+            .company-info p { margin: 2px 0; font-size: 9px; color: #666; }
+            .factura-title { text-align: right; }
+            .factura-title h2 { margin: 0; font-size: 16px; color: #1f4e0e; }
+            .factura-number { background: #1f4e0e; color: white; padding: 5px 10px; font-size: 11px; font-weight: bold; display: inline-block; margin-top: 5px; }
+            
+            .section-title { background: #1f4e0e; color: white; padding: 6px 8px; font-weight: bold; font-size: 10px; margin-top: 12px; margin-bottom: 8px; }
+            
+            .emisor-receptor { display: flex; gap: 20px; margin-bottom: 15px; }
+            .emisor, .receptor { flex: 1; font-size: 9px; line-height: 1.5; }
+            .emisor-title, .receptor-title { background: #1f4e0e; color: white; padding: 4px 6px; font-weight: bold; font-size: 10px; margin-bottom: 6px; }
+            .field-label { font-weight: bold; color: #333; margin-top: 4px; }
+            .field-value { color: #555; margin-left: 0; }
+            
+            .datos-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+            .datos-table td { padding: 4px 6px; font-size: 9px; border: none; }
+            .datos-label { font-weight: bold; width: 30%; }
+            .datos-value { color: #555; }
+            
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+            .items-table thead tr { background: #1f4e0e; color: white; }
+            .items-table th { padding: 6px 4px; text-align: left; font-weight: bold; font-size: 9px; border: 1px solid #1f4e0e; }
+            .items-table td { padding: 5px 4px; font-size: 9px; border: 1px solid #ddd; }
+            .items-table th:last-child, .items-table td:last-child { text-align: right; }
+            
+            .objeto-impuesto { font-size: 9px; color: #666; margin-bottom: 10px; }
+            
+            .totales { text-align: right; margin-top: 15px; }
+            .total-line { font-size: 9px; margin-bottom: 4px; }
+            .total-line-label { display: inline-block; width: 120px; text-align: left; }
+            .total-line-value { display: inline-block; width: 80px; text-align: right; font-weight: normal; }
+            .total-box { background: #1f4e0e; color: white; padding: 7px 10px; font-weight: bold; font-size: 11px; display: inline-block; min-width: 180px; text-align: center; margin-top: 6px; }
+          </style>
+          
+          <div class="invoice-container">
+            <!-- HEADER -->
+            <div class="header">
+              <div class="company-info">
+                <h1>COPYMART</h1>
+                <p>Servicios de Copiado e Impresión</p>
+              </div>
+              <div class="factura-title">
+                <h2>Factura</h2>
+                <div class="factura-number">- ${invoiceData.folio || 'F-001'}</div>
+              </div>
+            </div>
+            
+            <!-- EMISOR Y RECEPTOR -->
+            <div class="emisor-receptor">
+              <div class="emisor">
+                <div class="emisor-title">EMISOR</div>
+                <div>
+                  <div class="field-label">Razón Social:</div>
+                  <div class="field-value">COPYMART SOLUTIONS</div>
+                  <div class="field-label" style="margin-top: 6px;">RFC:</div>
+                  <div class="field-value">CCS161115L51</div>
+                  <div class="field-label" style="margin-top: 6px;">Domicilio:</div>
+                  <div class="field-value">Paseo Solares 555, Col. Solares</div>
+                </div>
+              </div>
+              <div class="receptor">
+                <div class="receptor-title">RECEPTOR</div>
+                <div>
+                  <div class="field-label">Razón Social:</div>
+                  <div class="field-value">${invoiceData.cliente?.nombre || 'Cliente'}</div>
+                  <div class="field-label" style="margin-top: 6px;">RFC:</div>
+                  <div class="field-value">${invoiceData.cliente?.rfc || 'N/A'}</div>
+                  <div class="field-label" style="margin-top: 6px;">Domicilio:</div>
+                  <div class="field-value">${invoiceData.cliente?.domicilio || 'N/A'}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- DATOS GENERALES -->
+            <div class="section-title">DATOS GENERALES</div>
+            <table class="datos-table">
+              <tr>
+                <td class="datos-label">Fecha de Expedición:</td>
+                <td class="datos-value">${invoiceData.fecha || new Date().toLocaleDateString('es-MX')}</td>
+                <td class="datos-label" style="text-align: right; padding-right: 40px;">Moneda:</td>
+                <td class="datos-value">MXN</td>
+              </tr>
+              <tr>
+                <td class="datos-label">Folio Interno:</td>
+                <td class="datos-value">${invoiceData.folio || 'F-001'}</td>
+                <td class="datos-label" style="text-align: right; padding-right: 40px;">Método de Pago:</td>
+                <td class="datos-value">${invoiceData.metodoPago || 'Por definir'}</td>
+              </tr>
+            </table>
+            
+            <!-- TABLA DE DETALLES -->
+            <div class="section-title">DETALLES</div>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Cantidad</th>
+                  <th>Descripción</th>
+                  <th>C. Prod/Serv</th>
+                  <th>Unidad</th>
+                  <th>P. Unitario</th>
+                  <th>Importe</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${invoiceData.items.map(item => `
+                  <tr>
+                    <td style="text-align: center;">${item.cantidad || 1}</td>
+                    <td>${(item.descripcion || 'Equipo').substring(0, 35)}</td>
+                    <td style="text-align: center;">${item.cProds || '84721900'}</td>
+                    <td style="text-align: center;">${item.unidad || 'Pieza'}</td>
+                    <td style="text-align: right;">$ ${(item.precio || 0).toFixed(2)}</td>
+                    <td style="text-align: right;">$ ${((item.cantidad || 1) * (item.precio || 0)).toFixed(2)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            
+            <div class="objeto-impuesto">Si objeto de impuesto.</div>
+            
+            <!-- TOTALES -->
+            <div class="totales">
+              <div class="total-line">
+                <span class="total-line-label">SUBTOTAL:</span>
+                <span class="total-line-value">$ ${subtotal.toFixed(2)}</span>
+              </div>
+              <div class="total-line">
+                <span class="total-line-label">+ IVA (16%):</span>
+                <span class="total-line-value">$ ${iva.toFixed(2)}</span>
+              </div>
+              <div class="total-box">
+                TOTAL: $ ${total.toFixed(2)}
+              </div>
+            </div>
+          </div>
+        `
         
-        // Nueva página si es necesario
-        if (yPos > 250) {
-          pdf.addPage()
-          yPos = 30
-        }
-      })
-      
-      // Totales
-      yPos += 10
-      pdf.line(20, yPos, 190, yPos)
-      yPos += 10
-      
-      const iva = subtotal * 0.16
-      const total = subtotal + iva
-      
-      pdf.setFontSize(10)
-      pdf.text(`Subtotal: $${subtotal.toFixed(2)}`, 140, yPos)
-      pdf.text(`IVA (16%): $${iva.toFixed(2)}`, 140, yPos + 7)
-      
-      pdf.setFontSize(12)
-      pdf.setFont('helvetica', 'bold')
-      pdf.text(`Total: $${total.toFixed(2)}`, 140, yPos + 17)
-      
-      // Método de pago
-      if (invoiceData.metodoPago) {
-        pdf.setFont('helvetica', 'normal')
-        pdf.setFontSize(9)
-        pdf.text(`Método de pago: ${invoiceData.metodoPago}`, 20, yPos + 20)
+        document.body.appendChild(invoiceHtml)
+        
+        // Convertir a PDF usando html2canvas
+        html2canvas(invoiceHtml, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        }).then(canvas => {
+          const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+          const imgData = canvas.toDataURL('image/png')
+          const imgWidth = 210
+          const pageHeight = 295
+          const imgHeight = (canvas.height * imgWidth) / canvas.width
+          
+          let heightLeft = imgHeight
+          let position = 0
+          
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+          heightLeft -= pageHeight
+          
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight
+            pdf.addPage()
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+            heightLeft -= pageHeight
+          }
+          
+          document.body.removeChild(invoiceHtml)
+          
+          if (showPreview) {
+            const pdfBlob = pdf.output('blob')
+            const pdfUrl = URL.createObjectURL(pdfBlob)
+            resolve({
+              success: true,
+              message: 'Vista previa de factura generada',
+              previewUrl: pdfUrl,
+              pdf: pdf,
+              filename: filename
+            })
+          } else {
+            pdf.save(filename)
+            resolve({
+              success: true,
+              message: 'Factura generada exitosamente'
+            })
+          }
+        }).catch(error => {
+          if (document.body.contains(invoiceHtml)) {
+            document.body.removeChild(invoiceHtml)
+          }
+          console.error('Error al generar factura:', error)
+          reject({
+            success: false,
+            message: 'Error al generar la factura: ' + error.message
+          })
+        })
+      } catch (error) {
+        console.error('Error al generar factura:', error)
+        reject({
+          success: false,
+          message: 'Error al generar la factura: ' + error.message
+        })
       }
-      
-      if (showPreview) {
-        // Mostrar vista previa
-        const pdfBlob = pdf.output('blob')
-        const pdfUrl = URL.createObjectURL(pdfBlob)
-        return {
-          success: true,
-          message: 'Vista previa de factura generada',
-          previewUrl: pdfUrl,
-          pdf: pdf,
-          filename: filename
-        }
-      } else {
-        // Descargar el PDF directamente
-        pdf.save(filename)
-        return {
-          success: true,
-          message: 'Factura generada exitosamente'
-        }
-      }
-    } catch (error) {
-      console.error('Error al generar factura:', error)
-      return {
-        success: false,
-        message: 'Error al generar la factura: ' + error.message
-      }
-    }
+    })
   }
 
   // Función para descargar un PDF desde su objeto
