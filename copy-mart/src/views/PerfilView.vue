@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
     <AppNavigation />
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -198,8 +198,8 @@
                       <h3 class="text-sm font-medium text-gray-900">Modo Oscuro</h3>
                       <p class="text-sm text-gray-500">Cambia el tema de la interfaz</p>
                     </div>
-                    <button type="button" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
-                      <span class="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                    <button @click="toggleDarkMode" type="button" :class="['relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2', isDarkMode ? 'bg-indigo-600' : 'bg-gray-200']">
+                      <span :class="['translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out', isDarkMode ? 'translate-x-5' : 'translate-x-0']"></span>
                     </button>
                   </div>
                 </div>
@@ -222,6 +222,7 @@ export default {
   },
   data() {
     return {
+      isDarkMode: localStorage.getItem('darkMode') !== 'false',
       user: {
         name: '',
         email: '',
@@ -243,6 +244,14 @@ export default {
     }
   },
   methods: {
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode
+      localStorage.setItem('darkMode', this.isDarkMode)
+      window.dispatchEvent(new CustomEvent('darkModeChange', { 
+        detail: { isDarkMode: this.isDarkMode }
+      }))
+    },
+
     formatDate(dateStr) {
       if (!dateStr) return '-'
       return new Date(dateStr).toLocaleDateString('es-MX')

@@ -1,6 +1,6 @@
 <template>
   <!-- Top Navigation Bar -->
-  <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+  <nav class="bg-white dark:bg-gray-900 shadow-md fixed w-full top-0 z-50 dark:shadow-lg">
     <div class="max-w-full mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
@@ -8,7 +8,7 @@
           <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <span class="text-xl font-semibold text-gray-800">CopyMart ERP</span>
+          <img src="/Logo.svg" alt="CopyMart Logo" class="h-12 w-auto" />
         </div>
 
         <!-- Right Side -->
@@ -16,7 +16,7 @@
           <!-- Apps Menu Button -->
           <button 
             @click="toggleAppsMenu"
-            class="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
+            class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
             title="Aplicaciones"
           >
             <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 24 24">

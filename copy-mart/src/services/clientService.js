@@ -24,7 +24,7 @@ export const clientService = {
 
   async updateClient(id, clientData) {
     return apiRequest(`${API_ENDPOINTS.CLIENTS}/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(clientData)
     })
   },
@@ -59,7 +59,7 @@ export const clientService = {
 
   async updateBranch(clientId, branchId, branchData) {
     return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(branchData)
     })
   },
@@ -94,7 +94,7 @@ export const clientService = {
 
   async updateArea(clientId, branchId, areaId, areaData) {
     return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}/areas/${areaId}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(areaData)
     })
   },

@@ -94,17 +94,17 @@
           </div>
         </div>
 
-        <!-- Create Form -->
-        <div v-if="showCreateForm" class="bg-white p-6 rounded-lg shadow border">
+        <!-- Create/Edit Form -->
+        <div v-if="showCreateForm || showEditForm" class="bg-white p-6 rounded-lg shadow border">
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-900">Nueva Venta</h2>
-            <button @click="showCreateForm = false" class="text-gray-400 hover:text-gray-600">
+            <h2 class="text-xl font-bold text-gray-900">{{ showEditForm ? 'Editar Venta' : 'Nueva Venta' }}</h2>
+            <button @click="closeForm" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-          <form @submit.prevent="createSale" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form @submit.prevent="showEditForm ? updateSale() : createSale()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
               <select v-model="newSale.client_id" required class="input-field">
@@ -142,11 +142,11 @@
               </label>
             </div>
             <div class="md:col-span-2 flex gap-2 justify-end">
-              <button type="button" @click="showCreateForm = false" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button type="button" @click="closeForm" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                 Cancelar
               </button>
               <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">
-                Crear Venta
+                {{ showEditForm ? 'Guardar Cambios' : 'Crear Venta' }}
               </button>
             </div>
           </form>
@@ -201,6 +201,8 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ formatCurrency(sale.sale_price) }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button @click="viewSale(sale)" class="text-blue-600 hover:text-blue-900 mr-3">Ver</button>
+                      <button @click="generateSalePdf(sale)" class="text-red-600 hover:text-red-900 mr-3">PDF</button>
+                      <button @click="editSale(sale)" class="text-purple-600 hover:text-purple-900 mr-3">Editar</button>
                       <button v-if="sale.sale_status === 'pendiente'" @click="updateStatus(sale.sale_id, 'confirmada')" class="text-green-600 hover:text-green-900 mr-3">Confirmar</button>
                       <button v-if="sale.sale_status === 'confirmada'" @click="updateStatus(sale.sale_id, 'entregada')" class="text-blue-600 hover:text-blue-900 mr-3">Entregar</button>
                       <button v-if="sale.sale_status !== 'entregada'" @click="cancelSale(sale.sale_id)" class="text-red-600 hover:text-red-900">Cancelar</button>
@@ -221,6 +223,8 @@ import BaseLayout from '@/components/BaseLayout.vue'
 import { saleService } from '@/services/saleService'
 import { clientService } from '@/services/clientService'
 import { equipmentService } from '@/services/equipmentService'
+import { useModalBus } from '@/composables/useModalBus'
+import { usePdfGenerator } from '@/composables/usePdfGenerator'
 
 export default {
   name: 'VentasView',
@@ -233,8 +237,10 @@ export default {
       clients: [],
       equipment: [],
       loading: false,
-      error: null,
+      errorMsg: null,
       showCreateForm: false,
+      showEditForm: false,
+      editingSaleId: null,
       newSale: {
         client_id: '',
         item_id: '',
@@ -267,6 +273,11 @@ export default {
     await this.loadEquipment()
   },
   methods: {
+    ...(() => {
+      const { success, error, info, confirm } = useModalBus()
+      const { generateInvoicePdf } = usePdfGenerator()
+      return { success, error, info, confirm, generateInvoicePdf }
+    })(),
     async loadSales() {
       this.loading = true
       this.error = null
@@ -296,9 +307,18 @@ export default {
         console.log('📦 loadEquipment - Iniciando carga de equipos...')
         const allEquipment = await equipmentService.getEquipment()
         console.log('📦 loadEquipment - Todos los equipos:', allEquipment)
-        // Filtrar solo equipos en bodega (disponibles para venta)
-        this.equipment = allEquipment.filter(e => e.location_status === 'bodega')
+        // Filtrar equipos disponibles para venta (en bodega)
+        this.equipment = allEquipment.filter(e => {
+          const status = typeof e.location_status === 'string'
+            ? e.location_status.toLowerCase()
+            : String(e.location_status || '').toLowerCase()
+          return status.includes('bodega')
+        })
         console.log('📦 loadEquipment - Equipos en bodega:', this.equipment)
+        if (!this.equipment || this.equipment.length === 0) {
+          console.warn('⚠️ No se encontraron equipos en bodega. Mostrando todos temporalmente.')
+          this.equipment = allEquipment
+        }
       } catch (err) {
         console.error('❌ Error loading equipment:', err)
       }
@@ -317,9 +337,9 @@ export default {
         this.showCreateForm = false
         this.resetForm()
         await this.loadSales()
-        alert('Venta creada exitosamente')
+        this.success('Venta creada exitosamente')
       } catch (err) {
-        alert('Error al crear venta: ' + err.message)
+        this.error('Error al crear venta: ' + err.message)
       }
     },
 
@@ -368,7 +388,8 @@ export default {
     },
 
     viewSale(sale) {
-      alert(`Venta: ${sale.invoice_number}\nCliente: ${sale.client?.name}\nEquipo: ${sale.equipment?.model}\nPrecio: ${this.formatCurrency(sale.sale_price)}`)
+      const text = `Venta: ${sale.invoice_number || '-'}\nCliente: ${sale.client?.name || '-'}\nEquipo: ${sale.equipment?.model || '-'}\nPrecio: ${this.formatCurrency(sale.sale_price)}`
+      this.info(text, 'Detalle de Venta', 4000)
     },
 
     async updateStatus(saleId, newStatus) {
@@ -376,17 +397,85 @@ export default {
         await saleService.updateSaleStatus(saleId, newStatus)
         await this.loadSales()
       } catch (err) {
-        alert('Error al actualizar estado: ' + err.message)
+        this.error('Error al actualizar estado: ' + err.message)
+      }
+    },
+    editSale(sale) {
+      this.editingSaleId = sale.sale_id
+      this.newSale = {
+        client_id: sale.client_id,
+        item_id: sale.item_id,
+        sale_price: sale.sale_price,
+        sale_status: sale.sale_status,
+        is_foreign: sale.is_foreign
+      }
+      this.showEditForm = true
+      this.showCreateForm = false
+    },
+
+    async updateSale() {
+      try {
+        const payload = {
+          client_id: parseInt(this.newSale.client_id),
+          item_id: parseInt(this.newSale.item_id),
+          sale_price: parseFloat(this.newSale.sale_price),
+          sale_status: this.newSale.sale_status,
+          is_foreign: this.newSale.is_foreign
+        }
+        await saleService.updateSale(this.editingSaleId, payload)
+        this.success('Venta actualizada exitosamente')
+        this.closeForm()
+        await this.loadSales()
+      } catch (err) {
+        this.error('Error al actualizar venta: ' + err.message)
+      }
+    },
+
+    closeForm() {
+      this.showCreateForm = false
+      this.showEditForm = false
+      this.editingSaleId = null
+      this.resetForm()
+    },
+    async generateSalePdf(sale) {
+      try {
+        const invoiceData = {
+          folio: sale.invoice_number || `V-${sale.sale_id}`,
+          fecha: sale.created_at || new Date().toLocaleDateString('es-MX'),
+          cliente: {
+            nombre: sale.client?.name || 'Cliente',
+            email: sale.client?.contact?.email || '',
+            telefono: sale.client?.contact?.phone || ''
+          },
+          items: [
+            {
+              descripcion: `${sale.equipment?.model || 'Equipo'} (${sale.equipment?.sku || ''})`,
+              cantidad: 1,
+              precio: parseFloat(sale.sale_price || 0)
+            }
+          ],
+          metodoPago: sale.payment_method || 'Efectivo'
+        }
+        const result = await this.generateInvoicePdf(invoiceData, `Venta_${invoiceData.folio}.pdf`, true)
+        if (result?.previewUrl) {
+          window.open(result.previewUrl, '_blank')
+          this.info('Se abrió la vista previa del PDF en una nueva pestaña.', 'Vista previa')
+        } else {
+          this.error('No se pudo generar la vista previa del PDF')
+        }
+      } catch (err) {
+        this.error('Error al generar PDF: ' + err.message)
       }
     },
 
     async cancelSale(saleId) {
-      if (!confirm('¿Está seguro de cancelar esta venta?')) return
+      const ok = await this.confirm('¿Está seguro de cancelar esta venta?', 'Confirmar cancelación', 'Confirmar', 'Cancelar')
+      if (!ok) return
       try {
         await saleService.deleteSale(saleId)
         await this.loadSales()
       } catch (err) {
-        alert('Error al cancelar venta: ' + err.message)
+        this.error('Error al cancelar venta: ' + err.message)
       }
     }
   }

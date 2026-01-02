@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
     <AppNavigation />
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -327,6 +327,7 @@
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
 import { equipmentService } from '@/services/equipmentService'
+import { useModalBus } from '@/composables/useModalBus'
 
 export default {
   name: 'InventarioView',
@@ -388,6 +389,10 @@ export default {
     await this.loadSuppliers()
   },
   methods: {
+    ...(() => {
+      const { success, error, info } = useModalBus()
+      return { success, error, info }
+    })(),
     async loadEquipment() {
       this.loading = true
       this.error = null
@@ -414,9 +419,9 @@ export default {
         await equipmentService.createEquipment(this.equipmentForm)
         await this.loadEquipment()
         this.closeModal()
-        alert('Equipo creado exitosamente')
+        this.success('Equipo creado exitosamente')
       } catch (err) {
-        alert('Error al crear equipo: ' + err.message)
+        this.error('Error al crear equipo: ' + err.message)
       }
     },
     
@@ -436,10 +441,10 @@ export default {
         await equipmentService.updateEquipment(this.editingEquipmentId, this.equipmentForm)
         await this.loadEquipment()
         this.closeModal()
-        alert('Equipo actualizado exitosamente')
+        this.success('Equipo actualizado exitosamente')
       } catch (err) {
         console.error('Update error:', err)
-        alert('Error al actualizar equipo: ' + err.message)
+        this.error('Error al actualizar equipo: ' + err.message)
       }
     },
     
@@ -449,9 +454,9 @@ export default {
       try {
         await equipmentService.deleteEquipment(equipmentId)
         await this.loadEquipment()
-        alert('Equipo eliminado exitosamente')
+        this.success('Equipo eliminado exitosamente')
       } catch (err) {
-        alert('Error al eliminar equipo: ' + err.message)
+        this.error('Error al eliminar equipo: ' + err.message)
       }
     },
     
@@ -494,9 +499,9 @@ export default {
         await equipmentService.createBrand(this.brandForm)
         this.brandForm = { name: '', prefix: '' }
         await this.loadBrands()
-        alert('Marca registrada exitosamente')
+        this.success('Marca registrada exitosamente')
       } catch (err) {
-        alert('Error al registrar marca: ' + err.message)
+        this.error('Error al registrar marca: ' + err.message)
       }
     },
     
@@ -517,9 +522,9 @@ export default {
       try {
         await equipmentService.deleteBrand(brandId)
         await this.loadBrands()
-        alert('Marca eliminada exitosamente')
+        this.success('Marca eliminada exitosamente')
       } catch (err) {
-        alert('Error al eliminar marca: ' + err.message)
+        this.error('Error al eliminar marca: ' + err.message)
       }
     },
     

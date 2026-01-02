@@ -9,14 +9,205 @@
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors duration-200;
+    @apply bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 font-medium py-2 px-4 rounded-md transition-colors duration-200;
+  }
+  
+  .btn-outline {
+    @apply border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-2 px-4 rounded-md transition-colors duration-200;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white;
   }
   
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg p-6;
   }
+}
+
+/* Dark mode - Estilos base */
+.dark {
+  background-color: #111827;
+  color: #f3f4f6;
+}
+
+/* Cards y contenedores */
+.dark .bg-white {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1f2937 !important;
+}
+
+/* Textos - Mantener contraste adecuado */
+.dark .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+.dark .text-gray-800 {
+  color: #e5e7eb !important;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+.dark .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+/* Bordes */
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #4b5563 !important;
+}
+
+.dark .border {
+  border-color: #374151 !important;
+}
+
+/* Dividers */
+.dark .divide-gray-200 > * {
+  border-color: #374151 !important;
+}
+
+/* Hover states */
+.dark .hover\:bg-gray-100:hover {
+  background-color: #374151 !important;
+}
+
+.dark .hover\:bg-gray-200:hover {
+  background-color: #4b5563 !important;
+}
+
+/* Forms - inputs, textarea, select */
+.dark input:not([type="radio"]):not([type="checkbox"]),
+.dark textarea,
+.dark select {
+  background-color: #374151 !important;
+  color: #f3f4f6 !important;
+  border-color: #4b5563 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #2563eb !important;
+  ring-color: #2563eb !important;
+}
+
+/* Tables */
+.dark table thead {
+  background-color: #1f2937 !important;
+}
+
+.dark table tbody tr {
+  border-color: #374151 !important;
+}
+
+.dark table tbody tr:hover {
+  background-color: #374151 !important;
+}
+
+/* Badges y pills */
+.dark .bg-green-100 {
+  background-color: #065f46 !important;
+}
+
+.dark .bg-green-100 .text-green-800 {
+  color: #d1fae5 !important;
+}
+
+.dark .bg-blue-100 {
+  background-color: #1e3a8a !important;
+}
+
+.dark .bg-blue-100 .text-blue-800 {
+  color: #dbeafe !important;
+}
+
+.dark .bg-yellow-100 {
+  background-color: #78350f !important;
+}
+
+.dark .bg-yellow-100 .text-yellow-800 {
+  color: #fef3c7 !important;
+}
+
+.dark .bg-red-100 {
+  background-color: #7f1d1d !important;
+}
+
+.dark .bg-red-100 .text-red-800 {
+  color: #fee2e2 !important;
+}
+
+/* Específicos para headers coloridos */
+.dark .bg-purple-50 {
+  background-color: #581c87 !important;
+}
+
+.dark .text-purple-800 {
+  color: #f3e8ff !important;
+}
+
+.dark .text-purple-600 {
+  color: #e9d5ff !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: #1e3a8a !important;
+}
+
+.dark .text-blue-800 {
+  color: #dbeafe !important;
+}
+
+.dark .text-blue-600 {
+  color: #bfdbfe !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: #065f46 !important;
+}
+
+.dark .text-emerald-800 {
+  color: #d1fae5 !important;
+}
+
+.dark .text-emerald-600 {
+  color: #a7f3d0 !important;
+}
+
+.dark .bg-rose-50 {
+  background-color: #881337 !important;
+}
+
+.dark .text-rose-800 {
+  color: #fecdd3 !important;
+}
+
+.dark .text-rose-600 {
+  color: #fda4af !important;
 }
