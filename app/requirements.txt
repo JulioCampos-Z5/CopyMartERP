@@ -1,5 +1,5 @@
 SQLAlchemy
-#pymysql
+pymysql
 psycopg2-binary  # Para PostgreSQL
 fastapi
 uvicorn

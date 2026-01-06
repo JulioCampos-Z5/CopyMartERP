@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from core.database import Base
+from ..core.database import Base
 
 class Contact(Base):
     __tablename__ = "contacts"

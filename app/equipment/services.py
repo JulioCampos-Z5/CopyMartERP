@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from equipment.models import Brand, Supplier, Equipment
-from equipment.schemas import SupplierCreate, BrandCreate, EquipmentCreate
+from .models import Brand, Supplier, Equipment
+from .schemas import SupplierCreate, BrandCreate, EquipmentCreate
 
 def create_brand(db: Session, brand_data: BrandCreate):
     brand = Brand(

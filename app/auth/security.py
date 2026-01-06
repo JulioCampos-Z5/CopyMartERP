@@ -2,8 +2,8 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt 
 from datetime import datetime, timedelta
 from fastapi import HTTPException, status
-from auth.schemas import TokenData
-from auth.models import RolEnum, DepartmentEnum
+from .schemas import TokenData
+from .models import RolEnum, DepartmentEnum
 
 SECRET_KEY = "JindnsniuNkna"
 ALGORITHM = "HS256"

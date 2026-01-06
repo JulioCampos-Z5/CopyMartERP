@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from equipment.models import Supplier, Equipment, Brand
-from equipment.schemas import (
+from .models import Supplier, Equipment, Brand
+from .schemas import (
     BrandCreate, BrandRead, 
     SupplierCreate, SupplierRead, 
     EquipmentCreate, EquipmentRead, EquipmentUpdate
 )
-from equipment.services import create_brand, create_supplier, create_equipment, update_equipment_status
-from core.database import get_db
+from .services import create_brand, create_supplier, create_equipment, update_equipment_status
+from ..core.database import get_db
 
 router = APIRouter(
     prefix="/equipment",

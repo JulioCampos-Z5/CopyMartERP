@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date
 
-from core.database import get_db
-from auth.routers import get_current_user
-from auth.models import User
-from billing.schemas import (
+from ..core.database import get_db
+from ..auth.routers import get_current_user
+from ..auth.models import User
+from .schemas import (
     BillingCreate,
     BillingUpdate,
     BillingResponse,
@@ -17,7 +17,7 @@ from billing.schemas import (
     BillingPayment,
     BillingStats
 )
-from billing.services import BillingService
+from .services import BillingService
 
 router = APIRouter(
     prefix="/billings",

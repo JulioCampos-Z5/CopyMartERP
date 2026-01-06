@@ -38,7 +38,13 @@ export const API_ENDPOINTS = {
   BILLINGS: '/api/billings',
   
   // Contactos - Prefijo: /api/contacts
-  CONTACTS: '/api/contacts'
+  CONTACTS: '/api/contacts',
+  
+  // Compras - Prefijo: /api/purchases
+  PURCHASES: '/api/purchases',
+  
+  // Refacciones - Prefijo: /api/spareparts
+  SPAREPARTS: '/api/spareparts'
 }
 
 // Cliente Axios con manejo de token y errores
@@ -64,6 +70,20 @@ apiClient.interceptors.response.use(
   (error) => {
     const status = error.response?.status
     const detail = error.response?.data?.detail || error.message
+    
+    // Si recibimos un 401, redirigir al login
+    if (status === 401) {
+      // Limpiar autenticación
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      localStorage.removeItem('isAuthenticated')
+      
+      // Redirigir al login si no estamos ya en esa ruta
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
+    }
+    
     const formattedError = new Error(detail || `Error ${status || ''}`.trim())
     formattedError.status = status
     throw formattedError

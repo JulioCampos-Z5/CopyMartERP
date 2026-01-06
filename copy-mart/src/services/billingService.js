@@ -48,6 +48,27 @@ export const billingService = {
     return apiRequest(url)
   },
 
+  async getPendingBillings(skip = 0, limit = 100) {
+    const url = buildUrlWithParams(`${API_ENDPOINTS.BILLINGS}/pending`, { skip, limit })
+    return apiRequest(url)
+  },
+
+  async getFollowUpBillings(skip = 0, limit = 100) {
+    const url = buildUrlWithParams(`${API_ENDPOINTS.BILLINGS}/follow-up`, { skip, limit })
+    return apiRequest(url)
+  },
+
+  async toggleFollowUp(billingId, followUp) {
+    return apiRequest(`${API_ENDPOINTS.BILLINGS}/${billingId}/follow-up`, {
+      method: 'PATCH',
+      params: { follow_up: followUp }
+    })
+  },
+
+  async getClientBillingSummary(clientId) {
+    return apiRequest(`${API_ENDPOINTS.BILLINGS}/client/${clientId}/summary`)
+  },
+
   async updateOverdueBillings() {
     return apiRequest(`${API_ENDPOINTS.BILLINGS}/update-overdue`, {
       method: 'POST'

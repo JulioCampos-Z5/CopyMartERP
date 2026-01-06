@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from contact.models import Contact
-from contact.schemas import ContactCreate, ContactUpdate
+from .models import Contact
+from .schemas import ContactCreate, ContactUpdate
 from datetime import datetime
 
 def get_contacts(db: Session):

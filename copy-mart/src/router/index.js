@@ -7,7 +7,11 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login'
+      redirect: to => {
+        const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+        const hasToken = !!localStorage.getItem('token')
+        return (isAuthenticated && hasToken) ? '/dashboard' : '/login'
+      }
     },
     {
       path: '/login',
@@ -189,13 +193,20 @@ router.beforeEach((to, from, next) => {
   // Usuario está autenticado si tiene ambos
   const userLoggedIn = isAuthenticated && hasToken
   
+  // Si la ruta requiere autenticación y no está autenticado
   if (to.meta.requiresAuth && !userLoggedIn) {
-    // Redirigir al login si la ruta requiere autenticación y no está autenticado
+    // Guardar la ruta a la que intentaba acceder
+    sessionStorage.setItem('redirectAfterLogin', to.fullPath)
+    // Redirigir al login
     next('/login')
-  } else if (to.path === '/login' && userLoggedIn) {
-    // Redirigir al dashboard si intenta ir al login estando ya autenticado
+  } 
+  // Si intenta ir al login estando ya autenticado
+  else if (to.path === '/login' && userLoggedIn) {
+    // Redirigir al dashboard
     next('/dashboard')
-  } else {
+  } 
+  // Si no requiere autenticación o está autenticado
+  else {
     next()
   }
 })

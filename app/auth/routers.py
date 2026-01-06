@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from auth.models import User
-from auth.schemas import (
+from .models import User
+from .schemas import (
     UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangeEmail, PermissionsResponse, Token, UserUpdate
 )
-from auth.schemas import TokenData
-from auth.services import get_user_by_id, get_user_by_email, create_user, authenticate_user
-from auth.permissions import can_create, can_edit, can_delete, get_accesible_modules
-from auth.security import get_password_hash, create_access_token, decode_token
-from core.database import get_db
+from .schemas import TokenData
+from .services import get_user_by_id, get_user_by_email, create_user, authenticate_user
+from .permissions import can_create, can_edit, can_delete, get_accesible_modules
+from .security import get_password_hash, create_access_token, decode_token
+from ..core.database import get_db
 from fastapi.security import OAuth2PasswordBearer
 
 router = APIRouter(

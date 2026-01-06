@@ -184,12 +184,22 @@
         <form v-if="!selectedRent" @submit.prevent="createRent" class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Cliente ID *</label>
-              <input v-model="rentForm.client_id" type="number" required class="input-field">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+              <select v-model="rentForm.client_id" required class="input-field">
+                <option value="">Selecciona un cliente</option>
+                <option v-for="client in clients" :key="client.client_id" :value="client.client_id">
+                  {{ client.name }} - {{ client.rfc }}
+                </option>
+              </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Equipo ID *</label>
-              <input v-model="rentForm.equipment_id" type="number" required class="input-field">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Equipo *</label>
+              <select v-model="rentForm.equipment_id" required class="input-field">
+                <option value="">Selecciona un equipo</option>
+                <option v-for="equipment in availableEquipment" :key="equipment.item_id" :value="equipment.item_id">
+                  {{ equipment.model }} - {{ equipment.sku }}
+                </option>
+              </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Número de Contrato</label>
@@ -200,29 +210,12 @@
               <input v-model="rentForm.rent" type="number" step="0.01" required class="input-field">
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio *</label>
-              <input v-model="rentForm.start_date" type="date" required class="input-field">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
-              <input v-model="rentForm.end_date" type="date" class="input-field">
-            </div>
-            <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Estado del Contrato</label>
               <select v-model="rentForm.contract_status" class="input-field">
                 <option value="vigente">Vigente</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="sin_firmar">Sin Firmar</option>
                 <option value="vencido">Vencido</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Periodo de Pago</label>
-              <select v-model="rentForm.payment_period" class="input-field">
-                <option value="mensual">Mensual</option>
-                <option value="trimestral">Trimestral</option>
-                <option value="semestral">Semestral</option>
-                <option value="anual">Anual</option>
               </select>
             </div>
             <div class="md:col-span-2">
@@ -262,12 +255,14 @@
               <p class="text-base font-medium">{{ formatCurrency(selectedRent.rent) }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Fecha de Inicio</p>
-              <p class="text-base font-medium">{{ formatDate(selectedRent.start_date) }}</p>
+              <p class="text-sm text-gray-500">Estado</p>
+              <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(selectedRent.contract_status)]">
+                {{ getStatusLabel(selectedRent.contract_status) }}
+              </span>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Fecha de Fin</p>
-              <p class="text-base font-medium">{{ formatDate(selectedRent.end_date) }}</p>
+              <p class="text-sm text-gray-500">Servicio Foráneo</p>
+              <p class="text-base font-medium">{{ selectedRent.is_foreign ? 'Sí' : 'No' }}</p>
             </div>
           </div>
           <div class="mt-6 flex justify-end">
@@ -284,6 +279,8 @@
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
 import { rentService } from '@/services/rentService'
+import { clientService } from '@/services/clientService'
+import { equipmentService } from '@/services/equipmentService'
 
 export default {
   name: 'RentasView',
@@ -293,6 +290,8 @@ export default {
   data() {
     return {
       rents: [],
+      clients: [],
+      availableEquipment: [],
       loading: false,
       error: null,
       stats: {
@@ -312,10 +311,7 @@ export default {
         equipment_id: '',
         contract_number: '',
         rent: '',
-        start_date: new Date().toISOString().split('T')[0],
-        end_date: '',
         contract_status: 'pendiente',
-        payment_period: 'mensual',
         is_foreign: false
       }
     }
@@ -332,6 +328,8 @@ export default {
   },
   async mounted() {
     await this.loadRents()
+    await this.loadClients()
+    await this.loadEquipment()
   },
   methods: {
     async loadRents() {
@@ -345,6 +343,32 @@ export default {
         console.error('Error loading rents:', err)
       } finally {
         this.loading = false
+      }
+    },
+
+    async loadClients() {
+      try {
+        this.clients = await clientService.getClients()
+        console.log('Clientes cargados:', this.clients.length, 'clientes')
+        if (this.clients.length > 0) {
+          console.log('Primer cliente:', this.clients[0])
+        }
+      } catch (err) {
+        console.error('Error loading clients:', err)
+      }
+    },
+
+    async loadEquipment() {
+      try {
+        // Cargar solo equipos disponibles (no en renta activa)
+        const allEquipment = await equipmentService.getEquipment()
+        this.availableEquipment = allEquipment.filter(eq => eq.status === 'disponible' || !eq.status)
+        console.log('Equipos disponibles:', this.availableEquipment.length, 'equipos')
+        if (this.availableEquipment.length > 0) {
+          console.log('Primer equipo:', this.availableEquipment[0])
+        }
+      } catch (err) {
+        console.error('Error loading equipment:', err)
       }
     },
 
@@ -413,6 +437,9 @@ export default {
     openNewRentModal() {
       this.selectedRent = null
       this.showModal = true
+      // Recargar listas al abrir el modal (sin esperar)
+      this.loadClients()
+      this.loadEquipment()
     },
 
     closeModal() {
@@ -423,28 +450,74 @@ export default {
         equipment_id: '',
         contract_number: '',
         rent: '',
-        start_date: new Date().toISOString().split('T')[0],
-        end_date: '',
         contract_status: 'pendiente',
-        payment_period: 'mensual',
         is_foreign: false
       }
     },
 
     async createRent() {
       try {
-        const data = {
-          ...this.rentForm,
-          client_id: parseInt(this.rentForm.client_id),
-          equipment_id: parseInt(this.rentForm.equipment_id),
-          rent: parseFloat(this.rentForm.rent)
+        // Validar campos requeridos
+        if (!this.rentForm.client_id) {
+          alert('Por favor selecciona un cliente')
+          return
         }
+        
+        if (!this.rentForm.equipment_id) {
+          alert('Por favor selecciona un equipo')
+          return
+        }
+        
+        if (!this.rentForm.rent || parseFloat(this.rentForm.rent) <= 0) {
+          alert('Por favor ingresa una renta mensual válida')
+          return
+        }
+        
+        const data = {
+          client_id: parseInt(this.rentForm.client_id),
+          item_id: parseInt(this.rentForm.equipment_id), // Backend espera 'item_id' no 'equipment_id'
+          rent: parseFloat(this.rentForm.rent),
+          contract_status: this.rentForm.contract_status,
+          is_foreign: this.rentForm.is_foreign
+        }
+        
+        console.log('Form values:', this.rentForm)
+        console.log('Enviando datos de renta:', data)
         await rentService.createRent(data)
         await this.loadRents()
         this.closeModal()
         alert('Renta creada exitosamente')
       } catch (err) {
-        alert('Error al crear renta: ' + err.message)
+        console.error('Error creating rent:', err)
+        console.error('Error response:', err.response)
+        
+        // Manejar errores de validación de FastAPI (422)
+        let errorMessage = 'Error desconocido al crear renta'
+        
+        if (err.response?.data) {
+          const errorData = err.response.data
+          
+          // Si es un error de validación con detalles
+          if (Array.isArray(errorData.detail)) {
+            errorMessage = errorData.detail.map(e => `${e.loc?.join('.') || 'campo'}: ${e.msg}`).join('\n')
+          } 
+          // Si es un string simple
+          else if (typeof errorData.detail === 'string') {
+            errorMessage = errorData.detail
+          }
+          // Si tiene un mensaje general
+          else if (errorData.message) {
+            errorMessage = errorData.message
+          }
+          // Último recurso
+          else {
+            errorMessage = JSON.stringify(errorData)
+          }
+        } else if (err.message) {
+          errorMessage = err.message
+        }
+        
+        alert('Error al crear renta:\n' + errorMessage)
       }
     }
   }

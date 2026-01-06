@@ -6,12 +6,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from core.database import Base, engine
+from .core.database import Base, engine
 
 # Importar modelos para que se registren con SQLAlchemy
 print("Importando modelos...")
 try:
-    from auth import models as auth_models
+    from .auth import models as auth_models
     print("✓ Modelos de autenticación importados")
 except ImportError as e:
     print(f"⚠ Error importando modelos de auth: {e}")

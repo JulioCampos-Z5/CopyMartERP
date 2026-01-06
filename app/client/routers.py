@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from core.database import get_db
-from auth.routers import get_current_user
-from client.schemas import (
+from ..core.database import get_db
+from ..auth.routers import get_current_user
+from .schemas import (
     ClientCreate, ClientUpdate, ClientResponse, ClientListResponse,
     BranchCreate, BranchUpdate, BranchResponse,
     AreaCreate, AreaUpdate, AreaResponse
 )
-from client.services import ClientService, BranchService, AreaService
+from .services import ClientService, BranchService, AreaService
 
 router = APIRouter()
 

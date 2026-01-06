@@ -2,19 +2,19 @@ from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from core.database import get_db
-from auth.routers import get_current_user
-from auth.models import User
-from rent.schemas import (
+from ..core.database import get_db
+from ..auth.routers import get_current_user
+from ..auth.models import User
+from .schemas import (
     RentCreate,
     RentUpdate,
     RentResponse,
     RentFilter,
     ContractStatus
 )
-from rent.services import RentService
+from .services import RentService
 from sqlalchemy import func
-from rent.models import Rent
+from .models import Rent
 
 router = APIRouter(
     prefix="/rents",

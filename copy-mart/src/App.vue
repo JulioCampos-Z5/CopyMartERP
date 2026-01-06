@@ -7,6 +7,7 @@
 
 <script>
 import ApiStatus from '@/components/ApiStatus.vue'
+import { authStorage } from '@/config/api'
 
 export default {
   name: 'App',
@@ -35,6 +36,23 @@ export default {
     window.addEventListener('darkModeChange', (e) => {
       this.isDarkMode = e.detail.isDarkMode
     })
+    
+    // Verificar autenticación al cargar la aplicación
+    this.checkAuthentication()
+  },
+  methods: {
+    checkAuthentication() {
+      const currentPath = this.$route.path
+      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true'
+      const hasToken = authStorage.isAuthenticated()
+      
+      // Si no está en login y no está autenticado, redirigir
+      if (currentPath !== '/login' && (!isAuthenticated || !hasToken)) {
+        // Limpiar cualquier estado inconsistente
+        authStorage.removeToken()
+        this.$router.push('/login')
+      }
+    }
   }
 }
 </script>

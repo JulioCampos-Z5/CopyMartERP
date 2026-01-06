@@ -46,121 +46,57 @@ export const clientService = {
     return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches`)
   },
 
-  async getBranchById(clientId, branchId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}`)
+  async getBranchById(branchId) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/branches/${branchId}`)
   },
 
   async createBranch(clientId, branchData) {
     return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches`, {
       method: 'POST',
-      body: JSON.stringify(branchData)
+      body: JSON.stringify({ ...branchData, client_id: clientId })
     })
   },
 
-  async updateBranch(clientId, branchId, branchData) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}`, {
+  async updateBranch(branchId, branchData) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/branches/${branchId}`, {
       method: 'PATCH',
       body: JSON.stringify(branchData)
     })
   },
 
-  async deleteBranch(clientId, branchId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}`, {
+  async deleteBranch(branchId) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/branches/${branchId}`, {
       method: 'DELETE'
-    })
-  },
-
-  async setMainBranch(clientId, branchId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}/set-main`, {
-      method: 'PATCH'
     })
   },
 
   // CRUD de áreas
-  async getAreas(clientId, branchId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}/areas`)
+  async getAreas(branchId) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/branches/${branchId}/areas`)
   },
 
-  async getAreaById(clientId, branchId, areaId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}/areas/${areaId}`)
+  async getAreaById(areaId) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/areas/${areaId}`)
   },
 
-  async createArea(clientId, branchId, areaData) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}/areas`, {
+  async createArea(branchId, areaData) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/branches/${branchId}/areas`, {
       method: 'POST',
-      body: JSON.stringify(areaData)
+      body: JSON.stringify({ ...areaData, branch_id: branchId })
     })
   },
 
-  async updateArea(clientId, branchId, areaId, areaData) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}/areas/${areaId}`, {
+  async updateArea(areaId, areaData) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/areas/${areaId}`, {
       method: 'PATCH',
       body: JSON.stringify(areaData)
     })
   },
 
-  async deleteArea(clientId, branchId, areaId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/branches/${branchId}/areas/${areaId}`, {
+  async deleteArea(areaId) {
+    return apiRequest(`${API_ENDPOINTS.CLIENTS}/areas/${areaId}`, {
       method: 'DELETE'
     })
-  },
-
-  // CRUD de contactos
-  async getContacts(clientId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`)
-  },
-
-  async getContactById(clientId, contactId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts/${contactId}`)
-  },
-
-  async createContact(clientId, contactData) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts`, {
-      method: 'POST',
-      body: JSON.stringify(contactData)
-    })
-  },
-
-  async updateContact(clientId, contactId, contactData) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts/${contactId}`, {
-      method: 'PUT',
-      body: JSON.stringify(contactData)
-    })
-  },
-
-  async deleteContact(clientId, contactId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts/${contactId}`, {
-      method: 'DELETE'
-    })
-  },
-
-  async setPrimaryContact(clientId, contactId) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${clientId}/contacts/${contactId}/set-primary`, {
-      method: 'PATCH'
-    })
-  },
-
-  // Métodos de búsqueda y filtros
-  async searchClients(query) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/search?q=${encodeURIComponent(query)}`)
-  },
-
-  async getClientsByIndustry(industry) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/by-industry/${encodeURIComponent(industry)}`)
-  },
-
-  async getActiveClients() {
-    const url = buildUrlWithParams(API_ENDPOINTS.CLIENTS, { active: true })
-    return apiRequest(url)
-  },
-
-  // Métodos para dashboard/estadísticas
-  async getClientStats() {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/stats`)
-  },
-
-  async getClientSummary(id) {
-    return apiRequest(`${API_ENDPOINTS.CLIENTS}/${id}/summary`)
   }
 }
 

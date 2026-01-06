@@ -1,5 +1,5 @@
 from typing import List
-from auth.models import User, RolEnum, DepartmentEnum
+from .models import User, RolEnum, DepartmentEnum
 
 MODULE_PERMISSIONS = {
     DepartmentEnum.RH: {

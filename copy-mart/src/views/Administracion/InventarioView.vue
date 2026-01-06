@@ -71,7 +71,22 @@
 
         <!-- Actions -->
         <div class="bg-white p-6 rounded-lg shadow border">
-          <div class="flex flex-wrap gap-4">
+          <!-- Tabs -->
+          <div class="flex border-b border-gray-200 mb-4">
+            <button 
+              @click="activeTab = 'equipos'" 
+              :class="['px-4 py-2 font-medium text-sm border-b-2 transition-colors', activeTab === 'equipos' ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700']">
+              Equipos
+            </button>
+            <button 
+              @click="activeTab = 'refacciones'" 
+              :class="['px-4 py-2 font-medium text-sm border-b-2 transition-colors', activeTab === 'refacciones' ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700']">
+              Refacciones
+            </button>
+          </div>
+          
+          <!-- Equipos Actions -->
+          <div v-if="activeTab === 'equipos'" class="flex flex-wrap gap-4">
             <button @click="showCreateModal = true" class="btn-primary">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -105,10 +120,32 @@
               <option value="mantenimiento">Mantenimiento</option>
             </select>
           </div>
+          
+          <!-- Refacciones Actions -->
+          <div v-else class="flex flex-wrap gap-4">
+            <button @click="showSparepartModal = true" class="btn-primary">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Agregar Refacción
+            </button>
+            <button @click="loadSpareparts" class="btn-secondary">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualizar
+            </button>
+            <input 
+              v-model="sparepartSearch" 
+              type="text" 
+              placeholder="Buscar por código o nombre..." 
+              class="input-field flex-1 max-w-md"
+            />
+          </div>
         </div>
 
-        <!-- Inventory Table -->
-        <div class="bg-white rounded-lg shadow border">
+        <!-- Equipos Table -->
+        <div v-if="activeTab === 'equipos'" class="bg-white rounded-lg shadow border">
           <div class="p-6 border-b border-gray-200">
             <h2 class="text-xl font-semibold text-gray-900">Equipos en Inventario</h2>
           </div>
@@ -152,6 +189,66 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button @click="editEquipment(item)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
                       <button @click="deleteEquipment(item.item_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Refacciones Table -->
+        <div v-else class="bg-white rounded-lg shadow border">
+          <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Refacciones en Inventario</h2>
+          </div>
+          <div class="p-6">
+            <div v-if="loadingSpareparts" class="text-center py-8">
+              <p class="text-gray-500">Cargando refacciones...</p>
+            </div>
+            <div v-else-if="errorSpareparts" class="text-center py-8">
+              <p class="text-red-500">{{ errorSpareparts }}</p>
+            </div>
+            <div v-else class="overflow-x-auto">
+              <table class="min-w-full table-auto">
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Color</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equipo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-if="filteredSpareparts.length === 0">
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                      No hay refacciones registradas
+                    </td>
+                  </tr>
+                  <tr v-for="part in filteredSpareparts" :key="part.sparepart_id">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-purple-600">{{ part.code || '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ part.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ part.brand || '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span v-if="part.color" :class="{
+                        'bg-gray-800 text-white': part.color === 'K',
+                        'bg-yellow-400 text-gray-900': part.color === 'Y',
+                        'bg-pink-500 text-white': part.color === 'M',
+                        'bg-cyan-500 text-white': part.color === 'C',
+                        'bg-gradient-to-r from-yellow-400 via-pink-500 to-cyan-500 text-white': part.color === 'COLOR'
+                      }" class="px-2 py-1 text-xs font-medium rounded">
+                        {{ part.color }}
+                      </span>
+                      <span v-else class="text-gray-400">-</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ part.equipment || '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ part.supplier || '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button @click="editSparepart(part)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                      <button @click="deleteSparepart(part.sparepart_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
                 </tbody>
@@ -321,12 +418,79 @@
         </div>
       </div>
     </div>
+
+    <!-- Sparepart Modal -->
+    <div v-if="showSparepartModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-semibold text-gray-900">{{ editingSparepartId ? 'Editar Refacción' : 'Nueva Refacción' }}</h3>
+            <button @click="closeSparepartModal" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <form @submit.prevent="editingSparepartId ? updateSparepart() : createSparepart()" class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Código</label>
+              <input v-model="sparepartForm.code" type="text" class="input-field" placeholder="REF-001">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+              <input v-model="sparepartForm.name" type="text" required class="input-field" placeholder="Toner HP 85A">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+              <input v-model="sparepartForm.brand" type="text" class="input-field" placeholder="HP">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+              <select v-model="sparepartForm.color" class="input-field">
+                <option value="">Seleccionar...</option>
+                <option value="K">Negro (K)</option>
+                <option value="C">Cyan (C)</option>
+                <option value="M">Magenta (M)</option>
+                <option value="Y">Amarillo (Y)</option>
+                <option value="COLOR">Color</option>
+                <option value="NA">N/A</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Equipo Compatible</label>
+              <input v-model="sparepartForm.equipment" type="text" class="input-field" placeholder="LaserJet Pro M404">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+              <input v-model="sparepartForm.supplier" type="text" class="input-field" placeholder="KONICA">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+              <textarea v-model="sparepartForm.description" rows="3" class="input-field" placeholder="Descripción de la refacción..."></textarea>
+            </div>
+          </div>
+          
+          <div class="mt-6 flex justify-end gap-3">
+            <button type="button" @click="closeSparepartModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+              {{ editingSparepartId ? 'Actualizar' : 'Crear' }} Refacción
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
 import { equipmentService } from '@/services/equipmentService'
+import { sparepartService } from '@/services/sparepartService'
 import { useModalBus } from '@/composables/useModalBus'
 
 export default {
@@ -336,16 +500,22 @@ export default {
   },
   data() {
     return {
+      activeTab: 'equipos',
       equipment: [],
       brands: [],
+      spareparts: [],
       loading: false,
       loadingBrands: false,
+      loadingSpareparts: false,
       error: null,
+      errorSpareparts: null,
       showCreateModal: false,
       showEditModal: false,
       showBrandModal: false,
+      showSparepartModal: false,
       filterCategory: '',
       filterStatus: '',
+      sparepartSearch: '',
       equipmentForm: {
         brand_id: null,
         model: '',
@@ -362,8 +532,18 @@ export default {
         name: '',
         prefix: ''
       },
+      sparepartForm: {
+        code: '',
+        name: '',
+        description: '',
+        color: '',
+        brand: '',
+        equipment: '',
+        supplier: ''
+      },
       suppliers: [],
-      editingEquipmentId: null
+      editingEquipmentId: null,
+      editingSparepartId: null
     }
   },
   computed: {
@@ -373,6 +553,14 @@ export default {
         const matchesStatus = !this.filterStatus || item.status === this.filterStatus
         return matchesCategory && matchesStatus
       })
+    },
+    filteredSpareparts() {
+      if (!this.sparepartSearch) return this.spareparts
+      const search = this.sparepartSearch.toLowerCase()
+      return this.spareparts.filter(part => 
+        part.code?.toLowerCase().includes(search) || 
+        part.name?.toLowerCase().includes(search)
+      )
     },
     stats() {
       return {
@@ -386,6 +574,7 @@ export default {
   async mounted() {
     await this.loadEquipment()
     await this.loadBrands()
+    await this.loadSpareparts()
     await this.loadSuppliers()
   },
   methods: {
@@ -421,7 +610,7 @@ export default {
         this.closeModal()
         this.success('Equipo creado exitosamente')
       } catch (err) {
-        this.error('Error al crear equipo: ' + err.message)
+        this.showError('Error al crear equipo: ' + err.message)
       }
     },
     
@@ -444,7 +633,7 @@ export default {
         this.success('Equipo actualizado exitosamente')
       } catch (err) {
         console.error('Update error:', err)
-        this.error('Error al actualizar equipo: ' + err.message)
+        this.showError('Error al actualizar equipo: ' + err.message)
       }
     },
     
@@ -456,7 +645,7 @@ export default {
         await this.loadEquipment()
         this.success('Equipo eliminado exitosamente')
       } catch (err) {
-        this.error('Error al eliminar equipo: ' + err.message)
+        this.showError('Error al eliminar equipo: ' + err.message)
       }
     },
     
@@ -501,7 +690,7 @@ export default {
         await this.loadBrands()
         this.success('Marca registrada exitosamente')
       } catch (err) {
-        this.error('Error al registrar marca: ' + err.message)
+        this.showError('Error al registrar marca: ' + err.message)
       }
     },
     
@@ -524,7 +713,7 @@ export default {
         await this.loadBrands()
         this.success('Marca eliminada exitosamente')
       } catch (err) {
-        this.error('Error al eliminar marca: ' + err.message)
+        this.showError('Error al eliminar marca: ' + err.message)
       }
     },
     
@@ -536,6 +725,88 @@ export default {
     closeBrandModal() {
       this.showBrandModal = false
       this.brandForm = { name: '' }
+    },
+
+    // Spareparts methods
+    async loadSpareparts() {
+      this.loadingSpareparts = true
+      this.errorSpareparts = null
+      try {
+        const response = await sparepartService.getSpareparts({ pageSize: 100 })
+        console.log('📦 Spareparts response:', response)
+        this.spareparts = response.items || []
+      } catch (err) {
+        this.errorSpareparts = 'Error al cargar refacciones: ' + err.message
+        console.error('Error loading spareparts:', err)
+      } finally {
+        this.loadingSpareparts = false
+      }
+    },
+
+    async createSparepart() {
+      try {
+        await sparepartService.createSparepart(this.sparepartForm)
+        await this.loadSpareparts()
+        this.closeSparepartModal()
+        this.success('Refacción creada exitosamente')
+      } catch (err) {
+        this.showError('Error al crear refacción: ' + err.message)
+      }
+    },
+
+    editSparepart(sparepart) {
+      this.editingSparepartId = sparepart.sparepart_id
+      this.sparepartForm = { ...sparepart }
+      this.showSparepartModal = true
+    },
+
+    async updateSparepart() {
+      try {
+        await sparepartService.updateSparepart(this.editingSparepartId, this.sparepartForm)
+        await this.loadSpareparts()
+        this.closeSparepartModal()
+        this.success('Refacción actualizada exitosamente')
+      } catch (err) {
+        this.showError('Error al actualizar refacción: ' + err.message)
+      }
+    },
+
+    async deleteSparepart(sparepartId) {
+      if (!confirm('¿Está seguro de eliminar esta refacción?')) return
+      
+      try {
+        await sparepartService.deleteSparepart(sparepartId)
+        await this.loadSpareparts()
+        this.success('Refacción eliminada exitosamente')
+      } catch (err) {
+        this.showError('Error al eliminar refacción: ' + err.message)
+      }
+    },
+
+    closeSparepartModal() {
+      this.showSparepartModal = false
+      this.editingSparepartId = null
+      this.sparepartForm = {
+        code: '',
+        name: '',
+        description: '',
+        color: '',
+        brand: '',
+        equipment: '',
+        supplier: ''
+      }
+    },
+    
+    showError(message) {
+      this.error = message
+      setTimeout(() => {
+        this.error = null
+      }, 5000)
+    },
+    
+    success(message) {
+      console.log('✅', message)
+      // Aquí puedes agregar una notificación toast si lo deseas
     }
   }
 }

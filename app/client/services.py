@@ -2,13 +2,13 @@ from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 from typing import List, Optional
 
-from client.schemas import (
+from .schemas import (
     ClientCreate, ClientUpdate,
     BranchCreate, BranchUpdate,
     AreaCreate, AreaUpdate,
 )
-from client.models import Client, Branch, Area
-from contact.models import Contact
+from .models import Client, Branch, Area
+from ..contact.models import Contact
 
 
 

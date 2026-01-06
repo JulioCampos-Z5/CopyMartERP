@@ -5,8 +5,10 @@ from typing import Optional
 from datetime import datetime
 from decimal import Decimal
 
-from models import Purchase, Sparepart, Contact, PurchaseStatus, PurchaseType
-from schemas import PurchaseCreate, PurchaseUpdate, PurchaseStatusUpdate
+from .models import Purchase, PurchaseStatus, PurchaseType
+from .schemas import PurchaseCreate, PurchaseUpdate, PurchaseStatusUpdate
+from ..sparepart.models import Sparepart
+from ..contact.models import Contact
 
 class PurchaseService:
     

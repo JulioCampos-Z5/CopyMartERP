@@ -4,8 +4,8 @@ from typing import Optional
 from datetime import datetime
 import math
 
-from app.core.database import get_db
-from schemas import (
+from ..core.database import get_db
+from .schemas import (
     PurchaseCreate,
     PurchaseUpdate,
     PurchaseResponse,
@@ -14,7 +14,7 @@ from schemas import (
     PurchaseStatusUpdate,
     PurchaseStatsResponse
 )
-from services import PurchaseService
+from .services import PurchaseService
 
 router = APIRouter(
     prefix="/purchases",

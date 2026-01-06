@@ -1,22 +1,27 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from auth.routers import router as user_router
-from equipment.routers import router as equipment_router
-from rent.routers import router as rent_router
-from sale.routers import router as sale_router
-from billing.routers import router as billing_router
-from client.routers import router as client_router
+from .auth.routers import router as user_router
+from .equipment.routers import router as equipment_router
+from .rent.routers import router as rent_router
+from .sale.routers import router as sale_router
+from .billing.routers import router as billing_router
+from .client.routers import router as client_router
+from .contact.routers import router as contact_router
+from .purchase.routers import router as purchase_router
+from .sparepart.routers import router as sparepart_router
 
-from core.database import Base, engine
+from .core.database import Base, engine
 
 # Importar TODOS los modelos para que se registren con SQLAlchemy
-from auth import models as auth_models
-from client import models as client_models
-from contact import models as contact_models
-from equipment import models as equipment_models
-from rent import models as rent_models
-from sale import models as sale_models
-from billing import models as billing_models
+from .auth import models as auth_models
+from .client import models as client_models
+from .contact import models as contact_models
+from .equipment import models as equipment_models
+from .rent import models as rent_models
+from .sale import models as sale_models
+from .billing import models as billing_models
+from .purchase import models as purchase_models
+from .sparepart import models as sparepart_models
 
 app = FastAPI(title="API de Usuarios")
 
@@ -39,6 +44,9 @@ app.include_router(client_router, prefix="/api/clients", tags=["clients"])
 app.include_router(rent_router, prefix="/api")
 app.include_router(sale_router, prefix="/api")
 app.include_router(billing_router, prefix="/api")
+app.include_router(contact_router, prefix="/api")
+app.include_router(purchase_router, prefix="/api")
+app.include_router(sparepart_router, prefix="/api")
 
 
 @app.get("/")

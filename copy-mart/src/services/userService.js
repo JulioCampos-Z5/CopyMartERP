@@ -90,6 +90,11 @@ export const userService = {
     })
   },
 
+  // Permisos de usuario
+  async getUserPermissions(userId) {
+    return apiRequest(`${API_ENDPOINTS.AUTH}/${userId}/permissions`)
+  },
+
   // Utilidades de autenticación
   isAuthenticated() {
     return !!authStorage.getToken()

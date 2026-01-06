@@ -2,19 +2,19 @@ from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from core.database import get_db
-from auth.routers import get_current_user
-from auth.models import User
-from sale.schemas import (
+from ..core.database import get_db
+from ..auth.routers import get_current_user
+from ..auth.models import User
+from .schemas import (
     SaleCreate,
     SaleUpdate,
     SaleResponse,
     SaleFilter,
     SaleStatus
 )
-from sale.services import SaleService
+from .services import SaleService
 from sqlalchemy import func
-from sale.models import Sale
+from .models import Sale
 
 router = APIRouter(
     prefix="/sales",

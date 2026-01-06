@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from core.database import get_db
-from contact.schemas import ContactCreate, ContactRead
-from contact import services
+from ..core.database import get_db
+from .schemas import ContactCreate, ContactRead
+from . import services
 
 router = APIRouter(
     prefix="/contacts",

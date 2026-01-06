@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from datetime import datetime
 import enum
-from core.database import Base
+from ..core.database import Base
 
 class PurchaseType(str, enum.Enum):
     INTERNA = "Interna"
