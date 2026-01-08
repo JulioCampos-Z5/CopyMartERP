@@ -87,7 +87,7 @@
           
           <!-- Equipos Actions -->
           <div v-if="activeTab === 'equipos'" class="flex flex-wrap gap-4">
-            <button @click="showCreateModal = true" class="btn-primary">
+            <button @click="goToNewEquipment" class="btn-primary">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
@@ -123,7 +123,7 @@
           
           <!-- Refacciones Actions -->
           <div v-else class="flex flex-wrap gap-4">
-            <button @click="showSparepartModal = true" class="btn-primary">
+            <button @click="goToNewSparepart" class="btn-primary">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
@@ -187,7 +187,8 @@
                       </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button @click="editEquipment(item)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                      <button @click="goToEquipmentDetail(item.item_id)" class="text-purple-600 hover:text-purple-900 mr-3">Ver</button>
+                      <button @click="goToEditEquipment(item.item_id)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
                       <button @click="deleteEquipment(item.item_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
@@ -247,7 +248,8 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ part.equipment || '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ part.supplier || '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button @click="editSparepart(part)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                      <button @click="goToSparepartDetail(part.sparepart_id)" class="text-purple-600 hover:text-purple-900 mr-3">Ver</button>
+                      <button @click="goToEditSparepart(part.sparepart_id)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
                       <button @click="deleteSparepart(part.sparepart_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
@@ -580,7 +582,7 @@ export default {
   methods: {
     ...(() => {
       const { success, error, info } = useModalBus()
-      return { success, error, info }
+      return { showSuccess: success, showError: error, showInfo: info }
     })(),
     async loadEquipment() {
       this.loading = true
@@ -608,29 +610,24 @@ export default {
         await equipmentService.createEquipment(this.equipmentForm)
         await this.loadEquipment()
         this.closeModal()
-        this.success('Equipo creado exitosamente')
+        this.showSuccess('Equipo creado exitosamente')
       } catch (err) {
         this.showError('Error al crear equipo: ' + err.message)
       }
     },
     
     editEquipment(item) {
-      console.log('Editing equipment:', item)
-      console.log('Item ID:', item.item_id)
       this.editingEquipmentId = item.item_id
       this.equipmentForm = { ...item }
       this.showEditModal = true
-      console.log('editingEquipmentId set to:', this.editingEquipmentId)
     },
     
     async updateEquipment() {
-      console.log('Updating equipment with ID:', this.editingEquipmentId)
-      console.log('Form data:', this.equipmentForm)
       try {
         await equipmentService.updateEquipment(this.editingEquipmentId, this.equipmentForm)
         await this.loadEquipment()
         this.closeModal()
-        this.success('Equipo actualizado exitosamente')
+        this.showSuccess('Equipo actualizado exitosamente')
       } catch (err) {
         console.error('Update error:', err)
         this.showError('Error al actualizar equipo: ' + err.message)
@@ -643,7 +640,7 @@ export default {
       try {
         await equipmentService.deleteEquipment(equipmentId)
         await this.loadEquipment()
-        this.success('Equipo eliminado exitosamente')
+        this.showSuccess('Equipo eliminado exitosamente')
       } catch (err) {
         this.showError('Error al eliminar equipo: ' + err.message)
       }
@@ -688,7 +685,7 @@ export default {
         await equipmentService.createBrand(this.brandForm)
         this.brandForm = { name: '', prefix: '' }
         await this.loadBrands()
-        this.success('Marca registrada exitosamente')
+        this.showSuccess('Marca registrada exitosamente')
       } catch (err) {
         this.showError('Error al registrar marca: ' + err.message)
       }
@@ -711,7 +708,7 @@ export default {
       try {
         await equipmentService.deleteBrand(brandId)
         await this.loadBrands()
-        this.success('Marca eliminada exitosamente')
+        this.showSuccess('Marca eliminada exitosamente')
       } catch (err) {
         this.showError('Error al eliminar marca: ' + err.message)
       }
@@ -733,7 +730,6 @@ export default {
       this.errorSpareparts = null
       try {
         const response = await sparepartService.getSpareparts({ pageSize: 100 })
-        console.log('📦 Spareparts response:', response)
         this.spareparts = response.items || []
       } catch (err) {
         this.errorSpareparts = 'Error al cargar refacciones: ' + err.message
@@ -748,7 +744,7 @@ export default {
         await sparepartService.createSparepart(this.sparepartForm)
         await this.loadSpareparts()
         this.closeSparepartModal()
-        this.success('Refacción creada exitosamente')
+        this.showSuccess('Refacción creada exitosamente')
       } catch (err) {
         this.showError('Error al crear refacción: ' + err.message)
       }
@@ -765,7 +761,7 @@ export default {
         await sparepartService.updateSparepart(this.editingSparepartId, this.sparepartForm)
         await this.loadSpareparts()
         this.closeSparepartModal()
-        this.success('Refacción actualizada exitosamente')
+        this.showSuccess('Refacción actualizada exitosamente')
       } catch (err) {
         this.showError('Error al actualizar refacción: ' + err.message)
       }
@@ -777,7 +773,7 @@ export default {
       try {
         await sparepartService.deleteSparepart(sparepartId)
         await this.loadSpareparts()
-        this.success('Refacción eliminada exitosamente')
+        this.showSuccess('Refacción eliminada exitosamente')
       } catch (err) {
         this.showError('Error al eliminar refacción: ' + err.message)
       }
@@ -805,8 +801,33 @@ export default {
     },
     
     success(message) {
-      console.log('✅', message)
       // Aquí puedes agregar una notificación toast si lo deseas
+    },
+
+    // Métodos de navegación para Equipos
+    goToNewEquipment() {
+      this.$router.push('/administracion/equipos/nuevo')
+    },
+
+    goToEquipmentDetail(itemId) {
+      this.$router.push(`/administracion/equipos/${itemId}`)
+    },
+
+    goToEditEquipment(itemId) {
+      this.$router.push(`/administracion/equipos/editar/${itemId}`)
+    },
+
+    // Métodos de navegación para Refacciones
+    goToNewSparepart() {
+      this.$router.push('/administracion/refacciones/nueva')
+    },
+
+    goToSparepartDetail(sparepartId) {
+      this.$router.push(`/administracion/refacciones/${sparepartId}`)
+    },
+
+    goToEditSparepart(sparepartId) {
+      this.$router.push(`/administracion/refacciones/editar/${sparepartId}`)
     }
   }
 }

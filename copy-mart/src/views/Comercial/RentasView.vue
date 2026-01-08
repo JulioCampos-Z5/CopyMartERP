@@ -78,7 +78,7 @@
       <!-- Actions -->
       <div class="bg-white p-6 rounded-lg shadow border">
         <div class="flex flex-wrap gap-4">
-          <button @click="openNewRentModal" class="btn-primary">
+          <button @click="goToNewRent" class="btn-primary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
@@ -349,10 +349,6 @@ export default {
     async loadClients() {
       try {
         this.clients = await clientService.getClients()
-        console.log('Clientes cargados:', this.clients.length, 'clientes')
-        if (this.clients.length > 0) {
-          console.log('Primer cliente:', this.clients[0])
-        }
       } catch (err) {
         console.error('Error loading clients:', err)
       }
@@ -363,10 +359,6 @@ export default {
         // Cargar solo equipos disponibles (no en renta activa)
         const allEquipment = await equipmentService.getEquipment()
         this.availableEquipment = allEquipment.filter(eq => eq.status === 'disponible' || !eq.status)
-        console.log('Equipos disponibles:', this.availableEquipment.length, 'equipos')
-        if (this.availableEquipment.length > 0) {
-          console.log('Primer equipo:', this.availableEquipment[0])
-        }
       } catch (err) {
         console.error('Error loading equipment:', err)
       }
@@ -481,8 +473,6 @@ export default {
           is_foreign: this.rentForm.is_foreign
         }
         
-        console.log('Form values:', this.rentForm)
-        console.log('Enviando datos de renta:', data)
         await rentService.createRent(data)
         await this.loadRents()
         this.closeModal()
@@ -519,6 +509,18 @@ export default {
         
         alert('Error al crear renta:\n' + errorMessage)
       }
+    },
+
+    goToNewRent() {
+      this.$router.push('/comercial/rentas/nueva')
+    },
+
+    goToDetail(rentId) {
+      this.$router.push(`/comercial/rentas/${rentId}`)
+    },
+
+    goToEditRent(rentId) {
+      this.$router.push(`/comercial/rentas/editar/${rentId}`)
     }
   }
 }

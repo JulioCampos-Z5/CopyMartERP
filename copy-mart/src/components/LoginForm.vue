@@ -170,8 +170,6 @@ export default {
         })
         
         // Si el login es exitoso, verificar si hay una ruta guardada para redireccionar
-        console.log('Login successful:', response)
-        
         const redirectPath = sessionStorage.getItem('redirectAfterLogin')
         if (redirectPath) {
           sessionStorage.removeItem('redirectAfterLogin')

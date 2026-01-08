@@ -50,13 +50,15 @@ class EquipmentCreate(BaseModel):
 
 class EquipmentRead(BaseModel):
     item_id: int
-    sku: str
+    sku: Optional[str] = None
     brand_id: int
+    brand: Optional[BrandRead] = None
     model: str
     serie: str
     model_toner: str
     type: TypeColor
     supplier_id: int
+    supplier: Optional[SupplierRead] = None
     invoice: Optional[str]
     cost: Optional[float]
     location_status: LocationStatus
@@ -67,4 +69,14 @@ class EquipmentRead(BaseModel):
         orm_mode = True
 
 class EquipmentUpdate(BaseModel):
-    location_status: LocationStatus
+    brand_id: Optional[int] = None
+    model: Optional[str] = None
+    serie: Optional[str] = None
+    model_toner: Optional[str] = None
+    type: Optional[TypeColor] = None
+    supplier_id: Optional[int] = None
+    invoice: Optional[str] = None
+    cost: Optional[float] = None
+    location_status: Optional[LocationStatus] = None
+    comments: Optional[str] = None
+    is_active: Optional[bool] = None

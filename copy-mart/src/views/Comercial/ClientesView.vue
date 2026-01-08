@@ -72,7 +72,7 @@
         <!-- Actions -->
         <div class="bg-white p-6 rounded-lg shadow border">
           <div class="flex flex-wrap gap-4">
-            <button @click="showCreateModal = true" class="btn-primary">
+            <button @click="goToNewClient" class="btn-primary">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
@@ -126,9 +126,9 @@
                       No hay clientes registrados
                     </td>
                   </tr>
-                  <tr v-for="client in filteredClients" :key="client.client_id">
+                  <tr v-for="client in filteredClients" :key="client.client_id" class="hover:bg-gray-50 cursor-pointer" @click="goToDetail(client.client_id)">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ client.client_id }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ client.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ client.name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ client.rfc || '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div class="font-medium text-gray-800">{{ client.contact_name || '-' }}</div>
@@ -141,8 +141,9 @@
                         {{ client.status || 'activo' }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button @click="editClient(client)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" @click.stop>
+                      <button @click="goToDetail(client.client_id)" class="text-green-600 hover:text-green-900 mr-3">Ver</button>
+                      <button @click="goToEditClient(client.client_id)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
                       <button @click="deleteClient(client.client_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
@@ -151,89 +152,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Create/Edit Modal -->
-    <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6 border-b border-gray-200">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xl font-semibold text-gray-900">{{ showCreateModal ? 'Nuevo Cliente' : 'Editar Cliente' }}</h3>
-            <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <form @submit.prevent="showCreateModal ? createClient() : updateClient()" class="p-6">
-          <div class="space-y-8">
-            <section>
-              <h4 class="text-sm font-semibold text-gray-800 mb-3">Datos del Cliente</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre / Razón Social *</label>
-                  <input v-model="clientForm.name" type="text" required class="input-field">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">RFC</label>
-                  <input v-model="clientForm.rfc" type="text" class="input-field">
-                </div>
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                  <input v-model="clientForm.address" type="text" class="input-field">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-                  <input v-model="clientForm.city" type="text" class="input-field">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                  <input v-model="clientForm.state" type="text" class="input-field">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
-                  <input v-model="clientForm.postal_code" type="text" class="input-field">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Límite de Crédito</label>
-                  <input v-model="clientForm.credit_limit" type="number" step="0.01" class="input-field">
-                </div>
-              </div>
-            </section>
-
-            <section class="pt-4 border-t border-gray-200">
-              <h4 class="text-sm font-semibold text-gray-800 mb-3">Datos de Contacto</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de Contacto</label>
-                  <input v-model="clientForm.contact_name" type="text" class="input-field" placeholder="Nombre del contacto principal">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Puesto / Rol</label>
-                  <input v-model="clientForm.contact_rol" type="text" class="input-field" placeholder="Ej. Compras, TI">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input v-model="clientForm.contact_email" type="email" class="input-field">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input v-model="clientForm.contact_phone" type="tel" class="input-field">
-                </div>
-              </div>
-            </section>
-          </div>
-          <div class="mt-6 flex justify-end gap-3">
-            <button type="button" @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              Cancelar
-            </button>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-              {{ showCreateModal ? 'Crear Cliente' : 'Actualizar Cliente' }}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
 
@@ -295,25 +213,8 @@ export default {
       clients: [],
       loading: false,
       error: null,
-      showCreateModal: false,
-      showEditModal: false,
       searchQuery: '',
       filterStatus: '',
-      clientForm: {
-        name: '',
-        rfc: '',
-        address: '',
-        city: '',
-        state: '',
-        postal_code: '',
-        client_type: 'empresa',
-        credit_limit: 0,
-        contact_name: '',
-        contact_email: '',
-        contact_phone: '',
-        contact_rol: ''
-      },
-      editingClientId: null,
       showMessageModal: false,
       messageType: 'success',
       messageTitle: '',
@@ -368,7 +269,6 @@ export default {
       this.error = null
       try {
         const clients = await clientService.getClients()
-        console.log('API clients raw:', clients)
         this.clients = clients.map(c => ({
           ...c,
           ...this.normalizeContact(c),
@@ -382,78 +282,17 @@ export default {
         this.loading = false
       }
     },
-    
-    async createClient() {
-      try {
-        const payload = {
-          name: this.clientForm.name,
-          rfc: this.clientForm.rfc,
-          address: this.clientForm.address,
-          city: this.clientForm.city,
-          state: this.clientForm.state,
-          zip_code: this.clientForm.postal_code,
-          comercial_name: this.clientForm.client_type === 'empresa' ? this.clientForm.name : null,
-          credit_limit: this.clientForm.credit_limit,
-          contact_name: this.clientForm.contact_name || this.clientForm.name,
-          contact_email: this.clientForm.contact_email,
-          contact_phone: this.clientForm.contact_phone,
-          contact_rol: this.clientForm.contact_rol
-        }
 
-        console.log('Create payload:', payload)
-
-        await clientService.createClient(payload)
-        await this.loadClients()
-        this.closeModal()
-        this.showMessage('success', 'Éxito', 'Cliente creado exitosamente')
-      } catch (err) {
-        this.showMessage('error', 'Error', 'Error al crear cliente: ' + err.message)
-      }
+    goToNewClient() {
+      this.$router.push('/comercial/clientes/nuevo')
     },
-    
-    editClient(client) {
-      this.editingClientId = client.client_id
-      const normalized = this.normalizeContact(client)
-      this.clientForm = {
-        name: client.name || '',
-        rfc: client.rfc || '',
-        address: client.address || '',
-        city: client.city || '',
-        state: client.state || '',
-        postal_code: client.postal_code || client.zip_code || '',
-        client_type: client.client_type || (client.comercial_name ? 'empresa' : 'persona'),
-        credit_limit: client.credit_limit ?? 0,
-        ...normalized
-      }
-      this.showEditModal = true
+
+    goToDetail(clientId) {
+      this.$router.push(`/comercial/clientes/${clientId}`)
     },
-    
-    async updateClient() {
-      try {
-        const payload = {
-          name: this.clientForm.name,
-          rfc: this.clientForm.rfc,
-          address: this.clientForm.address,
-          city: this.clientForm.city,
-          state: this.clientForm.state,
-          zip_code: this.clientForm.postal_code,
-          comercial_name: this.clientForm.client_type === 'empresa' ? this.clientForm.name : null,
-          credit_limit: this.clientForm.credit_limit,
-          contact_name: this.clientForm.contact_name || this.clientForm.name,
-          contact_email: this.clientForm.contact_email,
-          contact_phone: this.clientForm.contact_phone,
-          contact_rol: this.clientForm.contact_rol
-        }
 
-        console.log('Update payload:', payload)
-
-        await clientService.updateClient(this.editingClientId, payload)
-        await this.loadClients()
-        this.closeModal()
-        this.showMessage('success', 'Éxito', 'Cliente actualizado exitosamente')
-      } catch (err) {
-        this.showMessage('error', 'Error', 'Error al actualizar cliente: ' + err.message)
-      }
+    goToEditClient(clientId) {
+      this.$router.push(`/comercial/clientes/editar/${clientId}`)
     },
     
     deleteClient(clientId) {
@@ -463,9 +302,7 @@ export default {
 
     async confirmDelete() {
       try {
-        console.log('Eliminando cliente ID:', this.deleteClientId)
         await clientService.deleteClient(this.deleteClientId)
-        console.log('Cliente eliminado exitosamente')
         await this.loadClients()
         this.showDeleteConfirm = false
         this.deleteClientId = null
@@ -499,26 +336,6 @@ export default {
     closeMessageModal() {
       if (this.messageTimeout) clearTimeout(this.messageTimeout)
       this.showMessageModal = false
-    },
-    
-    closeModal() {
-      this.showCreateModal = false
-      this.showEditModal = false
-      this.editingClientId = null
-      this.clientForm = {
-        name: '',
-        rfc: '',
-        address: '',
-        city: '',
-        state: '',
-        postal_code: '',
-        client_type: 'empresa',
-        credit_limit: 0,
-        contact_name: '',
-        contact_email: '',
-        contact_phone: '',
-        contact_rol: ''
-      }
     }
   }
 }

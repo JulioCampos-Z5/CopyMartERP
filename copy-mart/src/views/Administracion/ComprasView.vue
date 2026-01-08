@@ -269,7 +269,7 @@
 import BaseLayout from '@/components/BaseLayout.vue'
 import { purchaseService } from '@/services/purchaseService'
 import { sparepartService } from '@/services/sparepartService'
-import { userService } from '@/services/userService'
+import { contactService } from '@/services/contactService'
 
 export default {
   name: 'ComprasView',
@@ -332,7 +332,6 @@ export default {
       this.error = null
       try {
         const response = await purchaseService.getPurchases({ pageSize: 100 })
-        console.log('📦 Purchases response:', response)
         this.purchases = response.items || []
       } catch (err) {
         console.error('Error loading purchases:', err)
@@ -347,16 +346,24 @@ export default {
         const response = await sparepartService.getSpareparts({ pageSize: 100 })
         this.spareparts = response.items || []
       } catch (err) {
-        console.error('Error loading spareparts:', err)
+        console.error('❌ Error loading spareparts:', err)
+        this.showError('Error al cargar refacciones')
       }
     },
 
     async loadUsers() {
       try {
-        const response = await userService.getUsers({ pageSize: 100 })
-        this.users = response.items || []
+        const response = await contactService.getContacts()
+        
+        // contactService.getContacts devuelve un array directo
+        if (Array.isArray(response)) {
+          this.users = response
+        } else {
+          this.users = []
+        }
       } catch (err) {
-        console.error('Error loading users:', err)
+        console.error('❌ Error loading contacts:', err)
+        this.showError('Error al cargar contactos')
       }
     },
 
@@ -460,7 +467,7 @@ export default {
     },
 
     success(message) {
-      console.log('✅', message)
+      // Success message
     }
   }
 }

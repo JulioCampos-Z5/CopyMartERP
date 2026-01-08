@@ -42,12 +42,66 @@ const router = createRouter({
       }
     },
     {
+      path: '/comercial/ventas/nueva',
+      name: 'VentaNueva',
+      component: () => import('../views/Comercial/ventas/VentaFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Nueva Venta - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/ventas/:id',
+      name: 'VentaDetalle',
+      component: () => import('../views/Comercial/ventas/VentaDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle de Venta - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/ventas/editar/:id',
+      name: 'VentaEditar',
+      component: () => import('../views/Comercial/ventas/VentaFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Editar Venta - CopyMart ERP'
+      }
+    },
+    {
       path: '/rentas',
       name: 'Rentas',
       component: () => import('../views/Comercial/RentasView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Gestión de Rentas - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/rentas/nueva',
+      name: 'RentaNueva',
+      component: () => import('../views/Comercial/rentas/RentaFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Nueva Renta - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/rentas/:id',
+      name: 'RentaDetalle',
+      component: () => import('../views/Comercial/rentas/RentaDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle de Renta - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/rentas/editar/:id',
+      name: 'RentaEditar',
+      component: () => import('../views/Comercial/rentas/RentaFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Editar Renta - CopyMart ERP'
       }
     },
     {
@@ -66,6 +120,33 @@ const router = createRouter({
       meta: { 
         requiresAuth: true,
         title: 'Gestión de Clientes - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/clientes/nuevo',
+      name: 'ClienteNuevo',
+      component: () => import('../views/Comercial/clientes/ClienteFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Nuevo Cliente - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/clientes/:id',
+      name: 'ClienteDetalle',
+      component: () => import('../views/Comercial/clientes/ClienteDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle del Cliente - CopyMart ERP'
+      }
+    },
+    {
+      path: '/comercial/clientes/editar/:id',
+      name: 'ClienteEditar',
+      component: () => import('../views/Comercial/clientes/ClienteFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Editar Cliente - CopyMart ERP'
       }
     },
     {
@@ -121,6 +202,60 @@ const router = createRouter({
       meta: { 
         requiresAuth: true,
         title: 'Gestión de Inventario - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/equipos/nuevo',
+      name: 'EquipoNuevo',
+      component: () => import('../views/Administracion/equipos/EquipoFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Nuevo Equipo - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/equipos/:id',
+      name: 'EquipoDetalle',
+      component: () => import('../views/Administracion/equipos/EquipoDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle del Equipo - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/equipos/editar/:id',
+      name: 'EquipoEditar',
+      component: () => import('../views/Administracion/equipos/EquipoFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Editar Equipo - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/refacciones/nueva',
+      name: 'RefaccionNueva',
+      component: () => import('../views/Administracion/refacciones/RefaccionFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Nueva Refacción - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/refacciones/:id',
+      name: 'RefaccionDetalle',
+      component: () => import('../views/Administracion/refacciones/RefaccionDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle de Refacción - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/refacciones/editar/:id',
+      name: 'RefaccionEditar',
+      component: () => import('../views/Administracion/refacciones/RefaccionFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Editar Refacción - CopyMart ERP'
       }
     },
     // Ruta de Recursos Humanos

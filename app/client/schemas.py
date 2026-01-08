@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
+from ..contact.schemas import ContactRead
 
 class AreaCreate(BaseModel):
     branch_id: int
@@ -77,6 +78,11 @@ class ClientUpdate(BaseModel):
     colonia: Optional[str] = None
     zip_code: Optional[str] = None
     city: Optional[str] = None
+    # Campos opcionales para actualizar contacto
+    contact_name: Optional[str] = None
+    contact_phone: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_rol: Optional[str] = None
 
 
 class ClientResponse(BaseModel):
@@ -90,6 +96,7 @@ class ClientResponse(BaseModel):
     city: Optional[str]
     is_active: bool
     created_at: datetime
+    contact: Optional[ContactRead] = None
     branches: Optional[List[BranchResponse]] = None
 
     class Config:
@@ -108,5 +115,9 @@ class ClientListResponse(BaseModel):
     total_branches: int
     total_areas: int
     created_at: datetime
+    contact_name: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    contact_rol: Optional[str] = None
     class Config:
         from_attributes = True

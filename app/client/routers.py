@@ -38,8 +38,22 @@ def get_all_clients(
 
         # calcular total de areas
         total_areas = 0
-        for b in c.branches:
-            total_areas += len(b.areas)
+        branches = c.branches if c.branches else []
+        for b in branches:
+            areas = b.areas if hasattr(b, 'areas') and b.areas else []
+            total_areas += len(areas)
+
+        # Extraer datos de contacto si existe
+        contact_name = None
+        contact_email = None
+        contact_phone = None
+        contact_rol = None
+        
+        if c.contact:
+            contact_name = c.contact.name
+            contact_email = c.contact.email
+            contact_phone = c.contact.phone
+            contact_rol = c.contact.rol
 
         result.append(
             ClientListResponse(
@@ -54,8 +68,12 @@ def get_all_clients(
 
                 is_active=c.is_active,
                 created_at=c.created_at,
-                total_branches=len(c.branches),
-                total_areas=total_areas
+                total_branches=len(branches),
+                total_areas=total_areas,
+                contact_name=contact_name,
+                contact_email=contact_email,
+                contact_phone=contact_phone,
+                contact_rol=contact_rol
             )
         )
 

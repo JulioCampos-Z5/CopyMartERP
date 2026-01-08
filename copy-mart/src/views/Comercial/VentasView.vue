@@ -85,7 +85,7 @@
                 <option value="cancelada">Cancelada</option>
               </select>
             </div>
-            <button @click="showCreateForm = !showCreateForm" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center">
+            <button @click="goToNewSale" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
@@ -243,6 +243,8 @@ export default {
       editingSaleId: null,
       newSale: {
         client_id: '',
+        branch_id: null,
+        area_id: null,
         item_id: '',
         sale_price: '',
         sale_status: 'pendiente',
@@ -282,9 +284,7 @@ export default {
       this.loading = true
       this.error = null
       try {
-        console.log('📊 loadSales - Iniciando carga de ventas...')
         this.sales = await saleService.getSales({ is_active: true })
-        console.log('📊 loadSales - Ventas cargadas:', this.sales)
         this.calculateStats()
       } catch (err) {
         this.error = err.message
@@ -304,20 +304,18 @@ export default {
 
     async loadEquipment() {
       try {
-        console.log('📦 loadEquipment - Iniciando carga de equipos...')
         const allEquipment = await equipmentService.getEquipment()
-        console.log('📦 loadEquipment - Todos los equipos:', allEquipment)
-        // Filtrar equipos disponibles para venta (en bodega)
-        this.equipment = allEquipment.filter(e => {
-          const status = typeof e.location_status === 'string'
-            ? e.location_status.toLowerCase()
-            : String(e.location_status || '').toLowerCase()
-          return status.includes('bodega')
+        
+        // Filtrar solo equipos disponibles para venta (en bodega)
+        const equiposDisponibles = allEquipment.filter(e => {
+          return e.location_status === 'bodega'
         })
-        console.log('📦 loadEquipment - Equipos en bodega:', this.equipment)
-        if (!this.equipment || this.equipment.length === 0) {
-          console.warn('⚠️ No se encontraron equipos en bodega. Mostrando todos temporalmente.')
-          this.equipment = allEquipment
+        
+        this.equipment = equiposDisponibles
+        
+        if (equiposDisponibles.length === 0) {
+          console.warn('⚠️ No hay equipos disponibles en bodega para venta.')
+          this.info('No hay equipos disponibles en bodega. Por favor, agregue equipos al inventario o cambie el estado de equipos existentes a "bodega".', 'Sin equipos disponibles', 6000)
         }
       } catch (err) {
         console.error('❌ Error loading equipment:', err)
@@ -331,21 +329,34 @@ export default {
           item_id: parseInt(this.newSale.item_id),
           sale_price: parseFloat(this.newSale.sale_price),
           sale_status: this.newSale.sale_status,
-          is_foreign: this.newSale.is_foreign
+          is_foreign: this.newSale.is_foreign || false
         }
+        
+        // Agregar branch_id y area_id solo si están presentes
+        if (this.newSale.branch_id) {
+          saleData.branch_id = parseInt(this.newSale.branch_id)
+        }
+        if (this.newSale.area_id) {
+          saleData.area_id = parseInt(this.newSale.area_id)
+        }
+        
         await saleService.createSale(saleData)
         this.showCreateForm = false
         this.resetForm()
         await this.loadSales()
         this.success('Venta creada exitosamente')
       } catch (err) {
-        this.error('Error al crear venta: ' + err.message)
+        console.error('❌ Error completo:', err)
+        console.error('❌ Response data:', err.response?.data)
+        this.showError('Error al crear venta: ' + (err.response?.data?.detail || err.message))
       }
     },
 
     resetForm() {
       this.newSale = {
         client_id: '',
+        branch_id: null,
+        area_id: null,
         item_id: '',
         sale_price: '',
         sale_status: 'pendiente',
@@ -396,10 +407,12 @@ export default {
       try {
         await saleService.updateSaleStatus(saleId, newStatus)
         await this.loadSales()
+        this.success('Estado actualizado exitosamente')
       } catch (err) {
-        this.error('Error al actualizar estado: ' + err.message)
+        this.showError('Error al actualizar estado: ' + err.message)
       }
     },
+    
     editSale(sale) {
       this.editingSaleId = sale.sale_id
       this.newSale = {
@@ -427,7 +440,7 @@ export default {
         this.closeForm()
         await this.loadSales()
       } catch (err) {
-        this.error('Error al actualizar venta: ' + err.message)
+        this.showError('Error al actualizar venta: ' + err.message)
       }
     },
 
@@ -461,10 +474,10 @@ export default {
           window.open(result.previewUrl, '_blank')
           this.info('Se abrió la vista previa del PDF en una nueva pestaña.', 'Vista previa')
         } else {
-          this.error('No se pudo generar la vista previa del PDF')
+          this.showError('No se pudo generar la vista previa del PDF')
         }
       } catch (err) {
-        this.error('Error al generar PDF: ' + err.message)
+        this.showError('Error al generar PDF: ' + err.message)
       }
     },
 
@@ -475,8 +488,27 @@ export default {
         await saleService.deleteSale(saleId)
         await this.loadSales()
       } catch (err) {
-        this.error('Error al cancelar venta: ' + err.message)
+        this.showError('Error al cancelar venta: ' + err.message)
       }
+    },
+
+    showError(message) {
+      this.errorMsg = message
+      setTimeout(() => {
+        this.errorMsg = null
+      }, 5000)
+    },
+
+    goToNewSale() {
+      this.$router.push('/comercial/ventas/nueva')
+    },
+
+    goToDetail(saleId) {
+      this.$router.push(`/comercial/ventas/${saleId}`)
+    },
+
+    goToEditSale(saleId) {
+      this.$router.push(`/comercial/ventas/editar/${saleId}`)
     }
   }
 }

@@ -30,13 +30,13 @@ class ClientService:
             contact_id = client_data.contact_id
         
         # Si vienen datos de contacto en el cliente, crear el contacto automáticamente
-        elif hasattr(client_data, 'contact_name') and client_data.contact_name:
+        elif client_data.contact_name:
             new_contact = Contact(
                 name=client_data.contact_name,
-                phone=getattr(client_data, 'contact_phone', None),
-                email=getattr(client_data, 'contact_email', None),
+                phone=client_data.contact_phone,
+                email=client_data.contact_email,
                 company=client_data.name,
-                rol=getattr(client_data, 'contact_rol', None),
+                rol=client_data.contact_rol,
                 is_client=True
             )
             db.add(new_contact)
@@ -93,7 +93,10 @@ class ClientService:
     def get_all_clients(db: Session, skip: int = 0, limit: int = 100,
                         is_active: Optional[bool] = None) -> List[Client]:
 
-        query = db.query(Client).options(joinedload(Client.branches))
+        query = db.query(Client).options(
+            joinedload(Client.branches).joinedload(Branch.areas),
+            joinedload(Client.contact)
+        )
 
         if is_active is not None:
             query = query.filter(Client.is_active == is_active)
@@ -113,7 +116,38 @@ class ClientService:
             if not contact:
                 raise HTTPException(status_code=404, detail="Contacto no encontrado")
 
-        update_data = client_data.model_dump(exclude_unset=True)
+        # Si vienen datos de contacto, actualizar o crear el contacto
+        if client_data.contact_name:
+            if client.contact_id:
+                # Actualizar contacto existente
+                contact = db.query(Contact).filter(Contact.contact_id == client.contact_id).first()
+                if contact:
+                    contact.name = client_data.contact_name
+                    if client_data.contact_phone:
+                        contact.phone = client_data.contact_phone
+                    if client_data.contact_email:
+                        contact.email = client_data.contact_email
+                    if client_data.contact_rol:
+                        contact.rol = client_data.contact_rol
+            else:
+                # Crear nuevo contacto
+                new_contact = Contact(
+                    name=client_data.contact_name,
+                    phone=client_data.contact_phone,
+                    email=client_data.contact_email,
+                    company=client.name,
+                    rol=client_data.contact_rol,
+                    is_client=True
+                )
+                db.add(new_contact)
+                db.flush()
+                client.contact_id = new_contact.contact_id
+
+        # Actualizar campos del cliente (excluyendo los campos de contacto)
+        update_data = client_data.model_dump(
+            exclude_unset=True,
+            exclude={'contact_name', 'contact_phone', 'contact_email', 'contact_rol'}
+        )
 
         for field, value in update_data.items():
             setattr(client, field, value)

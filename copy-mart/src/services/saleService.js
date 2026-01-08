@@ -28,9 +28,6 @@ export const saleService = {
    */
   async getSales(filters = {}) {
     const url = buildUrlWithParams(API_ENDPOINTS.SALES, filters)
-    console.log('🔍 getSales - API_ENDPOINTS.SALES:', API_ENDPOINTS.SALES)
-    console.log('🔍 getSales - filters:', filters)
-    console.log('🔍 getSales - URL construida:', url)
     return apiRequest(url)
   },
 
