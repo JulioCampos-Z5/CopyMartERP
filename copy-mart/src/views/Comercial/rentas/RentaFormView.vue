@@ -121,9 +121,9 @@
 
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
-import { rentService } from '@/services/rentService'
-import { clientService } from '@/services/clientService'
-import { equipmentService } from '@/services/equipmentService'
+import { rentService } from '@/services/rentService.ts'
+import { clientService } from '@/services/clientService.ts'
+import { equipmentService } from '@/services/equipmentService.ts'
 
 export default {
   name: 'RentaFormView',

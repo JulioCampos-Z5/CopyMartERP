@@ -33,7 +33,7 @@
 
 <script>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { API_BASE_URL } from '@/config/api'
+import { API_BASE_URL } from '@/config/api.ts'
 
 export default {
   name: 'ApiStatus',

@@ -588,7 +588,9 @@ export default {
       this.loading = true
       this.error = null
       try {
-        this.equipment = await equipmentService.getEquipment()
+        const response = await equipmentService.getEquipment()
+        // Si la respuesta es paginada, usar items; si no, usar directamente
+        this.equipment = response.items || response || []
       } catch (err) {
         this.error = 'Error al cargar equipos: ' + err.message
         console.error('Error loading equipment:', err)

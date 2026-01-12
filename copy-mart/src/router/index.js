@@ -35,7 +35,7 @@ const router = createRouter({
     {
       path: '/ventas',
       name: 'Ventas',
-      component: () => import('../views/Comercial/VentasView.vue'),
+      component: () => import('../views/Comercial/ventas/VentasView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Ventas - CopyMart ERP'
@@ -71,7 +71,7 @@ const router = createRouter({
     {
       path: '/rentas',
       name: 'Rentas',
-      component: () => import('../views/Comercial/RentasView.vue'),
+      component: () => import('../views/Comercial/rentas/RentasView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Gestión de Rentas - CopyMart ERP'
@@ -116,7 +116,7 @@ const router = createRouter({
     {
       path: '/clientes',
       name: 'Clientes',
-      component: () => import('../views/Comercial/ClientesView.vue'),
+      component: () => import('../views/Comercial/clientes/ClientesView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Gestión de Clientes - CopyMart ERP'
@@ -162,10 +162,37 @@ const router = createRouter({
     {
       path: '/compras',
       name: 'Compras',
-      component: () => import('../views/Administracion/ComprasView.vue'),
+      component: () => import('../views/Administracion/compras/ComprasView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Gestión de Compras - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/compras/nueva',
+      name: 'CompraNueva',
+      component: () => import('../views/Administracion/compras/CompraFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Nueva Compra - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/compras/:id',
+      name: 'CompraDetalle',
+      component: () => import('../views/Administracion/compras/CompraDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle de Compra - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/compras/editar/:id',
+      name: 'CompraEditar',
+      component: () => import('../views/Administracion/compras/CompraFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Editar Compra - CopyMart ERP'
       }
     },
     {
@@ -189,16 +216,43 @@ const router = createRouter({
     {
       path: '/facturacion',
       name: 'Facturacion',
-      component: () => import('../views/Administracion/FacturacionView.vue'),
+      component: () => import('../views/Administracion/facturacion/FacturacionView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Sistema de Facturación - CopyMart ERP'
       }
     },
     {
+      path: '/administracion/facturacion/nueva',
+      name: 'FacturacionNueva',
+      component: () => import('../views/Administracion/facturacion/FacturacionFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Nueva Factura - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/facturacion/:id',
+      name: 'FacturacionDetalle',
+      component: () => import('../views/Administracion/facturacion/FacturacionDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle de Factura - CopyMart ERP'
+      }
+    },
+    {
+      path: '/administracion/facturacion/editar/:id',
+      name: 'FacturacionEditar',
+      component: () => import('../views/Administracion/facturacion/FacturacionFormView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Editar Factura - CopyMart ERP'
+      }
+    },
+    {
       path: '/inventario',
       name: 'Inventario',
-      component: () => import('../views/Administracion/InventarioView.vue'),
+      component: () => import('../views/Administracion/equipos/InventarioView.vue'),
       meta: { 
         requiresAuth: true,
         title: 'Gestión de Inventario - CopyMart ERP'
@@ -267,8 +321,15 @@ const router = createRouter({
         requiresAuth: true,
         title: 'Recursos Humanos - CopyMart ERP'
       }
-    },
-    // Rutas del área Operaciones
+    },    {
+      path: '/recursos-humanos/areas',
+      name: 'Areas',
+      component: () => import('../views/RecursosHumanos/AreasView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Áreas - CopyMart ERP'
+      }
+    },    // Rutas del área Operaciones
     {
       path: '/rutas',
       name: 'Rutas',

@@ -1,7 +1,31 @@
+/**
+ * Composable: Permissions (TypeScript)
+ * =====================================
+ * Sistema de permisos basado en roles y departamentos
+ */
+
 import { computed, ref } from 'vue'
+import type { User } from '@/types'
+
+interface Module {
+  name: string
+  route: string
+  key: string
+}
+
+interface RolePermissions {
+  modules: string[]
+  canCreate: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
+
+interface DepartmentPermissions {
+  modules: string[]
+}
 
 // Definición de todos los módulos del sistema
-const ALL_MODULES = [
+const ALL_MODULES: Module[] = [
   { name: 'Dashboard', route: '/dashboard', key: 'dashboard' },
   { name: 'Ventas', route: '/ventas', key: 'ventas' },
   { name: 'Inventario', route: '/inventario', key: 'inventario' },
@@ -11,7 +35,7 @@ const ALL_MODULES = [
 ]
 
 // Permisos por ROL (tiene prioridad sobre departamento)
-const ROLE_PERMISSIONS = {
+const ROLE_PERMISSIONS: Record<string, RolePermissions> = {
   'administrador': {
     modules: ['dashboard', 'ventas', 'inventario', 'clientes', 'reportes', 'usuarios'],
     canCreate: true,
@@ -19,13 +43,13 @@ const ROLE_PERMISSIONS = {
     canDelete: true
   },
   'gerencia': {
-    modules: ['dashboard', 'ventas', 'clientes', 'reportes', 'usuarios'], // Todo MENOS inventario
+    modules: ['dashboard', 'ventas', 'clientes', 'reportes', 'usuarios'],
     canCreate: true,
     canEdit: true,
     canDelete: false
   },
   'usuario': {
-    modules: [], // Se define por departamento
+    modules: [],
     canCreate: false,
     canEdit: false,
     canDelete: false
@@ -33,7 +57,7 @@ const ROLE_PERMISSIONS = {
 }
 
 // Permisos por DEPARTAMENTO (aplica solo a usuarios normales)
-const DEPARTMENT_PERMISSIONS = {
+const DEPARTMENT_PERMISSIONS: Record<string, DepartmentPermissions> = {
   'rh': {
     modules: ['dashboard', 'usuarios']
   },
@@ -49,59 +73,47 @@ const DEPARTMENT_PERMISSIONS = {
 }
 
 export function usePermissions() {
-  // Obtener información del usuario desde localStorage
-  const getCurrentUser = () => {
+  const user = ref<User | null>(null)
+
+  // Cargar usuario desde localStorage
+  const storedUser = localStorage.getItem('user')
+  if (storedUser) {
     try {
-      const userStr = localStorage.getItem('user')
-      return userStr ? JSON.parse(userStr) : null
+      user.value = JSON.parse(storedUser)
     } catch (error) {
-      console.error('Error al obtener usuario:', error)
-      return null
+      console.error('Error parsing user from localStorage:', error)
     }
   }
 
-  const user = ref(getCurrentUser())
-
-  // Función para actualizar el usuario
-  const setUser = (userData) => {
-    user.value = userData
-    if (userData) {
-      localStorage.setItem('user', JSON.stringify(userData))
-    } else {
-      localStorage.removeItem('user')
-    }
+  const setUser = (newUser: User | null) => {
+    user.value = newUser
   }
 
   // Obtener módulos accesibles según rol y departamento
-  const getAccessibleModules = computed(() => {
+  const getAccessibleModules = computed<Module[]>(() => {
     if (!user.value) return []
-
-    const rol = user.value.rol?.toLowerCase()
+    
+    const rol = user.value.role?.toLowerCase()
     const department = user.value.department?.toLowerCase()
-
-    // Si es admin o gerencia, usa permisos de ROL
-    if (rol === 'administrador' || rol === 'gerencia') {
-      const rolePerms = ROLE_PERMISSIONS[rol]
-      return ALL_MODULES.filter(module => 
-        rolePerms.modules.includes(module.key)
-      )
+    
+    let allowedModuleKeys: string[] = []
+    
+    // 1. Primero verificar permisos por rol
+    if (rol && ROLE_PERMISSIONS[rol]) {
+      allowedModuleKeys = ROLE_PERMISSIONS[rol].modules
     }
-
-    // Si es usuario normal, usa permisos de DEPARTAMENTO
-    if (rol === 'usuario' && department) {
-      const deptPerms = DEPARTMENT_PERMISSIONS[department]
-      if (deptPerms) {
-        return ALL_MODULES.filter(module => 
-          deptPerms.modules.includes(module.key)
-        )
-      }
+    
+    // 2. Si es usuario normal, verificar permisos por departamento
+    if (rol === 'usuario' && department && DEPARTMENT_PERMISSIONS[department]) {
+      allowedModuleKeys = DEPARTMENT_PERMISSIONS[department].modules
     }
-
-    return []
+    
+    // 3. Filtrar módulos permitidos
+    return ALL_MODULES.filter(module => allowedModuleKeys.includes(module.key))
   })
 
   // Verificar si puede acceder a un módulo específico
-  const canAccessModule = (moduleKey) => {
+  const canAccessModule = (moduleKey: string): boolean => {
     if (!user.value) return false
     
     const accessibleModules = getAccessibleModules.value
@@ -109,7 +121,7 @@ export function usePermissions() {
   }
 
   // Verificar si puede acceder a una ruta específica
-  const canAccessRoute = (route) => {
+  const canAccessRoute = (route: string): boolean => {
     if (!user.value) return false
     
     // Rutas siempre accesibles
@@ -122,19 +134,19 @@ export function usePermissions() {
   // Permisos de acciones (crear, editar, eliminar)
   const canCreate = computed(() => {
     if (!user.value) return false
-    const rol = user.value.rol?.toLowerCase()
+    const rol = user.value.role?.toLowerCase()
     return ROLE_PERMISSIONS[rol]?.canCreate || false
   })
 
   const canEdit = computed(() => {
     if (!user.value) return false
-    const rol = user.value.rol?.toLowerCase()
+    const rol = user.value.role?.toLowerCase()
     return ROLE_PERMISSIONS[rol]?.canEdit || false
   })
 
   const canDelete = computed(() => {
     if (!user.value) return false
-    const rol = user.value.rol?.toLowerCase()
+    const rol = user.value.role?.toLowerCase()
     return ROLE_PERMISSIONS[rol]?.canDelete || false
   })
 
@@ -142,7 +154,7 @@ export function usePermissions() {
   const userInfo = computed(() => ({
     name: user.value?.full_name || 'Usuario',
     email: user.value?.email || '',
-    rol: user.value?.rol || '',
+    role: user.value?.role || '',
     department: user.value?.department || '',
     initials: user.value?.full_name
       ?.split(' ')
@@ -153,12 +165,12 @@ export function usePermissions() {
 
   // Verificar si es admin
   const isAdmin = computed(() => {
-    return user.value?.rol?.toLowerCase() === 'administrador'
+    return user.value?.role?.toLowerCase() === 'administrador'
   })
 
   // Verificar si es gerencia
   const isManager = computed(() => {
-    return user.value?.rol?.toLowerCase() === 'gerencia'
+    return user.value?.role?.toLowerCase() === 'gerencia'
   })
 
   return {

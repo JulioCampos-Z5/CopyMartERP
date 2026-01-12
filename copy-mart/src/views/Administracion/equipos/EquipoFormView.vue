@@ -192,7 +192,7 @@
 
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
-import { equipmentService } from '@/services/equipmentService'
+import { equipmentService } from '@/services/equipmentService.ts'
 
 export default {
   name: 'EquipoFormView',

@@ -173,7 +173,7 @@
 </template>
 
 <script>
-import { usePdfGenerator } from '../composables/usePdfGenerator.js'
+import { usePdfGenerator } from '@/composables/usePdfGenerator.ts'
 
 export default {
   name: 'PdfGenerator',

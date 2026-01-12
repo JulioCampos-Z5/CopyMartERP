@@ -1,420 +1,519 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-16">
-    <AppNavigation />
-    
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Header -->
+  <BaseLayout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="mb-6">
-        <button @click="goBack" class="text-blue-600 hover:text-blue-800 flex items-center mb-4">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        <button @click="$router.back()" class="text-orange-600 hover:text-orange-800 flex items-center gap-2 mb-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           Volver a Clientes
         </button>
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">{{ client?.name || 'Cargando...' }}</h1>
-            <p class="text-gray-600 mt-2">Información completa del cliente</p>
-          </div>
-          <div class="flex gap-3">
-            <button @click="goToEdit" class="btn-secondary">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      </div>
+
+      <div v-if="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+      </div>
+
+      <div v-else-if="client" class="space-y-6">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ client.name }}</h1>
+              <p v-if="client.comercial_name" class="text-lg text-gray-600">{{ client.comercial_name }}</p>
+              <span :class="client.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" class="mt-2 inline-block px-3 py-1 text-sm font-semibold rounded-full">
+                {{ client.is_active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+            <button @click="editClient" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               Editar
             </button>
-            <button @click="showDeleteModal = true" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Eliminar
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div v-if="loading" class="bg-white rounded-lg shadow-lg p-12 text-center">
-        <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p class="text-gray-600">Cargando información del cliente...</p>
-      </div>
-
-      <!-- Error State -->
-      <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6">
-        <div class="flex items-center">
-          <svg class="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div>
-            <h3 class="text-red-800 font-semibold">Error al cargar el cliente</h3>
-            <p class="text-red-600 text-sm">{{ error }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content -->
-      <div v-else-if="client" class="space-y-6">
-        <!-- Estado y estadísticas -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div class="bg-white p-6 rounded-lg shadow border">
-            <div class="flex items-center">
-              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm text-gray-600">Estado</p>
-                <p class="text-lg font-semibold" :class="client.is_active ? 'text-green-600' : 'text-gray-600'">
-                  {{ client.is_active ? 'Activo' : 'Inactivo' }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg shadow border">
-            <div class="flex items-center">
-              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm text-gray-600">Sucursales</p>
-                <p class="text-lg font-semibold text-gray-900">{{ client.branches?.length || 0 }}</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg shadow border">
-            <div class="flex items-center">
-              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm text-gray-600">Límite Crédito</p>
-                <p class="text-lg font-semibold text-gray-900">
-                  ${{ formatCurrency(client.credit_limit || 0) }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg shadow border">
-            <div class="flex items-center">
-              <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
-                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm text-gray-600">Registrado</p>
-                <p class="text-lg font-semibold text-gray-900">
-                  {{ formatDate(client.created_at) }}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
         <!-- Información General -->
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div class="px-6 py-4 bg-blue-50 border-b border-blue-200">
-            <div class="flex items-center">
-              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <h2 class="text-xl font-semibold text-gray-900">Información General</h2>
-            </div>
-          </div>
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Nombre / Razón Social</label>
-                <p class="text-base text-gray-900 font-medium">{{ client.name || 'N/A' }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">RFC</label>
-                <p class="text-base text-gray-900">{{ client.rfc || 'N/A' }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Nombre Comercial</label>
-                <p class="text-base text-gray-900">{{ client.comercial_name || 'N/A' }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Tipo</label>
-                <span :class="['px-3 py-1 rounded-full text-sm font-medium inline-block', client.comercial_name ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800']">
-                  {{ client.comercial_name ? 'Empresa' : 'Persona Física' }}
-                </span>
-              </div>
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
-                <p class="text-base text-gray-900">{{ client.address || 'N/A' }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Ciudad</label>
-                <p class="text-base text-gray-900">{{ client.city || 'N/A' }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Código Postal</label>
-                <p class="text-base text-gray-900">{{ client.zip_code || 'N/A' }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Contacto Principal -->
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div class="px-6 py-4 bg-green-50 border-b border-green-200">
-            <div class="flex items-center">
-              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <h2 class="text-xl font-semibold text-gray-900">Contacto Principal</h2>
-            </div>
-          </div>
-          <div class="p-6">
-            <div v-if="client.contact" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Nombre</label>
-                <p class="text-base text-gray-900 font-medium">{{ client.contact.name || 'N/A' }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Puesto / Rol</label>
-                <p class="text-base text-gray-900">{{ client.contact.rol || 'N/A' }}</p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Email</label>
-                <p class="text-base text-gray-900">
-                  <a v-if="client.contact.email" :href="`mailto:${client.contact.email}`" class="text-blue-600 hover:underline">
-                    {{ client.contact.email }}
-                  </a>
-                  <span v-else>N/A</span>
-                </p>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-600 mb-1">Teléfono</label>
-                <p class="text-base text-gray-900">
-                  <a v-if="client.contact.phone" :href="`tel:${client.contact.phone}`" class="text-blue-600 hover:underline">
-                    {{ client.contact.phone }}
-                  </a>
-                  <span v-else>N/A</span>
-                </p>
-              </div>
-            </div>
-            <div v-else class="text-center py-8 text-gray-500">
-              <svg class="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <p>No hay contacto principal registrado</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sucursales -->
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div class="px-6 py-4 bg-purple-50 border-b border-purple-200">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-                <h2 class="text-xl font-semibold text-gray-900">Sucursales</h2>
-              </div>
-              <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
-                {{ client.branches?.length || 0 }} Total
-              </span>
-            </div>
-          </div>
-          <div class="p-6">
-            <div v-if="client.branches && client.branches.length > 0" class="space-y-4">
-              <div v-for="branch in client.branches" :key="branch.branch_id" class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-2">
-                  <div class="flex items-center">
-                    <h3 class="text-lg font-semibold text-gray-900">{{ branch.name }}</h3>
-                    <span v-if="branch.is_main" class="ml-3 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                      Principal
-                    </span>
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <div v-if="branch.address">
-                    <span class="text-gray-600">Dirección:</span>
-                    <span class="text-gray-900 ml-2">{{ branch.address }}</span>
-                  </div>
-                  <div v-if="branch.city">
-                    <span class="text-gray-600">Ciudad:</span>
-                    <span class="text-gray-900 ml-2">{{ branch.city }}</span>
-                  </div>
-                  <div v-if="branch.zip_code">
-                    <span class="text-gray-600">C.P.:</span>
-                    <span class="text-gray-900 ml-2">{{ branch.zip_code }}</span>
-                  </div>
-                </div>
-                <div v-if="branch.areas && branch.areas.length > 0" class="mt-3 pt-3 border-t border-gray-200">
-                  <p class="text-sm text-gray-600 mb-2">Áreas:</p>
-                  <div class="flex flex-wrap gap-2">
-                    <span v-for="area in branch.areas" :key="area.area_id" class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                      {{ area.name }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else class="text-center py-8 text-gray-500">
-              <svg class="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <p>No hay sucursales registradas</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de eliminación -->
-    <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div class="p-6">
-          <div class="flex items-center mb-4">
-            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Información General</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">RFC</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ client.rfc || '-' }}</dd>
             </div>
             <div>
-              <h3 class="text-lg font-semibold text-gray-900">Confirmar eliminación</h3>
-              <p class="text-sm text-gray-600">Esta acción no se puede deshacer</p>
+              <dt class="text-sm font-medium text-gray-500">Dirección</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ formatAddress(client) }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Ciudad</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ client.city || '-' }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Código Postal</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ client.zip_code || '-' }}</dd>
             </div>
           </div>
-          <p class="text-gray-700 mb-6">
-            ¿Está seguro de que desea eliminar el cliente <strong>{{ client?.name }}</strong>?
-          </p>
-          <div class="flex justify-end gap-3">
-            <button @click="showDeleteModal = false" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              Cancelar
-            </button>
-            <button @click="handleDelete" :disabled="deleting" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
-              {{ deleting ? 'Eliminando...' : 'Eliminar' }}
-            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow-md">
+          <div class="border-b border-gray-200">
+            <nav class="flex -mb-px">
+              <button 
+                v-for="tab in tabs" 
+                :key="tab.id"
+                @click="activeTab = tab.id"
+                :class="[
+                  activeTab === tab.id 
+                    ? 'border-orange-500 text-orange-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                  'whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm'
+                ]"
+              >
+                {{ tab.label }}
+                <span v-if="tab.count !== undefined" class="ml-2 px-2 py-1 text-xs rounded-full bg-gray-100">
+                  {{ tab.count }}
+                </span>
+              </button>
+            </nav>
+          </div>
+
+          <!-- Tab: Contacto Principal -->
+          <div v-if="activeTab === 'contact'" class="p-6">
+            <div v-if="client.contact" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Nombre</dt>
+                  <dd class="text-base text-gray-900 mt-1">{{ client.contact.name }}</dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Rol/Puesto</dt>
+                  <dd class="text-base text-gray-900 mt-1">{{ client.contact.rol || '-' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Teléfono</dt>
+                  <dd class="text-base text-gray-900 mt-1">{{ client.contact.phone || '-' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-sm font-medium text-gray-500">Email</dt>
+                  <dd class="text-base text-gray-900 mt-1">{{ client.contact.email || '-' }}</dd>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              No hay contacto principal registrado
+            </div>
+          </div>
+
+          <!-- Tab: Sucursales -->
+          <div v-if="activeTab === 'branches'" class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">Sucursales</h3>
+              <button @click="openBranchModal()" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 text-sm">
+                + Nueva Sucursal
+              </button>
+            </div>
+            <div v-if="branches.length > 0" class="space-y-4">
+              <div v-for="branch in branches" :key="branch.branch_id" class="border rounded-lg p-4 hover:bg-gray-50">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <h4 class="font-semibold text-gray-900">{{ branch.name }}</h4>
+                      <span v-if="branch.is_main" class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Principal</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">{{ formatAddress(branch) }}</p>
+                    <p v-if="branch.areas && branch.areas.length > 0" class="text-sm text-gray-500 mt-2">
+                      {{ branch.areas.length }} área(s): {{ branch.areas.map(a => a.name).join(', ') }}
+                    </p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button @click="manageBranchAreas(branch)" class="text-blue-600 hover:text-blue-800" title="Gestionar Áreas">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                    </button>
+                    <button @click="openBranchModal(branch)" class="text-green-600 hover:text-green-800" title="Editar">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button @click="deleteBranch(branch.branch_id)" class="text-red-600 hover:text-red-800" title="Eliminar">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              No hay sucursales registradas
+            </div>
+          </div>
+
+          <!-- Tab: Contactos -->
+          <div v-if="activeTab === 'contacts'" class="p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">Contactos</h3>
+              <button @click="openContactModal()" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 text-sm">
+                + Nuevo Contacto
+              </button>
+            </div>
+            <div v-if="contacts.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div v-for="contact in contacts" :key="contact.contact_id" class="border rounded-lg p-4 hover:bg-gray-50">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900">{{ contact.name }}</h4>
+                    <p v-if="contact.position" class="text-sm text-gray-600">{{ contact.position }}</p>
+                    <p v-if="contact.phone" class="text-sm text-gray-600 mt-1">📞 {{ contact.phone }}</p>
+                    <p v-if="contact.email" class="text-sm text-gray-600">✉️ {{ contact.email }}</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button @click="openContactModal(contact)" class="text-green-600 hover:text-green-800">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button @click="deleteContact(contact.contact_id)" class="text-red-600 hover:text-red-800">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              No hay contactos adicionales registrados
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Sucursal -->
+      <div v-if="showBranchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showBranchModal = false">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+          <h3 class="text-xl font-semibold mb-4">{{ branchForm.branch_id ? 'Editar' : 'Nueva' }} Sucursal</h3>
+          <form @submit.prevent="saveBranch" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input v-model="branchForm.name" type="text" required class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="flex items-center gap-2">
+                  <input v-model="branchForm.is_main" type="checkbox" class="rounded" />
+                  <span class="text-sm text-gray-700">Sucursal principal</span>
+                </label>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                <input v-model="branchForm.address" type="text" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Colonia</label>
+                <input v-model="branchForm.colonia" type="text" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
+                <input v-model="branchForm.zip_code" type="text" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                <input v-model="branchForm.city" type="text" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+              <button type="button" @click="showBranchModal = false" class="px-4 py-2 border rounded-lg">Cancelar</button>
+              <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal Contacto -->
+      <div v-if="showContactModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showContactModal = false">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+          <h3 class="text-xl font-semibold mb-4">{{ contactForm.contact_id ? 'Editar' : 'Nuevo' }} Contacto</h3>
+          <form @submit.prevent="saveContact" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                <input v-model="contactForm.name" type="text" required class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Puesto</label>
+                <input v-model="contactForm.position" type="text" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <input v-model="contactForm.phone" type="tel" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input v-model="contactForm.email" type="email" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+              <button type="button" @click="showContactModal = false" class="px-4 py-2 border rounded-lg">Cancelar</button>
+              <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Guardar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal Áreas -->
+      <div v-if="showAreasModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showAreasModal = false">
+        <div class="bg-white rounded-lg p-6 w-full max-w-lg">
+          <h3 class="text-xl font-semibold mb-4">Áreas de {{ selectedBranch?.name }}</h3>
+          <div class="mb-4">
+            <form @submit.prevent="addArea" class="flex gap-2">
+              <input v-model="newAreaName" type="text" placeholder="Nombre del área" class="flex-1 px-3 py-2 border rounded-lg" />
+              <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Agregar</button>
+            </form>
+          </div>
+          <div v-if="areas.length > 0" class="space-y-2">
+            <div v-for="area in areas" :key="area.area_id" class="flex justify-between items-center p-2 border rounded">
+              <span>{{ area.name }}</span>
+              <button @click="deleteArea(area.area_id)" class="text-red-600 hover:text-red-800">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div v-else class="text-center py-4 text-gray-500">No hay áreas registradas</div>
+          <div class="flex justify-end mt-4">
+            <button @click="showAreasModal = false" class="px-4 py-2 border rounded-lg">Cerrar</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </BaseLayout>
 </template>
 
-<script>
-import AppNavigation from '@/components/AppNavigation.vue'
+<script setup lang="ts">
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import BaseLayout from '@/components/BaseLayout.vue'
 import { clientService } from '@/services/clientService'
+import { contactService } from '@/services/contactService'
+import type { Client, Branch, Contact, Area } from '@/types'
 
-export default {
-  name: 'ClienteDetailView',
-  components: {
-    AppNavigation
-  },
-  data() {
-    return {
-      client: null,
-      loading: false,
-      error: null,
-      showDeleteModal: false,
-      deleting: false
-    }
-  },
-  async mounted() {
-    const clientId = this.$route.params.id
-    if (clientId) {
-      await this.loadClient(clientId)
-    }
-  },
-  methods: {
-    async loadClient(clientId) {
-      this.loading = true
-      this.error = null
-      try {
-        this.client = await clientService.getClientById(clientId)
-      } catch (error) {
-        console.error('Error loading client:', error)
-        this.error = error.response?.data?.detail || 'No se pudo cargar la información del cliente'
-      } finally {
-        this.loading = false
-      }
-    },
+const router = useRouter()
+const route = useRoute()
+const loading = ref(false)
+const client = ref<Client | null>(null)
+const branches = ref<Branch[]>([])
+const contacts = ref<Contact[]>([])
+const areas = ref<Area[]>([])
+const activeTab = ref('contact')
 
-    formatCurrency(value) {
-      if (!value) return '0.00'
-      return Number(value).toLocaleString('es-MX', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })
-    },
+const showBranchModal = ref(false)
+const showContactModal = ref(false)
+const showAreasModal = ref(false)
+const selectedBranch = ref<Branch | null>(null)
+const newAreaName = ref('')
 
-    formatDate(dateString) {
-      if (!dateString) return 'N/A'
-      try {
-        const date = new Date(dateString)
-        return date.toLocaleDateString('es-MX', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric'
-        })
-      } catch (error) {
-        console.error('Error formatting date:', error)
-        return 'N/A'
-      }
-    },
+const branchForm = ref({
+  branch_id: 0,
+  name: '',
+  is_main: false,
+  address: '',
+  colonia: '',
+  zip_code: '',
+  city: ''
+})
 
-    goBack() {
-      this.$router.push('/clientes')
-    },
+const contactForm = ref({
+  contact_id: 0,
+  name: '',
+  position: '',
+  phone: '',
+  email: '',
+  client_id: 0
+})
 
-    goToEdit() {
-      this.$router.push(`/comercial/clientes/editar/${this.client.client_id}`)
-    },
+const tabs = computed(() => [
+  { id: 'contact', label: 'Contacto Principal', count: client.value?.contact ? 1 : 0 },
+  { id: 'branches', label: 'Sucursales', count: branches.value.length },
+  { id: 'contacts', label: 'Contactos Adicionales', count: contacts.value.length }
+])
 
-    async handleDelete() {
-      this.deleting = true
-      try {
-        await clientService.deleteClient(this.client.client_id)
-        this.$router.push('/clientes')
-      } catch (error) {
-        console.error('Error deleting client:', error)
-        alert('Error al eliminar el cliente: ' + (error.response?.data?.detail || error.message))
-      } finally {
-        this.deleting = false
-        this.showDeleteModal = false
-      }
-    }
+const loadClient = async () => {
+  loading.value = true
+  try {
+    const clientId = Number(route.params.id)
+    client.value = await clientService.getClientById(clientId)
+    await Promise.all([loadBranches(), loadContacts()])
+  } catch (error) {
+    console.error('Error loading client:', error)
+    alert('Error al cargar el cliente')
+  } finally {
+    loading.value = false
   }
 }
+
+const loadBranches = async () => {
+  try {
+    branches.value = await clientService.getClientBranches(Number(route.params.id))
+  } catch (error) {
+    console.error('Error loading branches:', error)
+  }
+}
+
+const loadContacts = async () => {
+  try {
+    const result = await contactService.getContacts({ client_id: Number(route.params.id) })
+    contacts.value = result.items || []
+  } catch (error) {
+    console.error('Error loading contacts:', error)
+  }
+}
+
+const editClient = () => {
+  router.push({ name: 'ClienteEditar', params: { id: route.params.id } })
+}
+
+const formatAddress = (obj: any) => {
+  const parts = []
+  if (obj.address) parts.push(obj.address)
+  if (obj.colonia) parts.push(obj.colonia)
+  return parts.join(', ') || '-'
+}
+
+// Sucursales
+const openBranchModal = (branch?: Branch) => {
+  if (branch) {
+    branchForm.value = { ...branch }
+  } else {
+    branchForm.value = {
+      branch_id: 0,
+      name: '',
+      is_main: false,
+      address: '',
+      colonia: '',
+      zip_code: '',
+      city: ''
+    }
+  }
+  showBranchModal.value = true
+}
+
+const saveBranch = async () => {
+  try {
+    const clientId = Number(route.params.id)
+    if (branchForm.value.branch_id) {
+      await clientService.updateBranch(branchForm.value.branch_id, branchForm.value)
+    } else {
+      await clientService.createBranch(clientId, { ...branchForm.value, client_id: clientId })
+    }
+    showBranchModal.value = false
+    await loadBranches()
+  } catch (error: any) {
+    console.error('Error saving branch:', error)
+    alert(`Error al guardar sucursal: ${error.message || error}`)
+  }
+}
+
+const deleteBranch = async (branchId: number) => {
+  if (!confirm('¿Estás seguro de eliminar esta sucursal?')) return
+  try {
+    await clientService.deleteBranch(branchId)
+    await loadBranches()
+  } catch (error: any) {
+    console.error('Error deleting branch:', error)
+    alert(`Error al eliminar sucursal: ${error.message || error}`)
+  }
+}
+
+// Contactos
+const openContactModal = (contact?: Contact) => {
+  if (contact) {
+    contactForm.value = { ...contact, client_id: Number(route.params.id) }
+  } else {
+    contactForm.value = {
+      contact_id: 0,
+      name: '',
+      position: '',
+      phone: '',
+      email: '',
+      client_id: Number(route.params.id)
+    }
+  }
+  showContactModal.value = true
+}
+
+const saveContact = async () => {
+  try {
+    if (contactForm.value.contact_id) {
+      await contactService.updateContact(contactForm.value.contact_id, contactForm.value)
+    } else {
+      await contactService.createContact(contactForm.value)
+    }
+    showContactModal.value = false
+    await loadContacts()
+  } catch (error: any) {
+    console.error('Error saving contact:', error)
+    alert(`Error al guardar contacto: ${error.message || error}`)
+  }
+}
+
+const deleteContact = async (contactId: number) => {
+  if (!confirm('¿Estás seguro de eliminar este contacto?')) return
+  try {
+    await contactService.deleteContact(contactId)
+    await loadContacts()
+  } catch (error: any) {
+    console.error('Error deleting contact:', error)
+    alert(`Error al eliminar contacto: ${error.message || error}`)
+  }
+}
+
+// Áreas
+const manageBranchAreas = async (branch: Branch) => {
+  selectedBranch.value = branch
+  showAreasModal.value = true
+  try {
+    areas.value = await clientService.getBranchAreas(branch.branch_id)
+  } catch (error) {
+    console.error('Error loading areas:', error)
+  }
+}
+
+const addArea = async () => {
+  if (!newAreaName.value || !selectedBranch.value) return
+  try {
+    await clientService.createArea(selectedBranch.value.branch_id, {
+      branch_id: selectedBranch.value.branch_id,
+      name: newAreaName.value
+    })
+    newAreaName.value = ''
+    areas.value = await clientService.getBranchAreas(selectedBranch.value.branch_id)
+    await loadBranches()
+  } catch (error: any) {
+    console.error('Error adding area:', error)
+    alert(`Error al agregar área: ${error.message || error}`)
+  }
+}
+
+const deleteArea = async (areaId: number) => {
+  if (!confirm('¿Estás seguro de eliminar esta área?')) return
+  try {
+    await clientService.deleteArea(areaId)
+    if (selectedBranch.value) {
+      areas.value = await clientService.getBranchAreas(selectedBranch.value.branch_id)
+      await loadBranches()
+    }
+  } catch (error: any) {
+    console.error('Error deleting area:', error)
+    alert(`Error al eliminar área: ${error.message || error}`)
+  }
+}
+
+onMounted(() => {
+  loadClient()
+})
 </script>
-
-<style scoped>
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  background-color: white;
-  color: #374151;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: #f3f4f6;
-}
-</style>

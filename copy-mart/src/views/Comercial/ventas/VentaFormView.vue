@@ -120,9 +120,9 @@
 
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
-import { saleService } from '@/services/saleService'
-import { clientService } from '@/services/clientService'
-import { equipmentService } from '@/services/equipmentService'
+import { saleService } from '@/services/saleService.ts'
+import { clientService } from '@/services/clientService.ts'
+import { equipmentService } from '@/services/equipmentService.ts'
 
 export default {
   name: 'VentaFormView',

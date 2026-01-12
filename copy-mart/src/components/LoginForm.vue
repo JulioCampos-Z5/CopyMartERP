@@ -109,7 +109,8 @@
 </template>
 
 <script>
-import userService from '@/services/userService.js'
+import { userService } from '@/services/userService.ts'
+import { authStorage } from '@/config/api.ts'
 
 export default {
   name: 'LoginForm',
@@ -189,7 +190,7 @@ export default {
   
   mounted() {
     // Verificar si ya está autenticado
-    if (userService.isAuthenticated()) {
+    if (authStorage.isAuthenticated()) {
       this.$router.push('/dashboard')
     }
   }

@@ -92,7 +92,7 @@
 
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
-import { sparepartService } from '@/services/sparepartService'
+import { sparepartService } from '@/services/sparepartService.ts'
 
 export default {
   name: 'RefaccionDetailView',

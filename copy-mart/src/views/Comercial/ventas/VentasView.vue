@@ -220,11 +220,11 @@
 
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
-import { saleService } from '@/services/saleService'
-import { clientService } from '@/services/clientService'
-import { equipmentService } from '@/services/equipmentService'
-import { useModalBus } from '@/composables/useModalBus'
-import { usePdfGenerator } from '@/composables/usePdfGenerator'
+import { saleService } from '@/services/saleService.ts'
+import { clientService } from '@/services/clientService.ts'
+import { equipmentService } from '@/services/equipmentService.ts'
+import { useModalBus } from '@/composables/useModalBus.ts'
+import { usePdfGenerator } from '@/composables/usePdfGenerator.ts'
 
 export default {
   name: 'VentasView',

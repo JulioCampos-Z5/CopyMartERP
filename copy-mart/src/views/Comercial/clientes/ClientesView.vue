@@ -201,7 +201,7 @@
 
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
-import { clientService } from '@/services/clientService'
+import { clientService } from '@/services/clientService.ts'
 
 export default {
   name: 'ClientesView',
@@ -268,7 +268,8 @@ export default {
       this.loading = true
       this.error = null
       try {
-        const clients = await clientService.getClients()
+        const response = await clientService.getClients({ page: 1, pageSize: 100 })
+        const clients = response.items || []
         this.clients = clients.map(c => ({
           ...c,
           ...this.normalizeContact(c),

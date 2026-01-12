@@ -7,7 +7,7 @@
 
 <script>
 import ApiStatus from '@/components/ApiStatus.vue'
-import { authStorage } from '@/config/api'
+import { authStorage } from '@/config/api.ts'
 
 export default {
   name: 'App',
