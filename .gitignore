@@ -34,6 +34,11 @@ MANIFEST
 *.sqlite
 *.sqlite3
 
+# Seed and migration scripts
+seed_all_data.py
+seed_equipment_data.py
+fix_foreign_keys.sql
+
 # IDEs
 .vscode/
 .idea/
