@@ -6,6 +6,9 @@ from rent.routers import router as rent_router
 from sale.routers import router as sale_router
 from billing.routers import router as billing_router
 from client.routers import router as client_router
+from ticket.routers import router as ticket_router
+from monthlyplan.routers import router as monthlyplan_router
+
 
 from core.database import Base, engine
 
@@ -39,6 +42,9 @@ app.include_router(client_router, prefix="/api/clients", tags=["clients"])
 app.include_router(rent_router, prefix="/api")
 app.include_router(sale_router, prefix="/api")
 app.include_router(billing_router, prefix="/api")
+app.include_router(ticket_router, prefix="/api")
+app.include_router(monthlyplan_router, prefix="/api")
+
 
 
 @app.get("/")
