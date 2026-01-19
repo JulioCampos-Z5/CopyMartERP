@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
 import math
-
 from app.core.database import get_db
 from schemas import (
     PurchaseCreate,
@@ -12,6 +11,7 @@ from schemas import (
     PurchaseDetailResponse,
     PurchaseListResponse,
     PurchaseStatusUpdate,
+    PurchaseAuthorizationUpdate,
     PurchaseStatsResponse
 )
 from services import PurchaseService
@@ -31,7 +31,6 @@ def create_purchase(
     purchase: PurchaseCreate,
     db: Session = Depends(get_db)
 ):
-
     return PurchaseService.create_purchase(db, purchase)
 
 @router.get(
@@ -42,16 +41,18 @@ def create_purchase(
 def list_purchases(
     page: int = Query(1, ge=1, description="Número de página"),
     page_size: int = Query(10, ge=1, le=100, description="Elementos por página"),
-    search: Optional[str] = Query(None, description="Buscar por nombre, código de envío o comentarios"),
+    search: Optional[str] = Query(None, description="Buscar por nombre, código, comentarios o proveedores"),
     status: Optional[str] = Query(None, description="Filtrar por estado"),
     type: Optional[str] = Query(None, description="Filtrar por tipo (Interna/Venta)"),
     user_id: Optional[int] = Query(None, description="Filtrar por usuario"),
     sparepart_id: Optional[int] = Query(None, description="Filtrar por refacción"),
     start_date: Optional[datetime] = Query(None, description="Fecha de inicio"),
     end_date: Optional[datetime] = Query(None, description="Fecha de fin"),
+    pending_authorization: Optional[bool] = Query(None, description="Filtrar por pendientes de autorización"),
+    is_paid: Optional[bool] = Query(None, description="Filtrar por pagadas (solo ventas)"),
     db: Session = Depends(get_db)
 ):
-    # Obtener listado de compras con paginación y filtros opcionales.
+
     skip = (page - 1) * page_size
     purchases, total = PurchaseService.get_all_purchases(
         db=db,
@@ -63,7 +64,9 @@ def list_purchases(
         user_id=user_id,
         sparepart_id=sparepart_id,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        pending_authorization=pending_authorization,
+        is_paid=is_paid
     )
     
     total_pages = math.ceil(total / page_size) if total > 0 else 0
@@ -82,8 +85,15 @@ def list_purchases(
     summary="Obtener compras pendientes"
 )
 def get_pending_purchases(db: Session = Depends(get_db)):
-
     return PurchaseService.get_pending_purchases(db)
+
+@router.get(
+    "/pending-authorizations",
+    response_model=list[PurchaseDetailResponse],
+    summary="Obtener compras pendientes de autorización"
+)
+def get_pending_authorizations(db: Session = Depends(get_db)):
+    return PurchaseService.get_pending_authorizations(db)
 
 @router.get(
     "/statistics",
@@ -91,13 +101,7 @@ def get_pending_purchases(db: Session = Depends(get_db)):
     summary="Obtener estadísticas de compras"
 )
 def get_purchase_statistics(db: Session = Depends(get_db)):
-    """
-    Obtener estadísticas generales de compras:
-    - Total de compras
-    - Compras por estado
-    - Compras por tipo
-    - Costo total de envíos
-    """
+
     return PurchaseService.get_purchase_statistics(db)
 
 @router.get(
@@ -111,9 +115,11 @@ def get_purchases_by_user(
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    # Obtener todas las compras realizadas por un usuario específico.
+
     skip = (page - 1) * page_size
-    purchases, total = PurchaseService.get_purchases_by_user(db, user_id, skip, page_size)
+    purchases, total = PurchaseService.get_purchases_by_user(
+        db, user_id, skip, page_size
+    )
     
     total_pages = math.ceil(total / page_size) if total > 0 else 0
     
@@ -136,9 +142,11 @@ def get_purchases_by_sparepart(
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    # Obtener todas las compras de una refacción específica.
+
     skip = (page - 1) * page_size
-    purchases, total = PurchaseService.get_purchases_by_sparepart(db, sparepart_id, skip, page_size)
+    purchases, total = PurchaseService.get_purchases_by_sparepart(
+        db, sparepart_id, skip, page_size
+    )
     
     total_pages = math.ceil(total / page_size) if total > 0 else 0
     
@@ -159,7 +167,6 @@ def get_purchases_by_shipping_code(
     shipping_code: str,
     db: Session = Depends(get_db)
 ):
-    # Obtener todas las compras con un código de rastreo específico.
     return PurchaseService.get_purchases_by_shipping_code(db, shipping_code)
 
 @router.get(
@@ -171,7 +178,7 @@ def get_purchase(
     purchase_id: int,
     db: Session = Depends(get_db)
 ):
-   #  Obtener una compra específica por su ID con toda la información relacionada.
+
     return PurchaseService.get_purchase_by_id(db, purchase_id)
 
 @router.put(
@@ -184,10 +191,7 @@ def update_purchase(
     purchase: PurchaseUpdate,
     db: Session = Depends(get_db)
 ):
-    """
-    Actualizar información de una compra existente.
-    Solo se actualizarán los campos proporcionados.
-    """
+
     return PurchaseService.update_purchase(db, purchase_id, purchase)
 
 @router.patch(
@@ -200,7 +204,40 @@ def update_purchase_status(
     status_update: PurchaseStatusUpdate,
     db: Session = Depends(get_db)
 ):
+
     return PurchaseService.update_purchase_status(db, purchase_id, status_update)
+
+@router.patch(
+    "/{purchase_id}/authorize/area-chief/{chief_id}",
+    response_model=PurchaseDetailResponse,
+    summary="Autorizar compra por jefe de área"
+)
+def authorize_by_area_chief(
+    purchase_id: int,
+    chief_id: int,
+    authorization: PurchaseAuthorizationUpdate,
+    db: Session = Depends(get_db)
+):
+
+    return PurchaseService.authorize_by_area_chief(
+        db, purchase_id, chief_id, authorization
+    )
+
+@router.patch(
+    "/{purchase_id}/authorize/admin/{admin_id}",
+    response_model=PurchaseDetailResponse,
+    summary="Autorizar compra por administrador"
+)
+def authorize_by_admin(
+    purchase_id: int,
+    admin_id: int,
+    authorization: PurchaseAuthorizationUpdate,
+    db: Session = Depends(get_db)
+):
+
+    return PurchaseService.authorize_by_admin(
+        db, purchase_id, admin_id, authorization
+    )
 
 @router.delete(
     "/{purchase_id}",
@@ -211,6 +248,5 @@ def delete_purchase(
     purchase_id: int,
     db: Session = Depends(get_db)
 ):
-    # Eliminar una compra del sistema.
     PurchaseService.delete_purchase(db, purchase_id)
     return None

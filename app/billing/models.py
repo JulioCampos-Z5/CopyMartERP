@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Enum as SQLEnum, DECIMAL, Date, Text
 from sqlalchemy.orm import relationship
-from core.database import Base
+from app.core.database import Base
 from datetime import datetime
 from enum import Enum
 
@@ -27,7 +27,7 @@ class Billing(Base):
     branch_id = Column(Integer, ForeignKey("branches.branch_id"), nullable=True, index=True)
     area_id = Column(Integer, ForeignKey("areas.area_id"), nullable=True, index=True)
     invoice_number = Column(String(50), unique=True, nullable=True, index=True)
-    amount = Column(DECIMAL(10, 2), nullable=False)
+    amount = Column(DECIMAL(10, 2), nullable=False)  # Monto total (renta base + excesos)
     target_date = Column(Date, nullable=False, index=True)  # Fecha objetivo de pago
     due_date = Column(Date, nullable=False, index=True)     # Fecha de vencimiento
     payment_date = Column(Date, nullable=True)               # Fecha de pago real
@@ -40,11 +40,16 @@ class Billing(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     created_by = Column(Integer, ForeignKey("users.user_id"), nullable=True)
-    
-    # Relaciones
-    rent = relationship("Rent", foreign_keys=[rent_id])
+    rent = relationship("Rent", foreign_keys=[rent_id], back_populates="billings")
     sale = relationship("Sale", foreign_keys=[sale_id])
     client = relationship("Client", foreign_keys=[client_id])
     branch = relationship("Branch", foreign_keys=[branch_id])
     area = relationship("Area", foreign_keys=[area_id])
     creator = relationship("User", foreign_keys=[created_by])
+    
+    print_counter = relationship(
+        "PrintCounter", 
+        back_populates="billing",
+        uselist=False, 
+        foreign_keys="PrintCounter.billing_id"
+    )
