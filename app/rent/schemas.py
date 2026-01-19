@@ -1,123 +1,84 @@
 from pydantic import BaseModel, Field, validator
-from datetime import datetime
 from typing import Optional
-from enum import Enum
+from datetime import date, datetime
+from decimal import Decimal
+from rent.models import ContractStatus
 
 
-class ContractStatus(str, Enum):
-    PENDIENTE = "pendiente"
-    SIN_FIRMAR = "sin_firmar"
-    VIGENTE = "vigente"
-    VENCIDO = "vencido"
-
-
-# Schemas para las relaciones
-class ClientBasic(BaseModel):
-    client_id: int
-    name: str
-    comercial_name: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
-
-
-class BranchBasic(BaseModel):
-    branch_id: int
-    name: str
-    
-    class Config:
-        from_attributes = True
-
-
-class AreaBasic(BaseModel):
-    area_id: int
-    name: str
-    
-    class Config:
-        from_attributes = True
-
-
-class EquipmentBasic(BaseModel):
-    item_id: int
-    sku: Optional[str] = None
-    model: str
-    serie: str
-    brand_id: int
-    
-    class Config:
-        from_attributes = True
-
-
-# Schema de creación
-class RentCreate(BaseModel):
-    client_id: int
-    branch_id: Optional[int] = None
-    area_id: Optional[int] = None
-    item_id: int
-    contract_status: ContractStatus = ContractStatus.PENDIENTE
-    rent: float = Field(gt=0, description="Renta debe ser mayor a 0")
+class RentBase(BaseModel):
+    client_id: int = Field(..., gt=0)
+    branch_id: Optional[int] = Field(None, gt=0)
+    area_id: Optional[int] = Field(None, gt=0)
+    item_id: int = Field(..., gt=0)
+    rent: Decimal = Field(..., gt=0, description="Renta mensual base")
+    start_date: date
+    end_date: Optional[date] = None
     is_foreign: bool = False
     
-    @validator('area_id')
-    def validate_area_assignment(cls, v, values):
-        # Si se asigna área sin sucursal, se validará en el servicio
-        if v and not values.get('branch_id'):
-            pass
+    # Configuración de impresión
+    has_print_service: bool = False
+    bn_included: Optional[int] = Field(None, ge=0, description="Impresiones B/N incluidas")
+    bn_cost_per_excess: Optional[Decimal] = Field(None, ge=0, description="Costo por exceso B/N")
+    color_included: Optional[int] = Field(None, ge=0, description="Impresiones Color incluidas")
+    color_cost_per_excess: Optional[Decimal] = Field(None, ge=0, description="Costo por exceso Color")
+    print_notes: Optional[str] = None
+    
+    @validator('bn_included', 'bn_cost_per_excess', 'color_included', 'color_cost_per_excess')
+    def validate_print_config(cls, v, values, field):
+        """Valida que si has_print_service es True, los campos de impresión no sean None"""
+        if values.get('has_print_service'):
+            if field.name in ['bn_included', 'bn_cost_per_excess']:
+                if v is None:
+                    raise ValueError(f"{field.name} es requerido cuando has_print_service es True")
+        return v
+    
+    @validator('end_date')
+    def validate_dates(cls, v, values):
+        if v and 'start_date' in values:
+            if v <= values['start_date']:
+                raise ValueError("end_date debe ser posterior a start_date")
         return v
 
 
-# Schema de actualización
+class RentCreate(RentBase):
+    contract_status: ContractStatus = ContractStatus.PENDIENTE
+
+
 class RentUpdate(BaseModel):
     branch_id: Optional[int] = None
     area_id: Optional[int] = None
+    rent: Optional[Decimal] = Field(None, gt=0)
     contract_status: Optional[ContractStatus] = None
-    rent: Optional[float] = Field(None, gt=0)
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     is_foreign: Optional[bool] = None
-    is_active: Optional[bool] = None
+    
+    # Configuración de impresión
+    has_print_service: Optional[bool] = None
+    bn_included: Optional[int] = Field(None, ge=0)
+    bn_cost_per_excess: Optional[Decimal] = Field(None, ge=0)
+    color_included: Optional[int] = Field(None, ge=0)
+    color_cost_per_excess: Optional[Decimal] = Field(None, ge=0)
+    print_notes: Optional[str] = None
 
 
-# Schema de respuesta
-class RentResponse(BaseModel):
+class RentResponse(RentBase):
     rent_id: int
-    client_id: int
-    branch_id: Optional[int] = None
-    area_id: Optional[int] = None
-    item_id: int
-    contract_number: Optional[str] = None
+    contract_number: Optional[str]
     contract_status: ContractStatus
-    rent: float
-    is_foreign: bool
     is_active: bool
     created_at: datetime
     updated_at: datetime
     
-    client: ClientBasic
-    branch: Optional[BranchBasic] = None
-    area: Optional[AreaBasic] = None
-    equipment: EquipmentBasic
+    client: Optional[dict] = None
+    branch: Optional[dict] = None
+    area: Optional[dict] = None
+    equipment: Optional[dict] = None
     
     class Config:
         from_attributes = True
 
 
-# Schema para listados
-class RentList(BaseModel):
-    rent_id: int
-    contract_number: Optional[str] = None
-    client_name: str
-    branch_name: Optional[str] = None
-    area_name: Optional[str] = None
-    equipment_model: str
-    equipment_serie: str
-    contract_status: ContractStatus
-    rent: float
-    is_foreign: bool
-    
-    class Config:
-        from_attributes = True
-
-
-# Schema para filtros
 class RentFilter(BaseModel):
     client_id: Optional[int] = None
     branch_id: Optional[int] = None
@@ -125,3 +86,4 @@ class RentFilter(BaseModel):
     contract_status: Optional[ContractStatus] = None
     is_foreign: Optional[bool] = None
     is_active: Optional[bool] = True
+    has_print_service: Optional[bool] = None  

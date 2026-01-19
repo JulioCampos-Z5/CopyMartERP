@@ -3,9 +3,10 @@ from sqlalchemy import and_, or_, func
 from fastapi import HTTPException, status
 from typing import List, Optional
 from datetime import datetime, date
+from decimal import Decimal
 
-from billing.models import Billing, BillingStatus, BillingType
-from billing.schemas import (
+from app.billing.models import Billing, BillingStatus, BillingType
+from app.billing.schemas import (
     BillingCreate, 
     BillingUpdate, 
     BillingResponse, 
@@ -17,6 +18,7 @@ from billing.schemas import (
 from rent.models import Rent, ContractStatus as RentContractStatus
 from sale.models import Sale, SaleStatus
 from client.models import Client
+from app.print.models import PrintCounter
 
 
 class BillingService:
@@ -39,6 +41,35 @@ class BillingService:
             return BillingStatus.VENCIDO
         
         return BillingStatus.PENDIENTE
+    
+    @staticmethod
+    def get_print_counter_for_billing(
+        db: Session,
+        rent_id: int,
+        target_date: date
+    ) -> Optional[PrintCounter]:
+        """Obtiene el contador de impresión correspondiente al período de facturación"""
+        return db.query(PrintCounter).filter(
+            PrintCounter.rent_id == rent_id,
+            PrintCounter.period_month == target_date.month,
+            PrintCounter.period_year == target_date.year,
+            PrintCounter.is_active == True,
+            PrintCounter.is_billed == False
+        ).first()
+    
+    @staticmethod
+    def calculate_billing_amount(
+        rent: Rent,
+        print_counter: Optional[PrintCounter] = None
+    ) -> Decimal:
+        """Calcula el monto total de facturación (renta base + excesos de impresión)"""
+        total_amount = rent.rent
+        
+        # Agregar excesos de impresión si hay contador
+        if print_counter:
+            total_amount += print_counter.total_excess_amount
+        
+        return total_amount
     
     @staticmethod
     def validate_rent(db: Session, rent_id: int) -> Rent:
@@ -100,7 +131,6 @@ class BillingService:
             client_id = rent.client_id
             branch_id = rent.branch_id
             area_id = rent.area_id
-            amount = rent.rent
             
             # Verificar si ya existe facturación activa para esta renta este mes
             existing = db.query(Billing).filter(
@@ -115,12 +145,26 @@ class BillingService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Ya existe una facturación activa para esta renta en {billing_data.target_date.strftime('%m/%Y')}"
                 )
+            
+            # Buscar contador de impresión si la renta tiene servicio de impresión
+            print_counter = None
+            if rent.has_print_service:
+                print_counter = BillingService.get_print_counter_for_billing(
+                    db,
+                    billing_data.rent_id,
+                    billing_data.target_date
+                )
+            
+            # Calcular monto total (renta base + excesos de impresión)
+            amount = BillingService.calculate_billing_amount(rent, print_counter)
+            
         else:  # VENTA
             sale = BillingService.validate_sale(db, billing_data.sale_id)
             client_id = sale.client_id
             branch_id = sale.branch_id
             area_id = sale.area_id
             amount = sale.sale_price
+            print_counter = None
             
             # Verificar si ya existe facturación para esta venta
             existing = db.query(Billing).filter(
@@ -170,6 +214,21 @@ class BillingService:
             new_billing.created_at
         )
         
+        # Si hay contador de impresión, vincularlo y marcarlo como facturado
+        if print_counter:
+            print_counter.billing_id = new_billing.billing_id
+            print_counter.is_billed = True
+            
+            # Agregar nota en comentario sobre excesos
+            if print_counter.total_excess_amount > 0:
+                excess_note = (
+                    f"\n[Excesos de impresión: "
+                    f"B/N: {print_counter.bn_excess} pág. (${print_counter.bn_excess_amount}), "
+                    f"Color: {print_counter.color_excess} pág. (${print_counter.color_excess_amount}). "
+                    f"Total excesos: ${print_counter.total_excess_amount}]"
+                )
+                new_billing.comment = (new_billing.comment or "") + excess_note
+        
         db.commit()
         db.refresh(new_billing)
         
@@ -197,6 +256,7 @@ class BillingService:
         
         created_count = 0
         skipped_count = 0
+        warnings = []
         errors = []
         
         for rent in rents:
@@ -212,6 +272,20 @@ class BillingService:
                 if existing:
                     skipped_count += 1
                     continue
+                
+                # Verificar si la renta tiene servicio de impresión pero no hay contador
+                if rent.has_print_service:
+                    print_counter = BillingService.get_print_counter_for_billing(
+                        db,
+                        rent.rent_id,
+                        batch_data.target_date
+                    )
+                    if not print_counter:
+                        warnings.append({
+                            "rent_id": rent.rent_id,
+                            "contract_number": rent.contract_number,
+                            "warning": "Renta con servicio de impresión sin contador registrado para este período"
+                        })
                 
                 # Crear facturación
                 billing_create = BillingCreate(
@@ -238,6 +312,7 @@ class BillingService:
             "total_rents": len(rents),
             "created": created_count,
             "skipped": skipped_count,
+            "warnings": warnings,
             "errors": errors
         }
     
@@ -249,7 +324,8 @@ class BillingService:
             joinedload(Billing.branch),
             joinedload(Billing.area),
             joinedload(Billing.rent),
-            joinedload(Billing.sale)
+            joinedload(Billing.sale),
+            joinedload(Billing.print_counter)
         ).filter(Billing.billing_id == billing_id).first()
         
         if not billing:
@@ -273,7 +349,8 @@ class BillingService:
             joinedload(Billing.branch),
             joinedload(Billing.area),
             joinedload(Billing.rent),
-            joinedload(Billing.sale)
+            joinedload(Billing.sale),
+            joinedload(Billing.print_counter)
         )
         
         # Aplicar filtros
@@ -441,6 +518,10 @@ class BillingService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No se puede eliminar una facturación ya pagada"
             )
+        
+        if billing.print_counter:
+            billing.print_counter.billing_id = None
+            billing.print_counter.is_billed = False
         
         billing.is_active = False
         billing.updated_at = datetime.utcnow()
