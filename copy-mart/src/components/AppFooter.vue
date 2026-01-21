@@ -47,7 +47,7 @@
 
 <script>
 import { computed } from 'vue'
-import { useModalBus } from '@/composables/useModalBus'
+import { useModalBus } from '@/composables/useModalBus.ts'
 
 export default {
   name: 'AppFooter',

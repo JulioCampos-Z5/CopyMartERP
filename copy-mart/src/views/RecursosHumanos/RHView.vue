@@ -78,24 +78,30 @@
       <!-- Actions -->
       <div class="bg-white p-6 rounded-lg shadow border">
         <div class="flex flex-wrap gap-4">
-          <button class="btn-primary">
+          <router-link to="/recursos-humanos/empleados" class="btn-primary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            Registrar Empleado
-          </button>
-          <button class="btn-secondary">
+            Gestionar Empleados
+          </router-link>
+          <router-link to="/recursos-humanos/nominas" class="btn-secondary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Procesar Nómina
-          </button>
-          <button class="btn-outline">
+            Procesar Nóminas
+          </router-link>
+          <router-link to="/recursos-humanos/vacaciones" class="btn-outline">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 12v6m0 0l-3-3m3 3l3-3" />
             </svg>
-            Control de Asistencia
-          </button>
+            Gestionar Vacaciones
+          </router-link>
+          <router-link to="/recursos-humanos/areas" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Gestionar Áreas
+          </router-link>
         </div>
       </div>
 

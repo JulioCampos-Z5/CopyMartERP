@@ -219,7 +219,7 @@
 
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
-import { billingService } from '@/services/billingService'
+import { billingService } from '@/services/billingService.ts'
 
 export default {
   name: 'CobranzaView',
