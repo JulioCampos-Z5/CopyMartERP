@@ -8,6 +8,11 @@ from billing.routers import router as billing_router
 from client.routers import router as client_router
 from ticket.routers import router as ticket_router
 from monthlyplan.routers import router as monthlyplan_router
+from app.inventory.routers import (
+    catalog_router,
+    inventory_router,
+    shelf_router
+)
 
 
 from core.database import Base, engine
@@ -44,6 +49,9 @@ app.include_router(sale_router, prefix="/api")
 app.include_router(billing_router, prefix="/api")
 app.include_router(ticket_router, prefix="/api")
 app.include_router(monthlyplan_router, prefix="/api")
+app.include_router(catalog_router, prefix="/api")
+app.include_router(inventory_router, prefix="/api")
+app.include_router(shelf_router, prefix="/api")
 
 
 
