@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.core.database import get_db
-from app.auth.routers import get_current_user
-from app.auth.models import User
-from app.print.schemas import (
+from core.database import get_db
+from auth.routers import get_current_user
+from auth.models import User
+from print.schemas import (
     PrintCounterCreate,
     PrintCounterUpdate,
     PrintCounterResponse,
@@ -12,7 +12,7 @@ from app.print.schemas import (
     PrintCounterBatchCreate,
     PrintCounterStats
 )
-from app.print.services import PrintCounterService
+from print.services import PrintCounterService
 
 router = APIRouter(
     prefix="/print",

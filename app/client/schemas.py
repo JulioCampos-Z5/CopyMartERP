@@ -84,6 +84,7 @@ class ClientResponse(BaseModel):
     name: str
     comercial_name: Optional[str]
     rfc: Optional[str]
+    contact_id: Optional[int] = None
     address: Optional[str]
     colonia: Optional[str]
     zip_code: Optional[str]
@@ -100,6 +101,7 @@ class ClientListResponse(BaseModel):
     client_id: int
     name: str
     rfc: Optional[str]
+    contact_id: Optional[int] = None
     address: Optional[str]
     colonia: Optional[str]
     zip_code: Optional[str]

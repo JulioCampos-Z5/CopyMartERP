@@ -5,15 +5,15 @@ from typing import List, Optional
 from datetime import datetime, date
 from decimal import Decimal
 
-from app.print.models import PrintCounter
-from app.print.schemas import (
+from print.models import PrintCounter
+from print.schemas import (
     PrintCounterCreate, 
     PrintCounterUpdate, 
     PrintCounterFilter,
     PrintCounterBatchCreate,
     PrintCounterStats
 )
-from app.rent.models import Rent, ContractStatus
+from rent.models import Rent, ContractStatus
 
 
 class PrintCounterService:

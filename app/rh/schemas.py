@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime, date
 from typing import Optional
 from enum import Enum
@@ -39,17 +39,20 @@ class EmployeeBase(BaseModel):
 class EmployeeCreate(EmployeeBase):
     user_id: int
     
-    @validator('nss')
+    @field_validator('nss')
+    @classmethod
     def validate_nss(cls, v):
         if not v.isdigit():
             raise ValueError('NSS debe contener solo números')
         return v
     
-    @validator('rfc')
+    @field_validator('rfc')
+    @classmethod
     def validate_rfc(cls, v):
         return v.upper()
     
-    @validator('curp')
+    @field_validator('curp')
+    @classmethod
     def validate_curp(cls, v):
         return v.upper()
 
@@ -86,7 +89,8 @@ class PayrollBase(BaseModel):
 class PayrollCreate(PayrollBase):
     employee_id: int
     
-    @validator('salary', 'bonus', 'commission')
+    @field_validator('salary', 'bonus', 'commission')
+    @classmethod
     def round_to_two_decimals(cls, v):
         return round(v, 2)
 
@@ -117,9 +121,11 @@ class VacationBase(BaseModel):
     end_date: date
     notes: Optional[str] = None
     
-    @validator('end_date')
-    def validate_dates(cls, v, values):
-        if 'start_date' in values and v < values['start_date']:
+    @field_validator('end_date', mode='after')
+    @classmethod
+    def validate_dates(cls, v, info):
+        from pydantic_core.core_schema import FieldValidationInfo
+        if hasattr(info, 'data') and 'start_date' in info.data and v < info.data['start_date']:
             raise ValueError('end_date debe ser posterior a start_date')
         return v
 
@@ -193,9 +199,11 @@ class AbsenceBase(BaseModel):
     file_path: Optional[str] = None
     notes: Optional[str] = None
     
-    @validator('end_date')
-    def validate_dates(cls, v, values):
-        if 'start_date' in values and v < values['start_date']:
+    @field_validator('end_date', mode='after')
+    @classmethod
+    def validate_dates(cls, v, info):
+        from pydantic_core.core_schema import FieldValidationInfo
+        if hasattr(info, 'data') and 'start_date' in info.data and v < info.data['start_date']:
             raise ValueError('end_date debe ser posterior a start_date')
         return v
 

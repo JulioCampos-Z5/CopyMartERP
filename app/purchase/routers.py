@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
 import math
-from app.core.database import get_db
-from schemas import (
+from core.database import get_db
+from purchase.schemas import (
     PurchaseCreate,
     PurchaseUpdate,
     PurchaseResponse,
@@ -14,7 +14,7 @@ from schemas import (
     PurchaseAuthorizationUpdate,
     PurchaseStatsResponse
 )
-from services import PurchaseService
+from purchase.services import PurchaseService
 
 router = APIRouter(
     prefix="/purchases",

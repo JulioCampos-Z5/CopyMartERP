@@ -5,8 +5,8 @@ from typing import List, Optional
 from datetime import datetime, date
 from decimal import Decimal
 
-from app.billing.models import Billing, BillingStatus, BillingType
-from app.billing.schemas import (
+from billing.models import Billing, BillingStatus, BillingType
+from billing.schemas import (
     BillingCreate, 
     BillingUpdate, 
     BillingResponse, 
@@ -18,7 +18,7 @@ from app.billing.schemas import (
 from rent.models import Rent, ContractStatus as RentContractStatus
 from sale.models import Sale, SaleStatus
 from client.models import Client
-from app.print.models import PrintCounter
+from print.models import PrintCounter
 
 
 class BillingService:

@@ -1,12 +1,12 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, and_, or_
-from app.monthlyplan.models import MonthlyPlan, ServiceType, AttendanceStatus
-from app.monthlyplan.schemas import (
+from monthlyplan.models import MonthlyPlan, ServiceType, AttendanceStatus
+from monthlyplan.schemas import (
     MonthlyPlanCreate, MonthlyPlanUpdate,
     ServiceTypeCreate, ServiceTypeUpdate
 )
-from app.auth.models import User
+from auth.models import User
 from datetime import datetime
 
 

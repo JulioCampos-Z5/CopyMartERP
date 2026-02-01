@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date
-from app.core.database import get_db 
-from . import schemas, services
+from core.database import get_db
+from rh import schemas, services
 
 router = APIRouter(prefix="/rh", tags=["RH"])
 

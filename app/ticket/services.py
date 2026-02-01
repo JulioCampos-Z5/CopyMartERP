@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-from app.ticket.models import Ticket, ReportStatus
-from app.ticket.schemas import TicketCreate, TicketUpdate
+from ticket.models import Ticket, ReportStatus
+from ticket.schemas import TicketCreate, TicketUpdate
 from datetime import datetime
 from fastapi import HTTPException, status
 

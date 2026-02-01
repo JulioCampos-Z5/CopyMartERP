@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
-from app.monthlyplan.models import AttendanceStatus
+from monthlyplan.models import AttendanceStatus
 
 class ServiceTypeBase(BaseModel):
     name: str

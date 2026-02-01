@@ -21,7 +21,7 @@ class Rent(Base):
     client_id = Column(Integer, ForeignKey("clients.client_id"), nullable=False, index=True)
     branch_id = Column(Integer, ForeignKey("branches.branch_id"), nullable=True, index=True)
     area_id = Column(Integer, ForeignKey("areas.area_id"), nullable=True, index=True)
-    item_id = Column(Integer, ForeignKey("equipments.item_id"), nullable=False, index=True)
+    item_id = Column(Integer, ForeignKey("items.item_id"), nullable=False, index=True)
     
     rent = Column(DECIMAL(10, 2), nullable=False)
     contract_status = Column(SQLEnum(ContractStatus), nullable=False, default=ContractStatus.PENDIENTE, index=True)

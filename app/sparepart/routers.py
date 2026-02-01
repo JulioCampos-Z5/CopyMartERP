@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 import math
-from app.core.database import get_db
-from schemas import (
+from core.database import get_db
+from sparepart.schemas import (
     SparepartCreate,
     SparepartUpdate,
     SparepartResponse,
     SparepartListResponse
 )
-from services import SparepartService
+from sparepart.services import SparepartService
 
 router = APIRouter(
     prefix="/spareparts",

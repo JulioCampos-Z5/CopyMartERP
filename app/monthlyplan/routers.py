@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
-from app.core.database import get_db
+from core.database import get_db
 from auth.routers import get_current_user
 from auth.models import User
-from app.monthlyplan.schemas import (
+from monthlyplan.schemas import (
     ServiceTypeCreate, ServiceTypeUpdate, ServiceTypeResponse,
     MonthlyPlanCreate, MonthlyPlanUpdate, MonthlyPlanResponse, MonthlyPlanListResponse
 )
-from app.monthlyplan.services import ServiceTypeService, MonthlyPlanService
-from app.monthlyplan.models import AttendanceStatus
+from monthlyplan.services import ServiceTypeService, MonthlyPlanService
+from monthlyplan.models import AttendanceStatus
 
 service_type_router = APIRouter(prefix="/service", tags=["Service Types"])
 

@@ -3,8 +3,8 @@ from sqlalchemy import or_, func
 from fastapi import HTTPException, status
 from typing import Optional
 import math
-from models import Sparepart
-from schemas import SparepartCreate, SparepartUpdate
+from sparepart.models import Sparepart
+from sparepart.schemas import SparepartCreate, SparepartUpdate
 
 class SparepartService:
     

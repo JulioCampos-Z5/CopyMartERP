@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import date, datetime
 from decimal import Decimal
@@ -19,12 +19,14 @@ class PrintCounterBase(BaseModel):
 class PrintCounterCreate(PrintCounterBase):
     rent_id: int = Field(..., gt=0)
     
-    @validator('period_month', 'period_year')
-    def validate_period(cls, v, values, field):
-        if field.name == 'period_year' and 'period_month' in values:
+    @field_validator('period_year', mode='after')
+    @classmethod
+    def validate_period(cls, v, info):
+        from pydantic_core.core_schema import FieldValidationInfo
+        if hasattr(info, 'data') and 'period_month' in info.data:
             # Validar que el período no sea futuro
             current_date = date.today()
-            period_date = date(v, values['period_month'], 1)
+            period_date = date(v, info.data['period_month'], 1)
             if period_date > current_date:
                 raise ValueError("El período no puede ser futuro")
         return v

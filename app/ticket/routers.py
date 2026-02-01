@@ -4,9 +4,9 @@ from typing import List, Optional
 from core.database import get_db
 from auth.routers import get_current_user
 from auth.models import User
-from app.ticket.schemas import TicketCreate, TicketUpdate, TicketResponse, TicketListResponse
-from app.ticket.services import TicketService
-from app.ticket.models import ReportStatus
+from ticket.schemas import TicketCreate, TicketUpdate, TicketResponse, TicketListResponse
+from ticket.services import TicketService
+from ticket.models import ReportStatus
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 

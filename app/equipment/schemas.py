@@ -23,7 +23,7 @@ class BrandRead(BaseModel):
     prefix: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SupplierCreate(BaseModel):
     name: str
@@ -33,7 +33,7 @@ class SupplierRead(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class EquipmentCreate(BaseModel):
     brand_id: int
@@ -50,7 +50,7 @@ class EquipmentCreate(BaseModel):
 
 class EquipmentRead(BaseModel):
     item_id: int
-    sku: str
+    sku: Optional[str]
     brand_id: int
     model: str
     serie: str
@@ -64,7 +64,7 @@ class EquipmentRead(BaseModel):
     is_active: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class EquipmentUpdate(BaseModel):
     location_status: LocationStatus
