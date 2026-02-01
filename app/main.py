@@ -7,21 +7,17 @@ from sale.routers import router as sale_router
 from billing.routers import router as billing_router
 from client.routers import router as client_router
 from ticket.routers import router as ticket_router
-<<<<<<< HEAD
 from monthlyplan.routers import service_type_router, monthlyplan_router
 from contact.routers import router as contact_router
 from sparepart.routers import router as sparepart_router
 from purchase.routers import router as purchase_router
 from print.routers import router as print_router
 from rh.routers import router as rh_router
-=======
-from monthlyplan.routers import router as monthlyplan_router
-from app.inventory.routers import (
+from inventory.routers import (
     catalog_router,
     inventory_router,
     shelf_router
 )
->>>>>>> 5d214165ad7be92e3ebc9e240fad45b6fb8d2c59
 
 
 from core.database import Base, engine
@@ -40,6 +36,7 @@ from print import models as print_models
 from rh import models as rh_models
 from ticket import models as ticket_models
 from monthlyplan import models as monthlyplan_models
+from inventory import models as inventory_models
 
 app = FastAPI(title="API de Usuarios")
 

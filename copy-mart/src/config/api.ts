@@ -45,7 +45,16 @@ export const API_ENDPOINTS = {
   PURCHASES: '/api/purchases',
   
   // Refacciones - Prefijo: /api/spareparts
-  SPAREPARTS: '/api/spareparts'
+  SPAREPARTS: '/api/spareparts',
+  
+  // Inventario - Catálogo de items
+  CATALOG: '/api/catalog',
+  
+  // Inventario - Instancias de inventario
+  INVENTORY: '/api/inventory',
+  
+  // Inventario - Estantes
+  SHELVES: '/api/shelves'
 } as const
 
 interface ApiRequestConfig extends AxiosRequestConfig {

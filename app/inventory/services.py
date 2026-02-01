@@ -6,7 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from . import models, schemas
-from app.equipment.models import Brand, Supplier, Equipment
+from equipment.models import Brand, Supplier, Equipment
 
 class ItemCatalogService:
     """Servicio para manejar el catálogo de items (TK-410, CF283A.)"""
