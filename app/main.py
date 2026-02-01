@@ -7,12 +7,21 @@ from sale.routers import router as sale_router
 from billing.routers import router as billing_router
 from client.routers import router as client_router
 from ticket.routers import router as ticket_router
+<<<<<<< HEAD
 from monthlyplan.routers import service_type_router, monthlyplan_router
 from contact.routers import router as contact_router
 from sparepart.routers import router as sparepart_router
 from purchase.routers import router as purchase_router
 from print.routers import router as print_router
 from rh.routers import router as rh_router
+=======
+from monthlyplan.routers import router as monthlyplan_router
+from app.inventory.routers import (
+    catalog_router,
+    inventory_router,
+    shelf_router
+)
+>>>>>>> 5d214165ad7be92e3ebc9e240fad45b6fb8d2c59
 
 
 from core.database import Base, engine
@@ -61,6 +70,9 @@ app.include_router(sparepart_router, prefix="/api")
 app.include_router(purchase_router, prefix="/api")
 app.include_router(print_router, prefix="/api")
 app.include_router(rh_router, prefix="/api")
+app.include_router(catalog_router, prefix="/api")
+app.include_router(inventory_router, prefix="/api")
+app.include_router(shelf_router, prefix="/api")
 
 
 
