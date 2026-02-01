@@ -19,7 +19,17 @@ export const equipmentService = {
       ...(is_active !== undefined && { is_active })
     }
     const url = buildUrlWithParams(`${API_ENDPOINTS.EQUIPMENT}/`, params)
-    return apiGet<PaginatedResponse<Equipment>>(url)
+    const items = await apiGet<Equipment[]>(url)
+    
+    // El backend devuelve una lista directa, construir respuesta paginada
+    const actualPageSize = page_size || pageSize
+    return {
+      items: items || [],
+      page,
+      page_size: actualPageSize,
+      total: items?.length || 0,
+      total_pages: 1
+    }
   },
 
   async getEquipmentById(id: number): Promise<Equipment> {

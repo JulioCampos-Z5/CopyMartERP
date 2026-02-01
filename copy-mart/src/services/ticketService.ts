@@ -38,7 +38,7 @@ export interface TicketUpdate {
 const ticketService = {
   // Crear ticket
   async create(data: TicketCreate): Promise<Ticket> {
-    const response = await api.post('/tickets/', data);
+    const response = await api.post('/api/tickets/', data);
     return response.data;
   },
 
@@ -50,31 +50,31 @@ const ticketService = {
     report_status?: string;
     report_type?: string;
   }): Promise<Ticket[]> {
-    const response = await api.get('/tickets/', { params });
+    const response = await api.get('/api/tickets/', { params });
     return response.data;
   },
 
   // Obtener mis tickets (tickets creados por el usuario actual)
   async getMyTickets(): Promise<Ticket[]> {
-    const response = await api.get('/tickets/my-tickets');
+    const response = await api.get('/api/tickets/my-tickets');
     return response.data;
   },
 
   // Obtener ticket por ID
   async getById(ticketId: number): Promise<Ticket> {
-    const response = await api.get(`/tickets/${ticketId}`);
+    const response = await api.get(`/api/tickets/${ticketId}`);
     return response.data;
   },
 
   // Actualizar ticket
   async update(ticketId: number, data: TicketUpdate): Promise<Ticket> {
-    const response = await api.put(`/tickets/${ticketId}`, data);
+    const response = await api.put(`/api/tickets/${ticketId}`, data);
     return response.data;
   },
 
   // Eliminar ticket
   async delete(ticketId: number): Promise<void> {
-    await api.delete(`/tickets/${ticketId}`);
+    await api.delete(`/api/tickets/${ticketId}`);
   }
 };
 

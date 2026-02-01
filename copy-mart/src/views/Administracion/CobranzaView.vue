@@ -271,19 +271,19 @@ export default {
       this.loading = true
       this.error = null
       try {
-        const [billings, overdue, statsData] = await Promise.all([
+        const [billingsResponse, overdue, statsData] = await Promise.all([
           billingService.getBillings({ is_active: true }),
           billingService.getOverdueBillings(),
           billingService.getStats()
         ])
         
-        this.billings = billings
+        this.billings = billingsResponse.items || []
         this.overdueBillings = overdue
         
         this.stats.totalPending = statsData.pending_amount || 0
         this.stats.overdueCount = statsData.by_status?.vencido || 0
         this.stats.paidThisMonth = statsData.paid_amount || 0
-        this.stats.expiringSoon = billings.filter(b => b.status === 'pendiente').length
+        this.stats.expiringSoon = this.billings.filter(b => b.status === 'pendiente').length
       } catch (err) {
         this.error = err.message
         console.error('Error loading billings:', err)

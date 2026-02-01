@@ -395,7 +395,7 @@
 
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
-import clientService from '@/services/clientService.ts'
+import { clientService } from '@/services/clientService.ts'
 
 export default {
   name: 'AtencionClientesView',

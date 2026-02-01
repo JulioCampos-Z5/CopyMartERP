@@ -60,7 +60,7 @@ export interface ServiceTypeCreate {
 const monthlyplanService = {
   // Planes mensuales
   async create(data: MonthlyPlanCreate): Promise<MonthlyPlan> {
-    const response = await api.post('/monthlyplans/', data);
+    const response = await api.post('/api/monthly-plans/', data);
     return response.data;
   },
 
@@ -73,42 +73,42 @@ const monthlyplanService = {
     start_date?: string;
     end_date?: string;
   }): Promise<MonthlyPlan[]> {
-    const response = await api.get('/monthlyplans/', { params });
+    const response = await api.get('/api/monthly-plans/', { params });
     return response.data;
   },
 
   async getById(planId: number): Promise<MonthlyPlan> {
-    const response = await api.get(`/monthlyplans/${planId}`);
+    const response = await api.get(`/api/monthly-plans/${planId}`);
     return response.data;
   },
 
   async update(planId: number, data: MonthlyPlanUpdate): Promise<MonthlyPlan> {
-    const response = await api.put(`/monthlyplans/${planId}`, data);
+    const response = await api.put(`/api/monthly-plans/${planId}`, data);
     return response.data;
   },
 
   async delete(planId: number): Promise<void> {
-    await api.delete(`/monthlyplans/${planId}`);
+    await api.delete(`/api/monthly-plans/${planId}`);
   },
 
   // Tipos de servicio
   async createServiceType(data: ServiceTypeCreate): Promise<ServiceType> {
-    const response = await api.post('/monthlyplans/service-types/', data);
+    const response = await api.post('/api/service/', data);
     return response.data;
   },
 
   async getServiceTypes(): Promise<ServiceType[]> {
-    const response = await api.get('/monthlyplans/service-types/');
+    const response = await api.get('/api/service/');
     return response.data;
   },
 
   async updateServiceType(typeId: number, data: Partial<ServiceTypeCreate>): Promise<ServiceType> {
-    const response = await api.put(`/monthlyplans/service-types/${typeId}`, data);
+    const response = await api.put(`/api/service/${typeId}`, data);
     return response.data;
   },
 
   async deleteServiceType(typeId: number): Promise<void> {
-    await api.delete(`/monthlyplans/service-types/${typeId}`);
+    await api.delete(`/api/service/${typeId}`);
   }
 };
 

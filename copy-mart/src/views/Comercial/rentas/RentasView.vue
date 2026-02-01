@@ -336,7 +336,8 @@ export default {
       this.loading = true
       this.error = null
       try {
-        this.rents = await rentService.getRents({ is_active: true })
+        const response = await rentService.getRents({ is_active: true })
+        this.rents = response.items || []
         this.calculateStats()
       } catch (err) {
         this.error = err.message
@@ -348,7 +349,8 @@ export default {
 
     async loadClients() {
       try {
-        this.clients = await clientService.getClients()
+        const response = await clientService.getClients()
+        this.clients = response.items || []
       } catch (err) {
         console.error('Error loading clients:', err)
       }
@@ -357,7 +359,8 @@ export default {
     async loadEquipment() {
       try {
         // Cargar solo equipos disponibles (no en renta activa)
-        const allEquipment = await equipmentService.getEquipment()
+        const response = await equipmentService.getEquipments()
+        const allEquipment = response.items || []
         this.availableEquipment = allEquipment.filter(eq => eq.status === 'disponible' || !eq.status)
       } catch (err) {
         console.error('Error loading equipment:', err)

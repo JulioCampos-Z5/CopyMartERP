@@ -153,42 +153,6 @@
             </div>
           </div>
 
-          <!-- Tab: Contactos -->
-          <div v-if="activeTab === 'contacts'" class="p-6">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-semibold text-gray-900">Contactos</h3>
-              <button @click="openContactModal()" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 text-sm">
-                + Nuevo Contacto
-              </button>
-            </div>
-            <div v-if="contacts.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div v-for="contact in contacts" :key="contact.contact_id" class="border rounded-lg p-4 hover:bg-gray-50">
-                <div class="flex justify-between items-start">
-                  <div class="flex-1">
-                    <h4 class="font-semibold text-gray-900">{{ contact.name }}</h4>
-                    <p v-if="contact.position" class="text-sm text-gray-600">{{ contact.position }}</p>
-                    <p v-if="contact.phone" class="text-sm text-gray-600 mt-1">📞 {{ contact.phone }}</p>
-                    <p v-if="contact.email" class="text-sm text-gray-600">✉️ {{ contact.email }}</p>
-                  </div>
-                  <div class="flex gap-2">
-                    <button @click="openContactModal(contact)" class="text-green-600 hover:text-green-800">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                    </button>
-                    <button @click="deleteContact(contact.contact_id)" class="text-red-600 hover:text-red-800">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else class="text-center py-8 text-gray-500">
-              No hay contactos adicionales registrados
-            </div>
-          </div>
         </div>
       </div>
 
@@ -338,8 +302,7 @@ const contactForm = ref({
 
 const tabs = computed(() => [
   { id: 'contact', label: 'Contacto Principal', count: client.value?.contact ? 1 : 0 },
-  { id: 'branches', label: 'Sucursales', count: branches.value.length },
-  { id: 'contacts', label: 'Contactos Adicionales', count: contacts.value.length }
+  { id: 'branches', label: 'Sucursales', count: branches.value.length }
 ])
 
 const loadClient = async () => {
@@ -347,6 +310,19 @@ const loadClient = async () => {
   try {
     const clientId = Number(route.params.id)
     client.value = await clientService.getClientById(clientId)
+    
+    // Cargar contacto principal si el cliente tiene contact_id
+    if (client.value && client.value.contact_id && !client.value.contact) {
+      try {
+        const primaryContact = await contactService.getContactById(client.value.contact_id)
+        if (primaryContact) {
+          client.value = { ...client.value, contact: primaryContact }
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar el contacto principal:', err)
+      }
+    }
+    
     await Promise.all([loadBranches(), loadContacts()])
   } catch (error) {
     console.error('Error loading client:', error)

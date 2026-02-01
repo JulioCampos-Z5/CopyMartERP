@@ -8,7 +8,6 @@
   },
   "scripts": {
     "dev": "npm run frontend",
-    "backend": "cd .. && uvicorn app.main:app --reload",
     "frontend": "vite",
     "build": "vite build",
     "preview": "vite preview"

@@ -58,10 +58,21 @@
             </label>
             <select v-model="saleForm.item_id" required class="input-field">
               <option value="">Seleccionar equipo...</option>
-              <option v-for="item in equipment" :key="item.item_id" :value="item.item_id">
-                {{ item.sku }} - {{ item.model }} (Serie: {{ item.serie }})
+              <option 
+                v-for="item in equipment" 
+                :key="item.item_id" 
+                :value="item.item_id"
+                :disabled="item.location_status !== 'bodega' && item.item_id !== saleForm.item_id"
+                :class="{ 'text-gray-400': item.location_status !== 'bodega' && item.item_id !== saleForm.item_id }"
+              >
+                {{ item.sku }} - {{ item.model }} (Serie: {{ item.serie }}) 
+                <template v-if="item.location_status === 'bodega'">✓ Disponible</template>
+                <template v-else-if="item.location_status === 'rentado'">🔒 Rentado</template>
+                <template v-else-if="item.location_status === 'vendido'">🔒 Vendido</template>
+                <template v-else>⚠️ {{ item.location_status }}</template>
               </option>
             </select>
+            <p class="text-xs text-gray-500 mt-1">Solo equipos en bodega están disponibles para venta</p>
           </div>
 
           <!-- Precio de Venta -->
@@ -161,11 +172,11 @@ export default {
       this.loading = true
       try {
         const [clientsRes, equipmentRes] = await Promise.all([
-          clientService.getAllClients(),
-          equipmentService.getAllEquipment()
+          clientService.getClients({ pageSize: 100 }),
+          equipmentService.getEquipments({ pageSize: 100 })
         ])
-        this.clients = clientsRes.data || []
-        this.equipment = equipmentRes.data || []
+        this.clients = clientsRes.items || []
+        this.equipment = equipmentRes.items || []
       } catch (err) {
         this.errorMsg = 'Error al cargar datos: ' + err.message
       } finally {
@@ -176,8 +187,7 @@ export default {
     async loadSale() {
       this.loading = true
       try {
-        const response = await saleService.getSaleById(this.$route.params.id)
-        const sale = response.data
+        const sale = await saleService.getSaleById(this.$route.params.id)
         this.saleForm = {
           client_id: sale.client_id || '',
           item_id: sale.item_id || '',

@@ -135,10 +135,10 @@
         </template>
       </BaseTable>
 
-      <!-- Modal crear/editar compra (placeholder) -->
+      <!-- Modal crear/editar compra -->
       <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg max-w-2xl w-full p-6">
-          <div class="flex justify-between items-center mb-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{{ editingPurchase ? 'Editar' : 'Nueva' }} Compra</h2>
             <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,12 +146,168 @@
               </svg>
             </button>
           </div>
-          <p class="text-gray-600">Funcionalidad de formulario en desarrollo...</p>
-          <div class="mt-6 flex justify-end gap-2">
-            <button @click="closeModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              Cancelar
-            </button>
-          </div>
+          
+          <form @submit.prevent="savePurchase" class="space-y-6">
+            <!-- Información básica -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Información Básica</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la compra *</label>
+                  <input v-model="purchaseForm.name" type="text" required 
+                         placeholder="Ej: Tóner HP 58A, Kit de mantenimiento..."
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Refacción *</label>
+                  <select v-model="purchaseForm.sparepart_id" required 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option value="">Seleccionar refacción...</option>
+                    <option v-for="sp in spareparts" :key="sp.sparepart_id" :value="sp.sparepart_id">
+                      {{ sp.name }} - {{ sp.brand || 'Sin marca' }}
+                    </option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
+                  <input v-model.number="purchaseForm.amount" type="number" min="1" required 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+                  <select v-model="purchaseForm.type" required 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option value="Interna">Interna (uso interno)</option>
+                    <option value="Venta">Venta (para cliente)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Calidad</label>
+                  <select v-model="purchaseForm.quality" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option value="">Sin especificar</option>
+                    <option value="Original">Original</option>
+                    <option value="Compatible">Compatible</option>
+                    <option value="Remanufacturado">Remanufacturado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Proveedores y cotizaciones -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Proveedores y Cotizaciones</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700">Proveedor 1</label>
+                  <select v-model="purchaseForm.supplier1_name" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Seleccionar...</option>
+                    <option v-for="s in suppliers" :key="s.supplier_id" :value="s.name">{{ s.name }}</option>
+                  </select>
+                  <input v-model.number="purchaseForm.supplier1_cost" type="number" step="0.01" min="0" 
+                         placeholder="Costo $" 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700">Proveedor 2</label>
+                  <select v-model="purchaseForm.supplier2_name" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Seleccionar...</option>
+                    <option v-for="s in suppliers" :key="s.supplier_id" :value="s.name">{{ s.name }}</option>
+                  </select>
+                  <input v-model.number="purchaseForm.supplier2_cost" type="number" step="0.01" min="0" 
+                         placeholder="Costo $" 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-gray-700">Proveedor 3</label>
+                  <select v-model="purchaseForm.supplier3_name" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Seleccionar...</option>
+                    <option v-for="s in suppliers" :key="s.supplier_id" :value="s.name">{{ s.name }}</option>
+                  </select>
+                  <input v-model.number="purchaseForm.supplier3_cost" type="number" step="0.01" min="0" 
+                         placeholder="Costo $" 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                </div>
+              </div>
+            </div>
+            
+            <!-- Información de envío -->
+            <div class="bg-purple-50 p-4 rounded-lg">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Información de Envío</h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Método de envío</label>
+                  <select v-model="purchaseForm.shipping_method" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <option value="">Sin especificar</option>
+                    <option value="Paquetería">Paquetería</option>
+                    <option value="Estafeta">Estafeta</option>
+                    <option value="DHL">DHL</option>
+                    <option value="FedEx">FedEx</option>
+                    <option value="Redpack">Redpack</option>
+                    <option value="Entrega directa">Entrega directa</option>
+                    <option value="Recolección">Recolección en tienda</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Código de rastreo</label>
+                  <input v-model="purchaseForm.shipping_code" type="text" 
+                         placeholder="Número de guía..."
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Costo de envío</label>
+                  <input v-model.number="purchaseForm.shipping_cost" type="number" step="0.01" min="0" 
+                         placeholder="$0.00"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                </div>
+              </div>
+            </div>
+            
+            <!-- Justificación y comentarios -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Justificación</label>
+                <textarea v-model="purchaseForm.justification" rows="2" 
+                          placeholder="Razón de la compra..."
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Comentarios adicionales</label>
+                <textarea v-model="purchaseForm.comments" rows="2" 
+                          placeholder="Notas adicionales..."
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"></textarea>
+              </div>
+            </div>
+            
+            <!-- Acciones -->
+            <div class="flex justify-end gap-3 pt-4 border-t">
+              <button type="button" @click="closeModal" 
+                      class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                Cancelar
+              </button>
+              <button type="submit" :disabled="savingPurchase"
+                      class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 transition-colors">
+                <svg v-if="savingPurchase" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ editingPurchase ? 'Actualizar' : 'Crear' }} Compra
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -293,9 +449,10 @@ import BaseLayout from '@/components/BaseLayout.vue'
 import BaseTable from '@/components/BaseTable.vue'
 import { purchaseService } from '@/services/purchaseService.ts'
 import { equipmentService } from '@/services/equipmentService.ts'
+import { sparepartService } from '@/services/sparepartService.ts'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useFiltersStore } from '@/stores/filters.ts'
-import type { Purchase, Supplier } from '@/types'
+import type { Purchase, Supplier, Sparepart, PurchaseCreate } from '@/types'
 
 // Router
 const router = useRouter()
@@ -317,6 +474,31 @@ const showSupplierModal = ref(false)
 const suppliers = ref<Supplier[]>([])
 const loadingSuppliers = ref(false)
 const supplierForm = ref({ name: '' })
+
+// Estado de refacciones
+const spareparts = ref<Sparepart[]>([])
+const savingPurchase = ref(false)
+
+// Formulario de compra
+const purchaseForm = ref<PurchaseCreate>({
+  name: '',
+  sparepart_id: 0,
+  user_id: 0,
+  amount: 1,
+  type: 'Interna',
+  quality: '',
+  justification: '',
+  comments: '',
+  supplier1_name: '',
+  supplier1_cost: undefined,
+  supplier2_name: '',
+  supplier2_cost: undefined,
+  supplier3_name: '',
+  supplier3_cost: undefined,
+  shipping_method: '',
+  shipping_code: '',
+  shipping_cost: undefined
+})
 
 // Computados desde stores
 const filters = computed(() => filtersStore.filters.purchases || {})
@@ -435,12 +617,34 @@ const viewDetails = (purchase: Purchase) => {
   router.push({ name: 'CompraDetalle', params: { id: purchase.purchase_id } })
 }
 
-const editPurchase = (purchase: Purchase) => {
-  router.push({ name: 'CompraEditar', params: { id: purchase.purchase_id } })
+const editPurchase = async (purchase: Purchase) => {
+  editingPurchase.value = purchase
+  await loadFormData()
+  // Llenar el formulario con los datos existentes
+  purchaseForm.value = {
+    name: purchase.name,
+    sparepart_id: purchase.sparepart_id,
+    user_id: purchase.user_id,
+    amount: purchase.amount,
+    type: purchase.type,
+    quality: purchase.quality || '',
+    justification: purchase.justification || '',
+    comments: purchase.comments || '',
+    supplier1_name: purchase.supplier1_name || '',
+    supplier1_cost: purchase.supplier1_cost,
+    supplier2_name: purchase.supplier2_name || '',
+    supplier2_cost: purchase.supplier2_cost,
+    supplier3_name: purchase.supplier3_name || '',
+    supplier3_cost: purchase.supplier3_cost,
+    shipping_method: purchase.shipping_method || '',
+    shipping_code: purchase.shipping_code || '',
+    shipping_cost: purchase.shipping_cost
+  }
+  showCreateModal.value = true
 }
 
 const goToCreate = () => {
-  router.push({ name: 'CompraNueva' })
+  openCreateModal()
 }
 
 const updateStatus = async (purchase: Purchase) => {
@@ -461,6 +665,78 @@ const canChangeStatus = (purchase: Purchase): boolean => {
 const closeModal = () => {
   showCreateModal.value = false
   editingPurchase.value = null
+  resetPurchaseForm()
+}
+
+const resetPurchaseForm = () => {
+  purchaseForm.value = {
+    name: '',
+    sparepart_id: 0,
+    user_id: authStore.user?.contact_id || 0,
+    amount: 1,
+    type: 'Interna',
+    quality: '',
+    justification: '',
+    comments: '',
+    supplier1_name: '',
+    supplier1_cost: undefined,
+    supplier2_name: '',
+    supplier2_cost: undefined,
+    supplier3_name: '',
+    supplier3_cost: undefined,
+    shipping_method: '',
+    shipping_code: '',
+    shipping_cost: undefined
+  }
+}
+
+const openCreateModal = async () => {
+  resetPurchaseForm()
+  editingPurchase.value = null
+  showCreateModal.value = true
+  await loadFormData()
+}
+
+const loadFormData = async () => {
+  try {
+    // Cargar refacciones y proveedores en paralelo
+    const [sparepartsRes, suppliersRes] = await Promise.all([
+      sparepartService.getSpareparts({ pageSize: 500 }),
+      equipmentService.getSuppliers()
+    ])
+    spareparts.value = sparepartsRes.items || []
+    suppliers.value = suppliersRes || []
+  } catch (err: any) {
+    console.error('Error loading form data:', err)
+  }
+}
+
+const savePurchase = async () => {
+  if (!purchaseForm.value.name || !purchaseForm.value.sparepart_id || !purchaseForm.value.amount) {
+    alert('Por favor completa los campos obligatorios')
+    return
+  }
+  
+  savingPurchase.value = true
+  try {
+    // Asegurar user_id
+    purchaseForm.value.user_id = authStore.user?.contact_id || 0
+    
+    if (editingPurchase.value) {
+      await purchaseService.updatePurchase(editingPurchase.value.purchase_id, purchaseForm.value)
+      alert('Compra actualizada exitosamente')
+    } else {
+      await purchaseService.createPurchase(purchaseForm.value)
+      alert('Compra creada exitosamente')
+    }
+    closeModal()
+    await loadPurchases()
+  } catch (err: any) {
+    console.error('Error saving purchase:', err)
+    alert('Error al guardar la compra: ' + (err.message || err))
+  } finally {
+    savingPurchase.value = false
+  }
 }
 
 const formatDate = (dateString: string | null | undefined): string => {

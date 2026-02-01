@@ -66,13 +66,13 @@ export interface PrintCounterStats {
 const printService = {
   // Crear contador
   async create(data: PrintCounterCreate): Promise<PrintCounter> {
-    const response = await api.post('/print-counters/', data);
+    const response = await api.post('/api/print/', data);
     return response.data;
   },
 
   // Crear contadores en lote
   async createBatch(data: PrintCounterBatch[]): Promise<any> {
-    const response = await api.post('/print-counters/batch', { counters: data });
+    const response = await api.post('/api/print/batch', { counters: data });
     return response.data;
   },
 
@@ -84,25 +84,25 @@ const printService = {
     period_year?: number;
     is_billed?: boolean;
   }): Promise<PrintCounter[]> {
-    const response = await api.get('/print-counters/', { params });
+    const response = await api.get('/api/print/', { params });
     return response.data;
   },
 
   // Obtener contador por ID
   async getById(counterId: number): Promise<PrintCounter> {
-    const response = await api.get(`/print-counters/${counterId}`);
+    const response = await api.get(`/api/print/${counterId}`);
     return response.data;
   },
 
   // Actualizar contador
   async update(counterId: number, data: PrintCounterUpdate): Promise<PrintCounter> {
-    const response = await api.put(`/print-counters/${counterId}`, data);
+    const response = await api.put(`/api/print/${counterId}`, data);
     return response.data;
   },
 
   // Eliminar contador
   async delete(counterId: number): Promise<void> {
-    await api.delete(`/print-counters/${counterId}`);
+    await api.delete(`/api/print/${counterId}`);
   },
 
   // Obtener estadísticas
@@ -111,13 +111,13 @@ const printService = {
     period_year?: number;
     client_id?: number;
   }): Promise<PrintCounterStats> {
-    const response = await api.get('/print-counters/stats/summary', { params });
+    const response = await api.get('/api/print/stats/summary', { params });
     return response.data;
   },
 
   // Obtener historial de un contrato de renta
   async getHistory(rentId: number): Promise<PrintCounter[]> {
-    const response = await api.get(`/print-counters/rent/${rentId}/history`);
+    const response = await api.get(`/api/print/rent/${rentId}/history`);
     return response.data;
   }
 };

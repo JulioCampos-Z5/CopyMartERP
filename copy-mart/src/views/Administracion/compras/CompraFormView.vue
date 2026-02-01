@@ -30,8 +30,12 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad Solicitada *</label>
               <input v-model.number="form.amount" type="number" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad Autorizada</label>
+              <input v-model.number="form.authorized_amount" type="number" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
@@ -39,6 +43,84 @@
                 <option value="Interna">Interna</option>
                 <option value="Venta">Venta</option>
               </select>
+            </div>
+            <div v-if="form.type === 'Venta'">
+              <label class="block text-sm font-medium text-gray-700 mb-1">¿Está Pagado?</label>
+              <select v-model="form.is_paid" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                <option :value="null">Sin Confirmar</option>
+                <option :value="true">Sí - Pagado</option>
+                <option :value="false">No - Pendiente</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Proveedores (máximo 3) -->
+        <div class="border-b pb-4">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Cotizaciones de Proveedores</h2>
+          <div class="space-y-4">
+            <!-- Proveedor 1 -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="font-medium text-gray-800 mb-3">Proveedor 1</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                  <input v-model="form.supplier1_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Costo</label>
+                  <input v-model.number="form.supplier1_cost" type="number" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+              </div>
+            </div>
+            
+            <!-- Proveedor 2 -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="font-medium text-gray-800 mb-3">Proveedor 2</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                  <input v-model="form.supplier2_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Costo</label>
+                  <input v-model.number="form.supplier2_cost" type="number" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+              </div>
+            </div>
+            
+            <!-- Proveedor 3 -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="font-medium text-gray-800 mb-3">Proveedor 3</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                  <input v-model="form.supplier3_name" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Costo</label>
+                  <input v-model.number="form.supplier3_cost" type="number" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Archivos -->
+        <div class="border-b pb-4">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Documentos</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Archivo de Cotización</label>
+              <input v-model="form.quotation_file" type="text" placeholder="URL o ruta del archivo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Archivo de Pago Proveedor</label>
+              <input v-model="form.supplier_payment_file" type="text" placeholder="URL o ruta del archivo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Factura Proveedor</label>
+              <input v-model="form.supplier_invoice_file" type="text" placeholder="URL o ruta del archivo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
             </div>
           </div>
         </div>
@@ -124,7 +206,9 @@ const spareparts = ref([])
 const form = ref({
   name: '',
   sparepart_id: '',
+  user_id: 1, // TODO: get from auth
   amount: 1,
+  authorized_amount: null,
   type: 'Interna',
   shipping_code: '',
   shipping_method: '',
@@ -132,7 +216,23 @@ const form = ref({
   status: 'En Curso',
   quality: '',
   justification: '',
-  comments: ''
+  comments: '',
+  
+  // Proveedores
+  supplier1_name: '',
+  supplier1_cost: null,
+  supplier2_name: '',
+  supplier2_cost: null,
+  supplier3_name: '',
+  supplier3_cost: null,
+  
+  // Archivos
+  quotation_file: '',
+  supplier_payment_file: '',
+  supplier_invoice_file: '',
+  
+  // Para ventas
+  is_paid: null
 })
 
 const isEditing = computed(() => !!route.params.id)
@@ -150,7 +250,7 @@ const loadPurchase = async () => {
 
 const loadSpareparts = async () => {
   try {
-    const response = await sparepartService.getSpareparts({ pageSize: 1000 })
+    const response = await sparepartService.getSpareparts({ pageSize: 100 })
     spareparts.value = response.items || []
   } catch (error) {
     console.error('Error loading spareparts:', error)

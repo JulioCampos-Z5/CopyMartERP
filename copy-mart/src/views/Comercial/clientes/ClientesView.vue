@@ -202,6 +202,7 @@
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
 import { clientService } from '@/services/clientService.ts'
+import { contactService } from '@/services/contactService.ts'
 
 export default {
   name: 'ClientesView',
@@ -269,13 +270,57 @@ export default {
       this.error = null
       try {
         const response = await clientService.getClients({ page: 1, pageSize: 100 })
-        const clients = response.items || []
-        this.clients = clients.map(c => ({
-          ...c,
-          ...this.normalizeContact(c),
-          client_type: c.client_type || (c.comercial_name ? 'empresa' : 'persona'),
-          status: c.is_active ? 'activo' : 'inactivo'
-        }))
+        const clientsList = response.items || []
+        
+        // Cargar TODOS los contactos en un solo request
+        let allContacts = []
+        try {
+          const contactsRes = await contactService.getContacts({ pageSize: 500 })
+          allContacts = contactsRes.items || []
+        } catch (err) {
+          console.warn('No se pudieron cargar contactos:', err)
+        }
+        
+        // Crear mapa de contactos por contact_id para búsqueda rápida O(1)
+        const contactsById = {}
+        allContacts.forEach(contact => {
+          contactsById[contact.contact_id] = contact
+        })
+        
+        // Cargar detalles de cada cliente (incluye contact_id) en paralelo
+        // Esto es necesario porque ClientListResponse no incluye contact_id
+        const clientsWithDetails = await Promise.all(
+          clientsList.map(async (c) => {
+            let contactData = this.normalizeContact(c)
+            
+            // Si no tiene contacto aún, obtener el detalle del cliente para saber su contact_id
+            if (!contactData.contact_name) {
+              try {
+                const clientDetail = await clientService.getClientById(c.client_id)
+                if (clientDetail.contact_id && contactsById[clientDetail.contact_id]) {
+                  const contact = contactsById[clientDetail.contact_id]
+                  contactData = {
+                    contact_name: contact.name || '',
+                    contact_email: contact.email || '',
+                    contact_phone: contact.phone || '',
+                    contact_rol: contact.rol || ''
+                  }
+                }
+              } catch (err) {
+                // Ignorar error individual
+              }
+            }
+            
+            return {
+              ...c,
+              ...contactData,
+              client_type: c.client_type || (c.comercial_name ? 'empresa' : 'persona'),
+              status: c.is_active !== false ? 'activo' : 'inactivo'
+            }
+          })
+        )
+        
+        this.clients = clientsWithDetails
       } catch (err) {
         this.error = 'Error al cargar clientes: ' + err.message
         console.error('Error loading clients:', err)

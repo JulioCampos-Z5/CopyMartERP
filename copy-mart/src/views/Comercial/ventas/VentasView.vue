@@ -284,7 +284,8 @@ export default {
       this.loading = true
       this.error = null
       try {
-        this.sales = await saleService.getSales({ is_active: true })
+        const response = await saleService.getSales({ is_active: true })
+        this.sales = response.items || []
         this.calculateStats()
       } catch (err) {
         this.error = err.message
@@ -296,7 +297,8 @@ export default {
 
     async loadClients() {
       try {
-        this.clients = await clientService.getClients()
+        const response = await clientService.getClients()
+        this.clients = response.items || []
       } catch (err) {
         console.error('Error loading clients:', err)
       }
@@ -304,7 +306,8 @@ export default {
 
     async loadEquipment() {
       try {
-        const allEquipment = await equipmentService.getEquipment()
+        const response = await equipmentService.getEquipments({ pageSize: 100 })
+        const allEquipment = response.items || []
         
         // Filtrar solo equipos disponibles para venta (en bodega)
         const equiposDisponibles = allEquipment.filter(e => {

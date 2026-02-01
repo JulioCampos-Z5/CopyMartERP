@@ -45,6 +45,7 @@ export interface Purchase {
   sparepart_id: number
   user_id: number
   amount: number
+  authorized_amount?: number
   type: PurchaseType
   status: PurchaseStatus
   shipping_code?: string
@@ -53,14 +54,40 @@ export interface Purchase {
   quality?: string
   justification?: string
   comments?: string
+  
+  // Proveedores (máximo 3)
+  supplier1_name?: string
+  supplier1_cost?: number
+  supplier2_name?: string
+  supplier2_cost?: number
+  supplier3_name?: string
+  supplier3_cost?: number
+  
+  // Autorizaciones
+  authorized_by_area_chief_id?: number
+  authorized_by_area_chief_date?: string
+  authorized_by_admin_id?: number
+  authorized_by_admin_date?: string
+  
+  // Archivos
+  quotation_file?: string
+  supplier_payment_file?: string
+  supplier_invoice_file?: string
+  
+  // Para ventas
+  is_paid?: boolean
+  
   created_at: string
   updated_at?: string
+  end_date?: string
 }
 
 export interface PurchaseCreate {
   name: string
   sparepart_id: number
+  user_id: number
   amount: number
+  authorized_amount?: number
   type: PurchaseType
   status?: PurchaseStatus
   shipping_code?: string
@@ -69,6 +96,24 @@ export interface PurchaseCreate {
   quality?: string
   justification?: string
   comments?: string
+  
+  // Proveedores
+  supplier1_name?: string
+  supplier1_cost?: number
+  supplier2_name?: string
+  supplier2_cost?: number
+  supplier3_name?: string
+  supplier3_cost?: number
+  
+  // Archivos
+  quotation_file?: string
+  supplier_payment_file?: string
+  supplier_invoice_file?: string
+  
+  // Para ventas
+  is_paid?: boolean
+  
+  end_date?: string
 }
 
 export interface PurchaseFilters extends PaginationParams {
@@ -148,6 +193,8 @@ export interface BillingFilters extends PaginationParams {
   status?: BillingStatus
   billing_type?: BillingType
   client_id?: number
+  rent_id?: number
+  sale_id?: number
   startDate?: string
   start_date?: string
   endDate?: string
@@ -355,9 +402,28 @@ export interface Rent {
   rent_id: number
   contract_number: string
   client_id: number
+  branch_id?: number
+  area_id?: number
+  item_id: number
   client_name?: string
-  monthly_rent: number
+  rent: number  // Renta mensual base
+  monthly_rent?: number  // Alias para compatibilidad
+  contract_status?: 'pendiente' | 'sin_firmar' | 'vigente' | 'finalizado' | 'cancelado'
+  start_date?: string
+  end_date?: string
+  is_foreign?: boolean
+  
+  // Configuración de impresión
+  has_print_service?: boolean
+  bn_included?: number  // Impresiones B/N incluidas
+  bn_cost_per_excess?: number  // Costo por exceso B/N
+  color_included?: number  // Impresiones Color incluidas
+  color_cost_per_excess?: number  // Costo por exceso Color
+  print_notes?: string
+  
+  is_active?: boolean
   created_at: string
+  updated_at?: string
 }
 
 export interface RentFilters extends PaginationParams {

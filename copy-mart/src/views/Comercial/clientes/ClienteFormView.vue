@@ -122,6 +122,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import BaseLayout from '@/components/BaseLayout.vue'
 import { clientService } from '@/services/clientService'
+import { contactService } from '@/services/contactService'
 
 const router = useRouter()
 const route = useRoute()
@@ -157,6 +158,25 @@ const loadClient = async () => {
   if (!isEditing.value) return
   try {
     const client = await clientService.getClientById(Number(route.params.id))
+    
+    // Cargar contacto principal si existe contact_id
+    let contactData = { name: '', phone: '', email: '', rol: '' }
+    if (client.contact_id) {
+      try {
+        const contact = await contactService.getContactById(client.contact_id)
+        if (contact) {
+          contactData = {
+            name: contact.name || '',
+            phone: contact.phone || '',
+            email: contact.email || '',
+            rol: contact.rol || ''
+          }
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar el contacto principal:', err)
+      }
+    }
+    
     form.value = {
       name: client.name,
       comercial_name: client.comercial_name || '',
@@ -165,10 +185,10 @@ const loadClient = async () => {
       colonia: client.colonia || '',
       zip_code: client.zip_code || '',
       city: client.city || '',
-      contact_name: client.contact?.name || '',
-      contact_phone: client.contact?.phone || '',
-      contact_email: client.contact?.email || '',
-      contact_rol: client.contact?.rol || ''
+      contact_name: contactData.name,
+      contact_phone: contactData.phone,
+      contact_email: contactData.email,
+      contact_rol: contactData.rol
     }
   } catch (error) {
     console.error('Error loading client:', error)
