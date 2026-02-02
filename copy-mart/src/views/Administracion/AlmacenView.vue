@@ -363,7 +363,7 @@ const loadInventoryData = async () => {
   loadingInventory.value = true
   try {
     // Cargar refacciones (todas)
-    const sparepartsRes = await sparepartService.getSpareparts({ pageSize: 500 })
+    const sparepartsRes = await sparepartService.getSpareparts({ pageSize: 100 })
     spareparts.value = sparepartsRes.items || []
     
     // Filtrar stock bajo (items con stock <= min_stock)

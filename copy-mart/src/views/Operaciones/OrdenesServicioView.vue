@@ -186,20 +186,26 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Reporte *</label>
                 <select v-model="ticketForm.report_type" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
-                  <option value="PREVENTIVO">Preventivo</option>
-                  <option value="CORRECTIVO">Correctivo</option>
-                  <option value="INSTALACION">Instalación</option>
-                  <option value="DESINSTALACION">Desinstalación</option>
-                  <option value="VISITA_CLIENTE">Visita Cliente</option>
+                  <option value="CONECTIVIDAD">Conectividad</option>
+                  <option value="ATASCO">Atasco</option>
+                  <option value="TONER">Tóner</option>
+                  <option value="QUEJAS">Quejas</option>
+                  <option value="COPIA">Copia</option>
+                  <option value="RUIDOS">Ruidos</option>
+                  <option value="IMPRESION">Impresión</option>
+                  <option value="OTROS">Otros</option>
                 </select>
               </div>
               <div v-if="ticketForm.ticket_id">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
                 <select v-model="ticketForm.report_status" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
                   <option value="PENDIENTE">Pendiente</option>
-                  <option value="EN_PROCESO">En Proceso</option>
-                  <option value="COMPLETADO">Completado</option>
-                  <option value="CANCELADO">Cancelado</option>
+                  <option value="LISTO">Listo</option>
+                  <option value="URGENTE">Urgente</option>
+                  <option value="PROGRAMADO">Programado</option>
+                  <option value="INFORMATIVO">Informativo</option>
+                  <option value="NO_QUEDO_VISITA">No quedó en la visita</option>
+                  <option value="ATENCION">Atención</option>
                 </select>
               </div>
               <div class="md:col-span-2">
@@ -249,7 +255,7 @@ const ticketForm = ref<any>({
   client_id: 0,
   branch_id: 0,
   area_id: undefined,
-  report_type: 'PREVENTIVO',
+  report_type: 'OTROS',
   report_status: 'PENDIENTE',
   description: '',
   evidence: '',
@@ -326,7 +332,7 @@ const openTicketModal = async (ticket?: Ticket) => {
       client_id: 0,
       branch_id: 0,
       area_id: undefined,
-      report_type: 'PREVENTIVO',
+      report_type: 'OTROS',
       report_status: 'PENDIENTE',
       description: '',
       evidence: '',
@@ -388,11 +394,14 @@ const getClientName = (clientId: number) => {
 
 const getTypeBadge = (type: string) => {
   const labels: Record<string, string> = {
-    'PREVENTIVO': 'Preventivo',
-    'CORRECTIVO': 'Correctivo',
-    'INSTALACION': 'Instalación',
-    'DESINSTALACION': 'Desinstalación',
-    'VISITA_CLIENTE': 'Visita'
+    'CONECTIVIDAD': 'Conectividad',
+    'ATASCO': 'Atasco',
+    'TONER': 'Tóner',
+    'QUEJAS': 'Quejas',
+    'COPIA': 'Copia',
+    'RUIDOS': 'Ruidos',
+    'IMPRESION': 'Impresión',
+    'OTROS': 'Otros'
   }
   return labels[type] || type
 }
@@ -400,9 +409,12 @@ const getTypeBadge = (type: string) => {
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
     'PENDIENTE': 'Pendiente',
-    'EN_PROCESO': 'En Proceso',
-    'COMPLETADO': 'Completado',
-    'CANCELADO': 'Cancelado'
+    'LISTO': 'Listo',
+    'URGENTE': 'Urgente',
+    'PROGRAMADO': 'Programado',
+    'INFORMATIVO': 'Informativo',
+    'NO_QUEDO_VISITA': 'No quedó en la visita',
+    'ATENCION': 'Atención'
   }
   return labels[status] || status
 }
@@ -410,9 +422,12 @@ const getStatusLabel = (status: string) => {
 const getStatusClass = (status: string) => {
   const classes: Record<string, string> = {
     'PENDIENTE': 'bg-yellow-100 text-yellow-800',
-    'EN_PROCESO': 'bg-blue-100 text-blue-800',
-    'COMPLETADO': 'bg-green-100 text-green-800',
-    'CANCELADO': 'bg-red-100 text-red-800'
+    'LISTO': 'bg-green-100 text-green-800',
+    'URGENTE': 'bg-red-100 text-red-800',
+    'PROGRAMADO': 'bg-blue-100 text-blue-800',
+    'INFORMATIVO': 'bg-purple-100 text-purple-800',
+    'NO_QUEDO_VISITA': 'bg-orange-100 text-orange-800',
+    'ATENCION': 'bg-pink-100 text-pink-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }

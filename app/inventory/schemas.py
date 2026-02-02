@@ -4,32 +4,32 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 
-# Enums
+# Enums - Valores en MAYÚSCULAS para coincidir con la base de datos
 class ColorType(str, Enum):
-    K = "k"
-    C = "c"
-    M = "m"
-    Y = "y"
+    K = "K"
+    C = "C"
+    M = "M"
+    Y = "Y"
 
 class QualityType(str, Enum):
-    ORIGINAL = "original"
-    GENERICO = "generico"
-    REPARADO = "reparado"
-    NUEVA = "nueva"
-    USADO = "usado"
-    NA = "n/a"
+    ORIGINAL = "ORIGINAL"
+    GENERICO = "GENERICO"
+    REPARADO = "REPARADO"
+    NUEVA = "NUEVA"
+    USADO = "USADO"
+    NA = "NA"
 
 class ItemType(str, Enum):
-    TONER = "toner"
-    REFACCION = "refaccion"
+    TONER = "TONER"
+    REFACCION = "REFACCION"
 
 class SectionLocation(str, Enum):
-    SECCION_1 = "seccion_1"
-    SECCION_2 = "seccion_2"
-    SECCION_3 = "seccion_3"
-    SECCION_4 = "seccion_4"
-    SECCION_5 = "seccion_5"
-    SECCION_6 = "seccion_6"
+    SECCION_1 = "SECCION_1"
+    SECCION_2 = "SECCION_2"
+    SECCION_3 = "SECCION_3"
+    SECCION_4 = "SECCION_4"
+    SECCION_5 = "SECCION_5"
+    SECCION_6 = "SECCION_6"
 
 class ShelfBase(BaseModel):
     name: str

@@ -312,8 +312,8 @@
                       <div v-if="item.description" class="text-xs text-gray-500">{{ item.description }}</div>
                     </td>
                     <td class="px-6 py-4">
-                      <span :class="['px-2 py-1 text-xs font-medium rounded-full', item.item_type === 'toner' ? 'bg-cyan-100 text-cyan-800' : 'bg-orange-100 text-orange-800']">
-                        {{ item.item_type === 'toner' ? 'Toner' : 'Refacción' }}
+                      <span :class="['px-2 py-1 text-xs font-medium rounded-full', item.item_type === 'TONER' ? 'bg-cyan-100 text-cyan-800' : 'bg-orange-100 text-orange-800']">
+                        {{ item.item_type === 'TONER' ? 'Toner' : 'Refacción' }}
                       </span>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500">{{ item.brand?.name || '-' }}</td>
@@ -386,7 +386,7 @@
                     </td>
                     <td class="px-4 py-3">
                       <div class="font-medium text-gray-900 text-sm">{{ item.catalog_item?.item_name || '-' }}</div>
-                      <div class="text-xs text-gray-500">{{ item.catalog_item?.item_type === 'toner' ? 'Toner' : 'Refacción' }}</div>
+                      <div class="text-xs text-gray-500">{{ item.catalog_item?.item_type === 'TONER' ? 'Toner' : 'Refacción' }}</div>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-500">{{ sectionLabels[item.section] }}</td>
                     <td class="px-4 py-3 text-sm text-gray-500">{{ item.shelf?.name || '-' }}</td>
@@ -702,8 +702,8 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
             <select v-model="catalogForm.item_type" required class="input-field">
-              <option value="toner">Toner</option>
-              <option value="refaccion">Refacción</option>
+              <option value="TONER">Toner</option>
+              <option value="REFACCION">Refacción</option>
             </select>
           </div>
           <div>
@@ -713,14 +713,14 @@
               <option v-for="brand in brands" :key="brand.brand_id" :value="brand.brand_id">{{ brand.name }}</option>
             </select>
           </div>
-          <div v-if="catalogForm.item_type === 'toner'">
+          <div v-if="catalogForm.item_type === 'TONER'">
             <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
             <select v-model="catalogForm.color" class="input-field">
               <option :value="null">N/A</option>
-              <option value="k">Negro (K)</option>
-              <option value="c">Cyan (C)</option>
-              <option value="m">Magenta (M)</option>
-              <option value="y">Amarillo (Y)</option>
+              <option value="K">Negro (K)</option>
+              <option value="C">Cyan (C)</option>
+              <option value="M">Magenta (M)</option>
+              <option value="Y">Amarillo (Y)</option>
             </select>
           </div>
           <div>
@@ -933,60 +933,60 @@ export default {
       filterCategory: '',
       filterStatus: '',
       sparepartSearch: '',
-      // Lookups para inventory
+      // Lookups para inventory - valores en MAYÚSCULAS para coincidir con BD
       sections: [
-        { value: 'seccion_1', label: 'Sección 1' },
-        { value: 'seccion_2', label: 'Sección 2' },
-        { value: 'seccion_3', label: 'Sección 3' },
-        { value: 'seccion_4', label: 'Sección 4' },
-        { value: 'seccion_5', label: 'Sección 5' },
-        { value: 'seccion_6', label: 'Sección 6' }
+        { value: 'SECCION_1', label: 'Sección 1' },
+        { value: 'SECCION_2', label: 'Sección 2' },
+        { value: 'SECCION_3', label: 'Sección 3' },
+        { value: 'SECCION_4', label: 'Sección 4' },
+        { value: 'SECCION_5', label: 'Sección 5' },
+        { value: 'SECCION_6', label: 'Sección 6' }
       ],
       qualities: [
-        { value: 'original', label: 'Original' },
-        { value: 'generico', label: 'Genérico' },
-        { value: 'reparado', label: 'Reparado' },
-        { value: 'nueva', label: 'Nueva' },
-        { value: 'usado', label: 'Usado' },
-        { value: 'n/a', label: 'N/A' }
+        { value: 'ORIGINAL', label: 'Original' },
+        { value: 'GENERICO', label: 'Genérico' },
+        { value: 'REPARADO', label: 'Reparado' },
+        { value: 'NUEVA', label: 'Nueva' },
+        { value: 'USADO', label: 'Usado' },
+        { value: 'NA', label: 'N/A' }
       ],
       sectionLabels: {
-        seccion_1: 'Sección 1', seccion_2: 'Sección 2', seccion_3: 'Sección 3',
-        seccion_4: 'Sección 4', seccion_5: 'Sección 5', seccion_6: 'Sección 6'
+        SECCION_1: 'Sección 1', SECCION_2: 'Sección 2', SECCION_3: 'Sección 3',
+        SECCION_4: 'Sección 4', SECCION_5: 'Sección 5', SECCION_6: 'Sección 6'
       },
       qualityLabels: {
-        original: 'Original', generico: 'Genérico', reparado: 'Reparado',
-        nueva: 'Nueva', usado: 'Usado', 'n/a': 'N/A'
+        ORIGINAL: 'Original', GENERICO: 'Genérico', REPARADO: 'Reparado',
+        NUEVA: 'Nueva', USADO: 'Usado', NA: 'N/A'
       },
       qualityClasses: {
-        original: 'bg-green-100 text-green-800', generico: 'bg-blue-100 text-blue-800',
-        reparado: 'bg-yellow-100 text-yellow-800', nueva: 'bg-purple-100 text-purple-800',
-        usado: 'bg-gray-100 text-gray-800', 'n/a': 'bg-gray-100 text-gray-500'
+        ORIGINAL: 'bg-green-100 text-green-800', GENERICO: 'bg-blue-100 text-blue-800',
+        REPARADO: 'bg-yellow-100 text-yellow-800', NUEVA: 'bg-purple-100 text-purple-800',
+        USADO: 'bg-gray-100 text-gray-800', NA: 'bg-gray-100 text-gray-500'
       },
-      colorLabels: { k: 'Negro', c: 'Cyan', m: 'Magenta', y: 'Amarillo' },
+      colorLabels: { K: 'Negro', C: 'Cyan', M: 'Magenta', Y: 'Amarillo' },
       colorClasses: {
-        k: 'bg-gray-800 text-white', c: 'bg-cyan-500 text-white',
-        m: 'bg-pink-500 text-white', y: 'bg-yellow-400 text-gray-900'
+        K: 'bg-gray-800 text-white', C: 'bg-cyan-500 text-white',
+        M: 'bg-pink-500 text-white', Y: 'bg-yellow-400 text-gray-900'
       },
       shelfSectionClasses: {
-        seccion_1: 'bg-red-100 text-red-800', seccion_2: 'bg-orange-100 text-orange-800',
-        seccion_3: 'bg-yellow-100 text-yellow-800', seccion_4: 'bg-green-100 text-green-800',
-        seccion_5: 'bg-blue-100 text-blue-800', seccion_6: 'bg-purple-100 text-purple-800'
+        SECCION_1: 'bg-red-100 text-red-800', SECCION_2: 'bg-orange-100 text-orange-800',
+        SECCION_3: 'bg-yellow-100 text-yellow-800', SECCION_4: 'bg-green-100 text-green-800',
+        SECCION_5: 'bg-blue-100 text-blue-800', SECCION_6: 'bg-purple-100 text-purple-800'
       },
       // Forms
       catalogForm: {
-        catalog_id: null, item_name: '', item_type: 'toner', brand_id: null,
+        catalog_id: null, item_name: '', item_type: 'TONER', brand_id: null,
         color: null, description: '', stock_min: 0, stock_max: 0
       },
       stockForm: {
-        inventory_id: null, catalog_id: null, section: 'seccion_1', shelf_id: null,
-        quality: 'original', supplier_id: null, invoice: '', cost: null
+        inventory_id: null, catalog_id: null, section: 'SECCION_1', shelf_id: null,
+        quality: 'ORIGINAL', supplier_id: null, invoice: '', cost: null
       },
       bulkStockForm: {
-        catalog_id: null, quantity: 1, section: 'seccion_1', quality: 'original',
+        catalog_id: null, quantity: 1, section: 'SECCION_1', quality: 'ORIGINAL',
         supplier_id: null, invoice: '', cost: null
       },
-      shelfForm: { shelf_id: null, name: '', section: 'seccion_1', description: '' },
+      shelfForm: { shelf_id: null, name: '', section: 'SECCION_1', description: '' },
       equipmentForm: {
         brand_id: null,
         model: '',
@@ -1324,7 +1324,7 @@ export default {
         }
       } else {
         this.catalogForm = {
-          catalog_id: null, item_name: '', item_type: 'toner', brand_id: null,
+          catalog_id: null, item_name: '', item_type: 'TONER', brand_id: null,
           color: null, description: '', stock_min: 0, stock_max: 0
         }
       }
@@ -1335,7 +1335,7 @@ export default {
         const data = {
           item_name: this.catalogForm.item_name, item_type: this.catalogForm.item_type,
           brand_id: this.catalogForm.brand_id || undefined,
-          color: this.catalogForm.item_type === 'toner' ? this.catalogForm.color || undefined : undefined,
+          color: this.catalogForm.item_type === 'TONER' ? this.catalogForm.color || undefined : undefined,
           description: this.catalogForm.description || undefined,
           stock_min: this.catalogForm.stock_min, stock_max: this.catalogForm.stock_max
         }
@@ -1377,15 +1377,15 @@ export default {
         }
       } else {
         this.stockForm = {
-          inventory_id: null, catalog_id: null, section: 'seccion_1', shelf_id: null,
-          quality: 'original', supplier_id: null, invoice: '', cost: null
+          inventory_id: null, catalog_id: null, section: 'SECCION_1', shelf_id: null,
+          quality: 'ORIGINAL', supplier_id: null, invoice: '', cost: null
         }
       }
       this.showStockModal = true
     },
     openBulkStockModal() {
       this.bulkStockForm = {
-        catalog_id: null, quantity: 1, section: 'seccion_1', quality: 'original',
+        catalog_id: null, quantity: 1, section: 'SECCION_1', quality: 'ORIGINAL',
         supplier_id: null, invoice: '', cost: null
       }
       this.showBulkStockModal = true

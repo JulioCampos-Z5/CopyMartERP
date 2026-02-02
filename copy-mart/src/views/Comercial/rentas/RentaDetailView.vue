@@ -463,7 +463,7 @@ import { useRoute, useRouter } from 'vue-router'
 import AppNavigation from '@/components/AppNavigation.vue'
 import { rentService } from '@/services/rentService'
 import { billingService } from '@/services/billingService'
-import { printService } from '@/services/printService'
+import printService from '@/services/printService'
 import monthlyplanService from '@/services/monthlyplanService'
 
 const route = useRoute()

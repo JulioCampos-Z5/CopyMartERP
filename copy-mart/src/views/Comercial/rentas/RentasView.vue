@@ -406,8 +406,7 @@ export default {
     },
 
     viewRent(rent) {
-      this.selectedRent = rent
-      this.showModal = true
+      this.$router.push(`/comercial/rentas/${rent.rent_id}`)
     },
 
     async updateStatus(rentId, newStatus) {

@@ -6,31 +6,32 @@ from enum import Enum
 
 from equipment.models import Brand, Supplier, Equipment, TypeColor, LocationStatus
 
+# Enums - Valores en MAYÚSCULAS para coincidir con la base de datos
 class ColorType(str, Enum):
-    K = "k"  # Negro
-    C = "c"  # Cyan
-    M = "m"  # Magenta
-    Y = "y"  # Amarillo
+    K = "K"  # Negro
+    C = "C"  # Cyan
+    M = "M"  # Magenta
+    Y = "Y"  # Amarillo
 
 class QualityType(str, Enum):
-    ORIGINAL = "original"
-    GENERICO = "generico"
-    REPARADO = "reparado"
-    NUEVA = "nueva"
-    USADO = "usado"
-    NA = "n/a"
+    ORIGINAL = "ORIGINAL"
+    GENERICO = "GENERICO"
+    REPARADO = "REPARADO"
+    NUEVA = "NUEVA"
+    USADO = "USADO"
+    NA = "NA"
 
 class ItemType(str, Enum):
-    TONER = "toner"
-    REFACCION = "refaccion"
+    TONER = "TONER"
+    REFACCION = "REFACCION"
 
 class SectionLocation(str, Enum):
-    SECCION_1 = "seccion_1"
-    SECCION_2 = "seccion_2"
-    SECCION_3 = "seccion_3"
-    SECCION_4 = "seccion_4"
-    SECCION_5 = "seccion_5"
-    SECCION_6 = "seccion_6"
+    SECCION_1 = "SECCION_1"
+    SECCION_2 = "SECCION_2"
+    SECCION_3 = "SECCION_3"
+    SECCION_4 = "SECCION_4"
+    SECCION_5 = "SECCION_5"
+    SECCION_6 = "SECCION_6"
 
 class ItemCatalog(Base):
     __tablename__ = "item_catalog"
