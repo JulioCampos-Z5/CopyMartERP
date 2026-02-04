@@ -42,7 +42,7 @@ export type PurchaseType = 'Interna' | 'Venta'
 export interface Purchase {
   purchase_id: number
   name: string
-  sparepart_id: number
+  sparepart_id: number | null
   user_id: number
   amount: number
   authorized_amount?: number
@@ -84,7 +84,7 @@ export interface Purchase {
 
 export interface PurchaseCreate {
   name: string
-  sparepart_id: number
+  sparepart_id: number | null
   user_id: number
   amount: number
   authorized_amount?: number
@@ -437,17 +437,16 @@ export interface RentFilters extends PaginationParams {
 
 export interface User {
   user_id: number
-  username: string
   email: string
   full_name: string
-  role: string
-  permissions: string[]
+  rol: string
+  department: string
   is_active: boolean
   created_at: string
 }
 
 export interface LoginCredentials {
-  username: string
+  email: string
   password: string
 }
 

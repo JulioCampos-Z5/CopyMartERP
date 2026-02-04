@@ -214,6 +214,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/administracion/usuarios',
+      name: 'Usuarios',
+      component: () => import('../views/Administracion/UsuariosView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Gestión de Usuarios - CopyMart ERP'
+      }
+    },
+    {
       path: '/facturacion',
       name: 'Facturacion',
       component: () => import('../views/Administracion/facturacion/FacturacionView.vue'),

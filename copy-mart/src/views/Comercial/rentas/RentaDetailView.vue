@@ -575,7 +575,7 @@ const loadServiceTypes = async () => {
 
 // Actions
 const editRent = () => {
-  router.push(`/rentas/${rentId.value}/editar`)
+  router.push(`/comercial/rentas/editar/${rentId.value}`)
 }
 
 const viewBilling = (billingId: number) => {

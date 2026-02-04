@@ -147,6 +147,21 @@
             </button>
           </div>
           
+          <!-- Banner de error -->
+          <div v-if="error" class="mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded">
+            <div class="flex items-center">
+              <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-sm text-red-700">{{ error }}</p>
+              <button @click="error = null" class="ml-auto text-red-400 hover:text-red-600">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
           <form @submit.prevent="savePurchase" class="space-y-6">
             <!-- Información básica -->
             <div class="bg-gray-50 p-4 rounded-lg">
@@ -160,8 +175,8 @@
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Refacción *</label>
-                  <select v-model="purchaseForm.sparepart_id" required 
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Refacción</label>
+                  <select v-model="purchaseForm.sparepart_id"  
                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
                     <option value="">Seleccionar refacción...</option>
                     <option v-for="sp in spareparts" :key="sp.sparepart_id" :value="sp.sparepart_id">
@@ -482,7 +497,7 @@ const savingPurchase = ref(false)
 // Formulario de compra
 const purchaseForm = ref<PurchaseCreate>({
   name: '',
-  sparepart_id: 0,
+  sparepart_id: null,
   user_id: 0,
   amount: 1,
   type: 'Interna',
@@ -671,8 +686,8 @@ const closeModal = () => {
 const resetPurchaseForm = () => {
   purchaseForm.value = {
     name: '',
-    sparepart_id: 0,
-    user_id: authStore.user?.contact_id || 0,
+    sparepart_id: null,
+    user_id: authStore.user?.user_id || 0,
     amount: 1,
     type: 'Interna',
     quality: '',
@@ -701,39 +716,46 @@ const loadFormData = async () => {
   try {
     // Cargar refacciones y proveedores en paralelo
     const [sparepartsRes, suppliersRes] = await Promise.all([
-      sparepartService.getSpareparts({ pageSize: 500 }),
+      sparepartService.getSpareparts({ pageSize: 100 }),
       equipmentService.getSuppliers()
     ])
     spareparts.value = sparepartsRes.items || []
     suppliers.value = suppliersRes || []
   } catch (err: any) {
     console.error('Error loading form data:', err)
+    error.value = 'Error al cargar datos del formulario: ' + err.message
   }
 }
 
 const savePurchase = async () => {
-  if (!purchaseForm.value.name || !purchaseForm.value.sparepart_id || !purchaseForm.value.amount) {
-    alert('Por favor completa los campos obligatorios')
+  if (!purchaseForm.value.name || !purchaseForm.value.amount) {
+    error.value = 'Por favor completa los campos obligatorios (Nombre y Cantidad)'
     return
   }
   
   savingPurchase.value = true
+  error.value = null
   try {
     // Asegurar user_id
-    purchaseForm.value.user_id = authStore.user?.contact_id || 0
+    purchaseForm.value.user_id = authStore.user?.user_id || 0
+    
+    // Convertir sparepart_id a null si es 0 o vacío
+    if (!purchaseForm.value.sparepart_id || purchaseForm.value.sparepart_id === 0) {
+      purchaseForm.value.sparepart_id = null
+    }
     
     if (editingPurchase.value) {
       await purchaseService.updatePurchase(editingPurchase.value.purchase_id, purchaseForm.value)
-      alert('Compra actualizada exitosamente')
+      closeModal()
+      await loadPurchases()
     } else {
       await purchaseService.createPurchase(purchaseForm.value)
-      alert('Compra creada exitosamente')
+      closeModal()
+      await loadPurchases()
     }
-    closeModal()
-    await loadPurchases()
   } catch (err: any) {
     console.error('Error saving purchase:', err)
-    alert('Error al guardar la compra: ' + (err.message || err))
+    error.value = err.message || 'Error al guardar la compra'
   } finally {
     savingPurchase.value = false
   }
@@ -743,6 +765,13 @@ const formatDate = (dateString: string | null | undefined): string => {
   if (!dateString) return '-'
   const date = new Date(dateString)
   return date.toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+const formatCurrency = (amount: number | null | undefined): string => {
+  if (!amount) return '-'
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
+}
+
 // Funciones de proveedores
 const openSupplierModal = async () => {
   showSupplierModal.value = true
@@ -760,7 +789,7 @@ const loadSuppliers = async () => {
     suppliers.value = await equipmentService.getSuppliers()
   } catch (err: any) {
     console.error('Error loading suppliers:', err)
-    alert('Error al cargar proveedores: ' + err.message)
+    error.value = 'Error al cargar proveedores: ' + err.message
   } finally {
     loadingSuppliers.value = false
   }
@@ -773,10 +802,9 @@ const createSupplier = async () => {
     await equipmentService.createSupplier(supplierForm.value)
     supplierForm.value = { name: '' }
     await loadSuppliers()
-    alert('Proveedor registrado exitosamente')
   } catch (err: any) {
     console.error('Error creating supplier:', err)
-    alert('Error al registrar proveedor: ' + err.message)
+    error.value = 'Error al registrar proveedor: ' + err.message
   }
 }
 
@@ -786,18 +814,10 @@ const deleteSupplier = async (supplierId: number) => {
   try {
     await equipmentService.deleteSupplier(supplierId)
     await loadSuppliers()
-    alert('Proveedor eliminado exitosamente')
   } catch (err: any) {
     console.error('Error deleting supplier:', err)
-    alert('Error al eliminar proveedor: ' + err.message)
+    error.value = 'Error al eliminar proveedor: ' + err.message
   }
-}
-
-}
-
-const formatCurrency = (amount: number | null | undefined): string => {
-  if (!amount) return '-'
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
 }
 
 onMounted(() => {

@@ -26,7 +26,7 @@ class Purchase(Base):
     __tablename__ = "purchases"
     
     purchase_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    sparepart_id = Column(Integer, ForeignKey("spareparts.sparepart_id"), nullable=False, index=True)
+    sparepart_id = Column(Integer, ForeignKey("spareparts.sparepart_id"), nullable=True, index=True)
     user_id = Column(Integer, ForeignKey("contacts.contact_id"), nullable=False, index=True)
     name = Column(String(255), nullable=False)
     amount = Column(Integer, nullable=False)

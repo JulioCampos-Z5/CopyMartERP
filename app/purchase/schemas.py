@@ -27,7 +27,7 @@ class SupplierInfo(BaseModel):
     cost: Decimal = Field(..., ge=0, description="Costo del proveedor")
 
 class SparepartInPurchase(BaseModel):
-    sparepart_id: int
+    sparepart_id: Optional[int] = None
     name: str
     code: Optional[str] = None
     brand: Optional[str] = None
@@ -42,7 +42,7 @@ class UserInPurchase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class PurchaseBase(BaseModel):
-    sparepart_id: int = Field(..., description="ID de la refacción")
+    sparepart_id: Optional[int] = Field(None, description="ID de la refacción")
     user_id: int = Field(..., description="ID del usuario que realiza la compra")
     name: str = Field(..., min_length=1, max_length=255, description="Nombre de la compra")
     amount: int = Field(..., ge=1, description="Cantidad solicitada")
@@ -128,7 +128,7 @@ class PurchaseResponse(PurchaseBase):
 
 class PurchaseDetailResponse(BaseModel):
     purchase_id: int
-    sparepart_id: int
+    sparepart_id: Optional[int] = None
     user_id: int
     name: str
     amount: int
@@ -168,7 +168,7 @@ class PurchaseDetailResponse(BaseModel):
     end_date: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     
-    sparepart: SparepartInPurchase
+    sparepart: Optional[SparepartInPurchase] = None
     user: UserInPurchase
     authorized_by_area_chief: Optional[UserInPurchase] = None
     authorized_by_admin: Optional[UserInPurchase] = None

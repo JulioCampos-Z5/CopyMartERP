@@ -20,15 +20,16 @@ class PurchaseService:
     @staticmethod
     def create_purchase(db: Session, purchase_data: PurchaseCreate) -> Purchase:
         """Crear una nueva compra"""
-        # Verificar que existe la refacción
-        sparepart = db.query(Sparepart).filter(
-            Sparepart.sparepart_id == purchase_data.sparepart_id
-        ).first()
-        if not sparepart:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Refacción con ID {purchase_data.sparepart_id} no encontrada"
-            )
+        # Verificar que existe la refacción (solo si se proporciona)
+        if purchase_data.sparepart_id and purchase_data.sparepart_id != 0:
+            sparepart = db.query(Sparepart).filter(
+                Sparepart.sparepart_id == purchase_data.sparepart_id
+            ).first()
+            if not sparepart:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Refacción con ID {purchase_data.sparepart_id} no encontrada"
+                )
         
         # Verificar que existe el usuario
         user = db.query(Contact).filter(

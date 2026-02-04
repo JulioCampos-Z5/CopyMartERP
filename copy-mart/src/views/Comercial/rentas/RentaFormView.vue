@@ -51,6 +51,19 @@
             </select>
           </div>
 
+          <!-- Sucursal -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Sucursal <span v-if="branches.length > 0">*</span>
+            </label>
+            <select v-model="rentForm.branch_id" :disabled="!rentForm.client_id" :required="branches.length > 0" class="input-field">
+              <option value="">Seleccionar sucursal...</option>
+              <option v-for="branch in branches" :key="branch.branch_id" :value="branch.branch_id">
+                {{ branch.name }}<span v-if="branch.is_main"> (Principal)</span>
+              </option>
+            </select>
+          </div>
+
           <!-- Equipo -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -244,8 +257,10 @@ export default {
       successMsg: null,
       clients: [],
       equipment: [],
+      branches: [],
       rentForm: {
         client_id: '',
+        branch_id: '',
         item_id: '',
         rent: '',
         start_date: new Date().toISOString().split('T')[0],
@@ -263,6 +278,18 @@ export default {
   computed: {
     isEditing() {
       return this.$route.params.id !== undefined
+    }
+  },
+  watch: {
+    'rentForm.client_id': {
+      handler(newVal) {
+        this.rentForm.branch_id = ''
+        if (newVal) {
+          this.loadBranches(parseInt(newVal))
+        } else {
+          this.branches = []
+        }
+      }
     }
   },
   async mounted() {
@@ -294,6 +321,7 @@ export default {
         const rent = await rentService.getRentById(this.$route.params.id)
         this.rentForm = {
           client_id: rent.client_id || '',
+          branch_id: '',
           item_id: rent.item_id || '',
           rent: rent.rent || '',
           start_date: rent.start_date || new Date().toISOString().split('T')[0],
@@ -306,10 +334,27 @@ export default {
           color_cost_per_excess: rent.color_cost_per_excess || 0,
           print_notes: rent.print_notes || ''
         }
+
+        if (rent.client_id) {
+          await this.loadBranches(rent.client_id)
+          if (rent.branch_id) {
+            this.rentForm.branch_id = String(rent.branch_id)
+          }
+        }
       } catch (err) {
         this.errorMsg = 'Error al cargar la renta: ' + err.message
       } finally {
         this.loading = false
+      }
+    },
+
+    async loadBranches(clientId) {
+      try {
+        const branches = await clientService.getClientBranches(clientId)
+        this.branches = branches || []
+      } catch (err) {
+        this.errorMsg = 'Error al cargar sucursales: ' + err.message
+        this.branches = []
       }
     },
 
@@ -319,8 +364,14 @@ export default {
       this.successMsg = null
 
       try {
+        if (this.branches.length > 0 && !this.rentForm.branch_id) {
+          this.errorMsg = 'Por favor selecciona una sucursal'
+          return
+        }
+
         const data = {
           client_id: parseInt(this.rentForm.client_id),
+          branch_id: this.rentForm.branch_id ? parseInt(this.rentForm.branch_id) : null,
           item_id: parseInt(this.rentForm.item_id),
           rent: parseFloat(this.rentForm.rent),
           start_date: this.rentForm.start_date,

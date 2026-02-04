@@ -21,7 +21,7 @@
             </div>
             <div class="ml-4">
               <h3 class="text-sm font-medium text-gray-500">Empleados Activos</h3>
-              <p class="text-2xl font-semibold text-gray-900">47</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ activeEmployeesCount }}</p>
             </div>
           </div>
         </div>
@@ -125,62 +125,32 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                  <tr>
+                  <tr v-for="employee in employees" :key="employee.employee_id" class="hover:bg-gray-50">
                     <td class="px-4 py-4 whitespace-nowrap">
                       <div class="flex items-center">
                         <div class="h-8 w-8 bg-teal-500 rounded-full flex items-center justify-center">
-                          <span class="text-xs font-medium text-white">JP</span>
+                          <span class="text-xs font-medium text-white">{{ getInitials(employee.rfc) }}</span>
                         </div>
                         <div class="ml-3">
-                          <p class="text-sm font-medium text-gray-900">Juan Pérez</p>
-                          <p class="text-sm text-gray-500">EMP001</p>
+                          <p class="text-sm font-medium text-gray-900">Empleado #{{ employee.employee_id }}</p>
+                          <p class="text-sm text-gray-500">{{ employee.rfc }}</p>
                         </div>
                       </div>
                     </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">Operador de Máquina</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">Producción</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">-</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">-</td>
                     <td class="px-4 py-4 whitespace-nowrap">
-                      <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Activo</span>
+                      <span
+                        class="px-2 py-1 text-xs font-medium rounded-full"
+                        :class="employee.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                      >
+                        {{ employee.is_active ? 'Activo' : 'Inactivo' }}
+                      </span>
                     </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">15/03/2023</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(employee.hire_date) }}</td>
                   </tr>
-                  <tr>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="h-8 w-8 bg-purple-500 rounded-full flex items-center justify-center">
-                          <span class="text-xs font-medium text-white">ML</span>
-                        </div>
-                        <div class="ml-3">
-                          <p class="text-sm font-medium text-gray-900">María López</p>
-                          <p class="text-sm text-gray-500">EMP002</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">Cajera</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">Ventas</td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                      <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Vacaciones</span>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">20/01/2024</td>
-                  </tr>
-                  <tr>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span class="text-xs font-medium text-white">CR</span>
-                        </div>
-                        <div class="ml-3">
-                          <p class="text-sm font-medium text-gray-900">Carlos Ruiz</p>
-                          <p class="text-sm text-gray-500">EMP003</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">Supervisor</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">Operaciones</td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                      <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Activo</span>
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">10/05/2022</td>
+                  <tr v-if="employees.length === 0">
+                    <td colspan="5" class="px-4 py-4 text-sm text-gray-500 text-center">No hay empleados registrados</td>
                   </tr>
                 </tbody>
               </table>
@@ -260,11 +230,46 @@
 
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
+import rhService from '@/services/rhService'
 
 export default {
   name: 'RHView',
   components: {
     BaseLayout
+  },
+  data() {
+    return {
+      employees: [],
+      loadingEmployees: false
+    }
+  },
+  computed: {
+    activeEmployeesCount() {
+      return this.employees.filter(emp => emp.is_active).length
+    }
+  },
+  mounted() {
+    this.loadEmployees()
+  },
+  methods: {
+    async loadEmployees() {
+      this.loadingEmployees = true
+      try {
+        this.employees = await rhService.employees.getAll()
+      } catch (error) {
+        this.employees = []
+      } finally {
+        this.loadingEmployees = false
+      }
+    },
+    getInitials(rfc) {
+      if (!rfc) return '??'
+      return rfc.substring(0, 2).toUpperCase()
+    },
+    formatDate(dateString) {
+      if (!dateString) return '-'
+      return new Date(dateString).toLocaleDateString('es-MX')
+    }
   }
 }
 </script>
