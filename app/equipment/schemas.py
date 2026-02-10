@@ -1,17 +1,8 @@
 from pydantic import BaseModel
-from enum import Enum
 from typing import Optional
-
-class TypeColor(str, Enum):
-    MONOCROMO = "monocromo"
-    COLOR = "color"
-
-class LocationStatus(str, Enum):
-    BODEGA = "bodega"
-    ASIGNADO = "asignado"
-    VENDIDO = "vendido"
-    TALLER = "taller"
-    DESCONOCIDO = "desconocido"
+from datetime import datetime
+from decimal import Decimal
+from equipment.models import TypeColor, LocationStatus
 
 class BrandCreate(BaseModel):
     name: str
@@ -25,6 +16,11 @@ class BrandRead(BaseModel):
     class Config:
         from_attributes = True
 
+class BrandUpdate(BaseModel):
+    name: Optional[str] = None
+    prefix: Optional[str] = None
+
+# SUPPLIER SCHEMAS
 class SupplierCreate(BaseModel):
     name: str
 
@@ -35,6 +31,9 @@ class SupplierRead(BaseModel):
     class Config:
         from_attributes = True
 
+class SupplierUpdate(BaseModel):
+    name: Optional[str] = None
+
 class EquipmentCreate(BaseModel):
     brand_id: int
     model: str
@@ -43,28 +42,43 @@ class EquipmentCreate(BaseModel):
     type: TypeColor
     supplier_id: int
     invoice: Optional[str] = None
-    cost: Optional[float] = None
-    location_status: LocationStatus
+    cost: Optional[Decimal] = None
+    location_status: LocationStatus = LocationStatus.BODEGA
     comments: Optional[str] = None
     is_active: bool = True
 
 class EquipmentRead(BaseModel):
     item_id: int
-    sku: Optional[str]
+    sku: str
     brand_id: int
     model: str
     serie: str
     model_toner: str
     type: TypeColor
     supplier_id: int
-    invoice: Optional[str]
-    cost: Optional[float]
+    invoice: Optional[str] = None
+    cost: Optional[Decimal] = None
     location_status: LocationStatus
-    comments: Optional[str]
+    comments: Optional[str] = None
+    created_at: datetime
     is_active: bool
+    brand: BrandRead
+    supplier: SupplierRead
 
     class Config:
         from_attributes = True
 
 class EquipmentUpdate(BaseModel):
-    location_status: LocationStatus
+    location_status: Optional[LocationStatus] = None
+
+class EquipmentUpdateFull(BaseModel):
+    model: Optional[str] = None
+    serie: Optional[str] = None
+    model_toner: Optional[str] = None
+    type: Optional[TypeColor] = None
+    supplier_id: Optional[int] = None
+    invoice: Optional[str] = None
+    cost: Optional[Decimal] = None
+    location_status: Optional[LocationStatus] = None
+    comments: Optional[str] = None
+    is_active: Optional[bool] = None
