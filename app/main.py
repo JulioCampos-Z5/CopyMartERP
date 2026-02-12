@@ -13,6 +13,7 @@ from sparepart.routers import router as sparepart_router
 from purchase.routers import router as purchase_router
 from print.routers import router as print_router
 from rh.routers import router as rh_router
+from repair.routers import router as repair_router
 from inventory.routers import (
     catalog_router,
     inventory_router,
@@ -70,6 +71,7 @@ app.include_router(rh_router, prefix="/api")
 app.include_router(catalog_router, prefix="/api")
 app.include_router(inventory_router, prefix="/api")
 app.include_router(shelf_router, prefix="/api")
+app.include_router(repair_router, prefix="/api")
 
 
 
