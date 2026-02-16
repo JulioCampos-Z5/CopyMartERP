@@ -150,6 +150,8 @@
                 <option value="Falta Pago Proveedor">Falta Pago</option>
                 <option value="Falta Factura">Falta Factura</option>
                 <option value="Por Revisar">Por Revisar</option>
+                <option value="Falta Autorización">Falta Autorización</option>
+                <option value="Falta Orden de Servicio">Falta Orden de Servicio</option>
                 <option value="Pausado Back Orders">Pausado</option>
                 <option value="Concluido">Concluido</option>
                 <option value="Rechazado">Rechazado</option>

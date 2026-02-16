@@ -23,9 +23,14 @@ export const useAuthStore = defineStore('auth', () => {
   // ============================================
   // GETTERS
   // ============================================
+
+  const normalizedRole = computed(() => String((user.value as any)?.role || (user.value as any)?.rol || '').toLowerCase())
   
-  const userRole = computed(() => user.value?.role || '')
-  const userPermissions = computed(() => user.value?.permissions || [])
+  const userRole = computed(() => (user.value as any)?.role || (user.value as any)?.rol || '')
+  const userPermissions = computed(() => {
+    const permissions = (user.value as any)?.permissions
+    return Array.isArray(permissions) ? permissions : []
+  })
   const userName = computed(() => user.value?.full_name || user.value?.username || '')
   const userEmail = computed(() => user.value?.email || '')
 
@@ -109,7 +114,24 @@ export const useAuthStore = defineStore('auth', () => {
    * Verifica si el usuario tiene un permiso específico
    */
   function hasPermission(permission: string): boolean {
-    return userPermissions.value.includes(permission)
+    if (!isAuthenticated.value) return false
+
+    const normalizedPermission = String(permission || '').toLowerCase()
+    const explicitPermissions = userPermissions.value.map(p => String(p || '').toLowerCase())
+
+    if (explicitPermissions.length > 0) {
+      return explicitPermissions.includes(normalizedPermission)
+    }
+
+    if (normalizedRole.value === 'administrador' || normalizedRole.value === 'admin') {
+      return true
+    }
+
+    if (normalizedRole.value === 'gerencia' || normalizedRole.value === 'manager') {
+      return !normalizedPermission.startsWith('delete')
+    }
+
+    return false
   }
 
   /**

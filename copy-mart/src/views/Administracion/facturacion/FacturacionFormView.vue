@@ -37,7 +37,7 @@
               <select v-model="form.sale_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 <option value="">Seleccione una venta...</option>
                 <option v-for="sale in sales" :key="sale.sale_id" :value="sale.sale_id">
-                  Factura: {{ sale.invoice_number || `#${sale.sale_id}` }} | Cliente: {{ sale.client_name || 'N/A' }} | Monto: {{ formatCurrency(sale.total_amount) }}
+                  Factura: {{ sale.invoice_number || `#${sale.sale_id}` }} | Cliente: {{ getSaleClientName(sale) }} | Monto: {{ formatCurrency(getSaleAmount(sale)) }}
                 </option>
               </select>
               <p v-if="sales.length === 0 && form.client_id" class="text-sm text-gray-500 mt-1">No hay ventas disponibles para este cliente</p>
@@ -47,7 +47,7 @@
               <select v-model="form.rent_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 <option value="">Seleccione una renta...</option>
                 <option v-for="rent in rents" :key="rent.rent_id" :value="rent.rent_id">
-                  Contrato: {{ rent.contract_number || `#${rent.rent_id}` }} | Cliente: {{ rent.client_name || 'N/A' }} | Renta Mensual: {{ formatCurrency(rent.monthly_rent) }}
+                  Contrato: {{ rent.contract_number || `#${rent.rent_id}` }} | Cliente: {{ getRentClientName(rent) }} | Renta Mensual: {{ formatCurrency(getRentAmount(rent)) }}
                 </option>
               </select>
               <p v-if="rents.length === 0 && form.client_id" class="text-sm text-gray-500 mt-1">No hay rentas disponibles para este cliente</p>
@@ -176,8 +176,20 @@ const loadClientData = async () => {
       saleService.getSales({ client_id: form.value.client_id, pageSize: 100 }),
       rentService.getRents({ client_id: form.value.client_id, pageSize: 100 })
     ])
-    sales.value = salesResp.items || []
-    rents.value = rentsResp.items || []
+    sales.value = (salesResp.items || [])
+      .map((sale) => ({
+        ...sale,
+        client_name: sale.client_name || sale.client?.comercial_name || sale.client?.name || '',
+        total_amount: Number(sale.total_amount ?? sale.sale_price ?? 0),
+        sale_status: String(sale.sale_status || '').toLowerCase()
+      }))
+      .filter((sale) => ['confirmada', 'entregada'].includes(sale.sale_status))
+
+    rents.value = (rentsResp.items || []).map((rent) => ({
+      ...rent,
+      client_name: rent.client_name || rent.client?.comercial_name || rent.client?.name || '',
+      monthly_rent: Number(rent.monthly_rent ?? rent.rent ?? 0)
+    }))
   } catch (error) {
     console.error('Error loading client data:', error)
   }
@@ -220,6 +232,11 @@ const formatCurrency = (amount) => {
   if (!amount) return '$0.00'
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
 }
+
+const getSaleAmount = (sale) => Number(sale?.total_amount ?? sale?.sale_price ?? 0)
+const getRentAmount = (rent) => Number(rent?.monthly_rent ?? rent?.rent ?? 0)
+const getSaleClientName = (sale) => sale?.client_name || sale?.client?.comercial_name || sale?.client?.name || 'N/A'
+const getRentClientName = (rent) => rent?.client_name || rent?.client?.comercial_name || rent?.client?.name || 'N/A'
 
 onMounted(() => {
   loadClients()

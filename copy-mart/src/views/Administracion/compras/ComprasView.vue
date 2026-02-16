@@ -219,11 +219,10 @@
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Proveedor 1</label>
-                  <select v-model="purchaseForm.supplier1_name" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Seleccionar...</option>
-                    <option v-for="s in suppliers" :key="s.supplier_id" :value="s.name">{{ s.name }}</option>
-                  </select>
+                  <input v-model="purchaseForm.supplier1_name"
+                         type="text"
+                         placeholder="Nombre del proveedor"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   <input v-model.number="purchaseForm.supplier1_cost" type="number" step="0.01" min="0" 
                          placeholder="Costo $" 
                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
@@ -231,11 +230,10 @@
                 
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Proveedor 2</label>
-                  <select v-model="purchaseForm.supplier2_name" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Seleccionar...</option>
-                    <option v-for="s in suppliers" :key="s.supplier_id" :value="s.name">{{ s.name }}</option>
-                  </select>
+                  <input v-model="purchaseForm.supplier2_name"
+                         type="text"
+                         placeholder="Nombre del proveedor"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   <input v-model.number="purchaseForm.supplier2_cost" type="number" step="0.01" min="0" 
                          placeholder="Costo $" 
                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
@@ -243,11 +241,10 @@
                 
                 <div class="space-y-2">
                   <label class="block text-sm font-medium text-gray-700">Proveedor 3</label>
-                  <select v-model="purchaseForm.supplier3_name" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Seleccionar...</option>
-                    <option v-for="s in suppliers" :key="s.supplier_id" :value="s.name">{{ s.name }}</option>
-                  </select>
+                  <input v-model="purchaseForm.supplier3_name"
+                         type="text"
+                         placeholder="Nombre del proveedor"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                   <input v-model.number="purchaseForm.supplier3_cost" type="number" step="0.01" min="0" 
                          placeholder="Costo $" 
                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
@@ -416,7 +413,7 @@
                 <div v-for="supplier in suppliers" :key="supplier.supplier_id" 
                      class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
                   <span class="text-sm font-medium text-gray-900">{{ supplier.name }}</span>
-                  <button @click="deleteSupplier(supplier.supplier_id)" 
+                    <button v-if="canDelete" @click="deleteSupplier(supplier.supplier_id)" 
                           class="text-red-500 hover:text-red-700">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -468,6 +465,7 @@ import { sparepartService } from '@/services/sparepartService.ts'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useFiltersStore } from '@/stores/filters.ts'
 import type { Purchase, Supplier, Sparepart, PurchaseCreate } from '@/types'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 // Router
 const router = useRouter()
@@ -489,6 +487,7 @@ const showSupplierModal = ref(false)
 const suppliers = ref<Supplier[]>([])
 const loadingSuppliers = ref(false)
 const supplierForm = ref({ name: '' })
+const canDelete = computed(() => hasDeleteAccess(getStoredUser()))
 
 // Estado de refacciones
 const spareparts = ref<Sparepart[]>([])
@@ -714,13 +713,9 @@ const openCreateModal = async () => {
 
 const loadFormData = async () => {
   try {
-    // Cargar refacciones y proveedores en paralelo
-    const [sparepartsRes, suppliersRes] = await Promise.all([
-      sparepartService.getSpareparts({ pageSize: 100 }),
-      equipmentService.getSuppliers()
-    ])
+    // Cargar únicamente refacciones (proveedores se capturan manualmente)
+    const sparepartsRes = await sparepartService.getSpareparts({ pageSize: 100 })
     spareparts.value = sparepartsRes.items || []
-    suppliers.value = suppliersRes || []
   } catch (err: any) {
     console.error('Error loading form data:', err)
     error.value = 'Error al cargar datos del formulario: ' + err.message
@@ -809,6 +804,10 @@ const createSupplier = async () => {
 }
 
 const deleteSupplier = async (supplierId: number) => {
+  if (!canDelete.value) {
+    error.value = 'No tienes permisos para eliminar proveedores'
+    return
+  }
   if (!confirm('¿Está seguro de eliminar este proveedor?')) return
   
   try {

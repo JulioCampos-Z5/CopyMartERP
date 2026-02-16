@@ -21,7 +21,7 @@
             </div>
             <div class="ml-4">
               <h3 class="text-sm font-medium text-gray-500">Tickets Pendientes</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ tickets.filter(t => t.report_status === 'PENDIENTE').length }}</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ tickets.filter(t => t.report_status === 'pendiente').length }}</p>
             </div>
           </div>
         </div>
@@ -37,7 +37,7 @@
             </div>
             <div class="ml-4">
               <h3 class="text-sm font-medium text-gray-500">En Proceso</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ tickets.filter(t => t.report_status === 'EN_PROCESO').length }}</p>
+              <p class="text-2xl font-semibold text-gray-900">{{ tickets.filter(t => ['urgente', 'programado', 'atencion'].includes(t.report_status)).length }}</p>
             </div>
           </div>
         </div>
@@ -131,12 +131,18 @@
                   <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(ticket.created_at) }}</td>
                   <td class="px-4 py-4 whitespace-nowrap text-sm">
                     <div class="flex gap-2">
-                      <button @click="openTicketModal(ticket)" class="text-blue-600 hover:text-blue-800" title="Editar">
+                      <button @click="viewTicket(ticket.ticket_id)" class="text-blue-600 hover:text-blue-800" title="Ver detalle">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      <button @click="editTicket(ticket)" class="text-cyan-600 hover:text-cyan-800" title="Editar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
-                      <button @click="deleteTicket(ticket.ticket_id)" class="text-red-600 hover:text-red-800" title="Eliminar">
+                      <button v-if="canDelete" @click="deleteTicket(ticket.ticket_id)" class="text-red-600 hover:text-red-800" title="Eliminar">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -186,26 +192,26 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Reporte *</label>
                 <select v-model="ticketForm.report_type" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
-                  <option value="CONECTIVIDAD">Conectividad</option>
-                  <option value="ATASCO">Atasco</option>
-                  <option value="TONER">Tóner</option>
-                  <option value="QUEJAS">Quejas</option>
-                  <option value="COPIA">Copia</option>
-                  <option value="RUIDOS">Ruidos</option>
-                  <option value="IMPRESION">Impresión</option>
-                  <option value="OTROS">Otros</option>
+                  <option value="conectividad">Conectividad</option>
+                  <option value="atasco">Atasco</option>
+                  <option value="toner">Tóner</option>
+                  <option value="quejas">Quejas</option>
+                  <option value="copia">Copia</option>
+                  <option value="ruidos">Ruidos</option>
+                  <option value="impresion">Impresión</option>
+                  <option value="otros">Otros</option>
                 </select>
               </div>
               <div v-if="ticketForm.ticket_id">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
                 <select v-model="ticketForm.report_status" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
-                  <option value="PENDIENTE">Pendiente</option>
-                  <option value="LISTO">Listo</option>
-                  <option value="URGENTE">Urgente</option>
-                  <option value="PROGRAMADO">Programado</option>
-                  <option value="INFORMATIVO">Informativo</option>
-                  <option value="NO_QUEDO_VISITA">No quedó en la visita</option>
-                  <option value="ATENCION">Atención</option>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="listo">Listo</option>
+                  <option value="urgente">Urgente</option>
+                  <option value="programado">Programado</option>
+                  <option value="informativo">Informativo</option>
+                  <option value="no_quedo_en_la_visita">No quedó en la visita</option>
+                  <option value="atencion">Atención</option>
                 </select>
               </div>
               <div class="md:col-span-2">
@@ -214,7 +220,24 @@
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Evidencia</label>
-                <textarea v-model="ticketForm.evidence" rows="2" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"></textarea>
+                <input
+                  type="file"
+                  @change="onEvidenceFileChange"
+                  accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                  class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                />
+                <p v-if="selectedEvidenceFile" class="text-xs text-gray-600 mt-1">
+                  Archivo seleccionado: {{ selectedEvidenceFile.name }}
+                </p>
+                <a
+                  v-if="!selectedEvidenceFile && ticketForm.evidence"
+                  :href="ticketService.getEvidenceUrl(ticketForm.evidence)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-xs text-blue-600 hover:text-blue-800 mt-1 inline-block"
+                >
+                  Ver evidencia actual
+                </a>
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Acción Correctiva</label>
@@ -236,14 +259,19 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseLayout from '@/components/BaseLayout.vue'
 import ticketService, { type Ticket, type TicketCreate, type TicketUpdate } from '@/services/ticketService'
 import { clientService } from '@/services/clientService'
 import type { Client, Branch } from '@/types'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
+const router = useRouter()
 const loading = ref(false)
 const tickets = ref<Ticket[]>([])
 const showTicketModal = ref(false)
+const selectedEvidenceFile = ref<File | null>(null)
+const canDelete = computed(() => hasDeleteAccess(getStoredUser()))
 
 // Datos para selects
 const clients = ref<Client[]>([])
@@ -255,8 +283,8 @@ const ticketForm = ref<any>({
   client_id: 0,
   branch_id: 0,
   area_id: undefined,
-  report_type: 'OTROS',
-  report_status: 'PENDIENTE',
+  report_type: 'otros',
+  report_status: 'pendiente',
   description: '',
   evidence: '',
   corrective_action: ''
@@ -265,7 +293,7 @@ const ticketForm = ref<any>({
 const ticketsCompletedToday = computed(() => {
   const today = new Date().toISOString().split('T')[0]
   return tickets.value.filter(t => 
-    t.report_status === 'COMPLETADO' && 
+    t.report_status === 'listo' && 
     t.completed_at?.startsWith(today)
   ).length
 })
@@ -293,6 +321,29 @@ const loadClients = async () => {
   }
 }
 
+const viewTicket = (ticketId: number) => {
+  router.push({ name: 'TicketDetail', params: { id: ticketId } })
+}
+
+const editTicket = async (ticket: Ticket) => {
+  // Cargar clientes si no están cargados
+  if (clients.value.length === 0) {
+    await loadClients()
+  }
+  
+  ticketForm.value = { ...ticket }
+  selectedEvidenceFile.value = null
+  // Cargar sucursales del cliente
+  if (ticket.client_id) {
+    try {
+      branches.value = await clientService.getClientBranches(ticket.client_id)
+    } catch (error) {
+      console.error('Error loading branches:', error)
+    }
+  }
+  showTicketModal.value = true
+}
+
 const onClientChange = async () => {
   branches.value = []
   ticketForm.value.branch_id = 0
@@ -318,6 +369,7 @@ const openTicketModal = async (ticket?: Ticket) => {
   
   if (ticket) {
     ticketForm.value = { ...ticket }
+    selectedEvidenceFile.value = null
     // Cargar sucursales del cliente
     if (ticket.client_id) {
       try {
@@ -332,19 +384,31 @@ const openTicketModal = async (ticket?: Ticket) => {
       client_id: 0,
       branch_id: 0,
       area_id: undefined,
-      report_type: 'OTROS',
-      report_status: 'PENDIENTE',
+        report_type: 'otros',
+        report_status: 'pendiente',
       description: '',
       evidence: '',
       corrective_action: ''
     }
+    selectedEvidenceFile.value = null
     branches.value = []
   }
   showTicketModal.value = true
 }
 
+const onEvidenceFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  selectedEvidenceFile.value = target.files?.[0] || null
+}
+
 const saveTicket = async () => {
   try {
+    let evidencePath = ticketForm.value.evidence
+    if (selectedEvidenceFile.value) {
+      const uploaded = await ticketService.uploadEvidence(selectedEvidenceFile.value)
+      evidencePath = uploaded.file_path
+    }
+
     if (ticketForm.value.ticket_id) {
       const updateData: TicketUpdate = {
         branch_id: ticketForm.value.branch_id,
@@ -352,7 +416,7 @@ const saveTicket = async () => {
         report_status: ticketForm.value.report_status,
         report_type: ticketForm.value.report_type,
         description: ticketForm.value.description,
-        evidence: ticketForm.value.evidence,
+        evidence: evidencePath,
         corrective_action: ticketForm.value.corrective_action
       }
       await ticketService.update(ticketForm.value.ticket_id, updateData)
@@ -363,11 +427,12 @@ const saveTicket = async () => {
         area_id: ticketForm.value.area_id,
         report_type: ticketForm.value.report_type,
         description: ticketForm.value.description,
-        evidence: ticketForm.value.evidence,
+        evidence: evidencePath,
         corrective_action: ticketForm.value.corrective_action
       }
       await ticketService.create(createData)
     }
+    selectedEvidenceFile.value = null
     showTicketModal.value = false
     await loadTickets()
   } catch (error: any) {
@@ -377,6 +442,10 @@ const saveTicket = async () => {
 }
 
 const deleteTicket = async (ticketId: number) => {
+  if (!canDelete.value) {
+    alert('No tienes permisos para eliminar tickets')
+    return
+  }
   if (!confirm('¿Estás seguro de eliminar este ticket?')) return
   try {
     await ticketService.delete(ticketId)
@@ -394,40 +463,40 @@ const getClientName = (clientId: number) => {
 
 const getTypeBadge = (type: string) => {
   const labels: Record<string, string> = {
-    'CONECTIVIDAD': 'Conectividad',
-    'ATASCO': 'Atasco',
-    'TONER': 'Tóner',
-    'QUEJAS': 'Quejas',
-    'COPIA': 'Copia',
-    'RUIDOS': 'Ruidos',
-    'IMPRESION': 'Impresión',
-    'OTROS': 'Otros'
+    'conectividad': 'Conectividad',
+    'atasco': 'Atasco',
+    'toner': 'Tóner',
+    'quejas': 'Quejas',
+    'copia': 'Copia',
+    'ruidos': 'Ruidos',
+    'impresion': 'Impresión',
+    'otros': 'Otros'
   }
   return labels[type] || type
 }
 
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
-    'PENDIENTE': 'Pendiente',
-    'LISTO': 'Listo',
-    'URGENTE': 'Urgente',
-    'PROGRAMADO': 'Programado',
-    'INFORMATIVO': 'Informativo',
-    'NO_QUEDO_VISITA': 'No quedó en la visita',
-    'ATENCION': 'Atención'
+    'pendiente': 'Pendiente',
+    'listo': 'Listo',
+    'urgente': 'Urgente',
+    'programado': 'Programado',
+    'informativo': 'Informativo',
+    'no_quedo_en_la_visita': 'No quedó en la visita',
+    'atencion': 'Atención'
   }
   return labels[status] || status
 }
 
 const getStatusClass = (status: string) => {
   const classes: Record<string, string> = {
-    'PENDIENTE': 'bg-yellow-100 text-yellow-800',
-    'LISTO': 'bg-green-100 text-green-800',
-    'URGENTE': 'bg-red-100 text-red-800',
-    'PROGRAMADO': 'bg-blue-100 text-blue-800',
-    'INFORMATIVO': 'bg-purple-100 text-purple-800',
-    'NO_QUEDO_VISITA': 'bg-orange-100 text-orange-800',
-    'ATENCION': 'bg-pink-100 text-pink-800'
+    'pendiente': 'bg-yellow-100 text-yellow-800',
+    'listo': 'bg-green-100 text-green-800',
+    'urgente': 'bg-red-100 text-red-800',
+    'programado': 'bg-blue-100 text-blue-800',
+    'informativo': 'bg-purple-100 text-purple-800',
+    'no_quedo_en_la_visita': 'bg-orange-100 text-orange-800',
+    'atencion': 'bg-pink-100 text-pink-800'
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
 }

@@ -7,8 +7,9 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "dev": "npm run frontend",
+    "dev": "concurrently \"npm run frontend\" \"npm run backend\"",
     "frontend": "vite",
+    "backend": "cd ../app && python main.py",
     "build": "vite build",
     "preview": "vite preview"
   },

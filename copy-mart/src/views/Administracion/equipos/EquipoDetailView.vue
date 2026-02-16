@@ -250,7 +250,6 @@ const loadPrintCounters = async () => {
           const counters = await printService.getAll({ rent_id: rent.rent_id })
           allCounters.push(...counters)
         } catch (err) {
-          console.warn(`No se pudieron cargar contadores para renta ${rent.rent_id}`)
         }
       }
       

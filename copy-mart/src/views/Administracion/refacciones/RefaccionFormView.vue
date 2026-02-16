@@ -38,17 +38,27 @@
       <!-- Form -->
       <form v-if="!loading" @submit.prevent="handleSubmit" class="bg-white shadow rounded-lg p-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Código -->
+          <!-- Tipo -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              Código
+              Tipo *
             </label>
-            <input 
-              v-model="sparepartForm.code" 
-              type="text" 
-              class="input-field"
-              placeholder="REF-001"
-            >
+            <select v-model="sparepartForm.part_type" required class="input-field">
+              <option value="REFACCION">Refacción</option>
+              <option value="TONER">Tóner</option>
+            </select>
+          </div>
+
+          <!-- Condición -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Condición *
+            </label>
+            <select v-model="sparepartForm.condition" required class="input-field">
+              <option value="NUEVO">Nuevo</option>
+              <option value="USADO">Usado</option>
+              <option value="REPARADO">Reparado</option>
+            </select>
           </div>
 
           <!-- Nombre -->
@@ -99,12 +109,12 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">
               Equipo Compatible
             </label>
-            <input 
-              v-model="sparepartForm.equipment" 
-              type="text" 
-              class="input-field"
-              placeholder="Ej: LaserJet Pro M404"
-            >
+            <select v-model="sparepartForm.selected_equipment_id" class="input-field">
+              <option value="">Seleccionar equipo...</option>
+              <option v-for="equipment in equipmentOptions" :key="equipment.item_id" :value="equipment.item_id">
+                {{ equipment.sku || `#${equipment.item_id}` }} - {{ equipment.model }}{{ equipment.serie ? ` (${equipment.serie})` : '' }}
+              </option>
+            </select>
           </div>
 
           <!-- Proveedor -->
@@ -155,6 +165,7 @@
 <script>
 import AppNavigation from '@/components/AppNavigation.vue'
 import { sparepartService } from '@/services/sparepartService.ts'
+import { equipmentService } from '@/services/equipmentService.ts'
 
 export default {
   name: 'RefaccionFormView',
@@ -166,13 +177,17 @@ export default {
       loading: false,
       errorMsg: null,
       successMsg: null,
+      equipmentOptions: [],
       sparepartForm: {
         code: '',
+        part_type: 'REFACCION',
+        condition: 'NUEVO',
         name: '',
         description: '',
         color: '',
         brand: '',
         equipment: '',
+        selected_equipment_id: '',
         supplier: ''
       }
     }
@@ -183,22 +198,58 @@ export default {
     }
   },
   async mounted() {
+    await this.loadEquipmentOptions()
     if (this.isEditing) {
       await this.loadSparepart()
     }
   },
   methods: {
+    async loadEquipmentOptions() {
+      try {
+        const response = await equipmentService.getEquipments({ page: 1, pageSize: 500 })
+        this.equipmentOptions = response.items || []
+      } catch (err) {
+        console.error('Error loading equipment options:', err)
+      }
+    },
+
+    generateInternalCode() {
+      const prefix = this.sparepartForm.part_type === 'TONER' ? 'TON' : 'REF'
+      const conditionCode = {
+        NUEVO: 'N',
+        USADO: 'U',
+        REPARADO: 'R'
+      }[this.sparepartForm.condition] || 'N'
+      const suffix = Date.now().toString().slice(-6)
+      return `${prefix}-${conditionCode}-${suffix}`
+    },
+
+    getSelectedEquipmentLabel() {
+      const selected = this.equipmentOptions.find(
+        eq => String(eq.item_id) === String(this.sparepartForm.selected_equipment_id)
+      )
+      if (!selected) return this.sparepartForm.equipment || ''
+      return `${selected.sku || `#${selected.item_id}`} - ${selected.model}${selected.serie ? ` (${selected.serie})` : ''}`
+    },
+
     async loadSparepart() {
       this.loading = true
       try {
         const sparepart = await sparepartService.getSparepartById(this.$route.params.id)
+        const rawCode = sparepart.code || ''
+        const detectedType = rawCode.startsWith('TON-') ? 'TONER' : 'REFACCION'
+        const detectedCondition = rawCode.includes('-R-') ? 'REPARADO' : rawCode.includes('-U-') ? 'USADO' : 'NUEVO'
+
         this.sparepartForm = {
-          code: sparepart.code || '',
+          code: rawCode,
+          part_type: detectedType,
+          condition: detectedCondition,
           name: sparepart.name || '',
           description: sparepart.description || '',
           color: sparepart.color || '',
           brand: sparepart.brand || '',
           equipment: sparepart.equipment || '',
+          selected_equipment_id: '',
           supplier: sparepart.supplier || ''
         }
       } catch (err) {
@@ -214,11 +265,21 @@ export default {
       this.successMsg = null
 
       try {
+        const payload = {
+          ...this.sparepartForm,
+          code: this.isEditing ? (this.sparepartForm.code || this.generateInternalCode()) : this.generateInternalCode(),
+          equipment: this.getSelectedEquipmentLabel()
+        }
+
+        delete payload.part_type
+        delete payload.condition
+        delete payload.selected_equipment_id
+
         if (this.isEditing) {
-          await sparepartService.updateSparepart(this.$route.params.id, this.sparepartForm)
+          await sparepartService.updateSparepart(this.$route.params.id, payload)
           this.successMsg = 'Refacción actualizada exitosamente'
         } else {
-          await sparepartService.createSparepart(this.sparepartForm)
+          await sparepartService.createSparepart(payload)
           this.successMsg = 'Refacción creada exitosamente'
         }
 

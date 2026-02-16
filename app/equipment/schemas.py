@@ -49,7 +49,7 @@ class EquipmentCreate(BaseModel):
 
 class EquipmentRead(BaseModel):
     item_id: int
-    sku: str
+    sku: Optional[str] = None
     brand_id: int
     model: str
     serie: str

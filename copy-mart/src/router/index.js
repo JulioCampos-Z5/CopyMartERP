@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import { canAccessPath, getStoredUser } from '@/config/accessControl'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -385,6 +386,15 @@ const router = createRouter({
         title: 'Órdenes de Servicio - CopyMart ERP'
       }
     },
+    {
+      path: '/ordenes-servicio/:id',
+      name: 'TicketDetail',
+      component: () => import('../views/Operaciones/TicketDetailView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Detalle de Órdenes de Servicio - CopyMart ERP'
+      }
+    },
     // Ruta de Tecnologías de la Información
     {
       path: '/ti',
@@ -440,6 +450,14 @@ router.beforeEach((to, from, next) => {
   } 
   // Si no requiere autenticación o está autenticado
   else {
+    if (to.meta.requiresAuth) {
+      const currentUser = getStoredUser()
+      if (!canAccessPath(currentUser, to.path)) {
+        next('/dashboard')
+        return
+      }
+    }
+
     next()
   }
 })

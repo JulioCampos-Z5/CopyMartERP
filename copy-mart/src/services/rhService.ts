@@ -159,40 +159,42 @@ export interface AbsenceUpdate {
   notes?: string;
 }
 
+const RH_BASE = '/api/rh';
+
 const rhService = {
   // Employees
   employees: {
     async create(data: EmployeeCreate): Promise<Employee> {
-      const response = await api.post('/rh/employees', data);
+      const response = await api.post(`${RH_BASE}/employees`, data);
       return response.data;
     },
 
     async getAll(params?: { is_active?: boolean }): Promise<Employee[]> {
-      const response = await api.get('/rh/employees', { params });
+      const response = await api.get(`${RH_BASE}/employees`, { params });
       return response.data;
     },
 
     async getById(employeeId: number): Promise<Employee> {
-      const response = await api.get(`/rh/employees/${employeeId}`);
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}`);
       return response.data;
     },
 
     async getByUserId(userId: number): Promise<Employee> {
-      const response = await api.get(`/rh/employees/user/${userId}`);
+      const response = await api.get(`${RH_BASE}/employees/user/${userId}`);
       return response.data;
     },
 
     async update(employeeId: number, data: EmployeeUpdate): Promise<Employee> {
-      const response = await api.put(`/rh/employees/${employeeId}`, data);
+      const response = await api.put(`${RH_BASE}/employees/${employeeId}`, data);
       return response.data;
     },
 
     async delete(employeeId: number): Promise<void> {
-      await api.delete(`/rh/employees/${employeeId}`);
+      await api.delete(`${RH_BASE}/employees/${employeeId}`);
     },
 
     async getSummary(employeeId: number): Promise<any> {
-      const response = await api.get(`/rh/employees/${employeeId}/summary`);
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}/summary`);
       return response.data;
     }
   },
@@ -200,22 +202,22 @@ const rhService = {
   // Payrolls
   payrolls: {
     async create(data: PayrollCreate): Promise<Payroll> {
-      const response = await api.post('/rh/payrolls', data);
+      const response = await api.post(`${RH_BASE}/payrolls`, data);
       return response.data;
     },
 
     async getById(payrollId: number): Promise<Payroll> {
-      const response = await api.get(`/rh/payrolls/${payrollId}`);
+      const response = await api.get(`${RH_BASE}/payrolls/${payrollId}`);
       return response.data;
     },
 
     async getByEmployee(employeeId: number): Promise<Payroll[]> {
-      const response = await api.get(`/rh/employees/${employeeId}/payrolls`);
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}/payrolls`);
       return response.data;
     },
 
     async update(payrollId: number, data: PayrollUpdate): Promise<Payroll> {
-      const response = await api.put(`/rh/payrolls/${payrollId}`, data);
+      const response = await api.put(`${RH_BASE}/payrolls/${payrollId}`, data);
       return response.data;
     }
   },
@@ -223,27 +225,27 @@ const rhService = {
   // Vacations
   vacations: {
     async create(data: VacationCreate): Promise<Vacation> {
-      const response = await api.post('/rh/vacations', data);
+      const response = await api.post(`${RH_BASE}/vacations`, data);
       return response.data;
     },
 
     async getById(vacationId: number): Promise<Vacation> {
-      const response = await api.get(`/rh/vacations/${vacationId}`);
+      const response = await api.get(`${RH_BASE}/vacations/${vacationId}`);
       return response.data;
     },
 
     async getByEmployee(employeeId: number): Promise<Vacation[]> {
-      const response = await api.get(`/rh/employees/${employeeId}/vacations`);
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}/vacations`);
       return response.data;
     },
 
     async getVacationDays(employeeId: number): Promise<any> {
-      const response = await api.get(`/rh/employees/${employeeId}/vacation-days`);
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}/vacation-days`);
       return response.data;
     },
 
     async update(vacationId: number, data: VacationUpdate): Promise<Vacation> {
-      const response = await api.put(`/rh/vacations/${vacationId}`, data);
+      const response = await api.put(`${RH_BASE}/vacations/${vacationId}`, data);
       return response.data;
     }
   },
@@ -251,22 +253,22 @@ const rhService = {
   // Administrative Records
   administrativeRecords: {
     async create(data: AdministrativeRecordCreate): Promise<AdministrativeRecord> {
-      const response = await api.post('/rh/administrative-records', data);
+      const response = await api.post(`${RH_BASE}/administrative-records`, data);
       return response.data;
     },
 
     async getById(recordId: number): Promise<AdministrativeRecord> {
-      const response = await api.get(`/rh/administrative-records/${recordId}`);
+      const response = await api.get(`${RH_BASE}/administrative-records/${recordId}`);
       return response.data;
     },
 
     async getByEmployee(employeeId: number): Promise<AdministrativeRecord[]> {
-      const response = await api.get(`/rh/employees/${employeeId}/administrative-records`);
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}/administrative-records`);
       return response.data;
     },
 
     async update(recordId: number, data: AdministrativeRecordUpdate): Promise<AdministrativeRecord> {
-      const response = await api.put(`/rh/administrative-records/${recordId}`, data);
+      const response = await api.put(`${RH_BASE}/administrative-records/${recordId}`, data);
       return response.data;
     }
   },
@@ -274,12 +276,12 @@ const rhService = {
   // Absences
   absences: {
     async create(data: AbsenceCreate): Promise<Absence> {
-      const response = await api.post('/rh/absences', data);
+      const response = await api.post(`${RH_BASE}/absences`, data);
       return response.data;
     },
 
     async getById(absenceId: number): Promise<Absence> {
-      const response = await api.get(`/rh/absences/${absenceId}`);
+      const response = await api.get(`${RH_BASE}/absences/${absenceId}`);
       return response.data;
     },
 
@@ -288,26 +290,26 @@ const rhService = {
       end_date?: string;
       absence_type?: string;
     }): Promise<Absence[]> {
-      const response = await api.get(`/rh/employees/${employeeId}/absences`, { params });
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}/absences`, { params });
       return response.data;
     },
 
     async getByDateRange(employeeId: number, startDate: string, endDate: string): Promise<Absence[]> {
-      const response = await api.get(`/rh/employees/${employeeId}/absences/range`, {
+      const response = await api.get(`${RH_BASE}/employees/${employeeId}/absences/range`, {
         params: { start_date: startDate, end_date: endDate }
       });
       return response.data;
     },
 
     async update(absenceId: number, data: AbsenceUpdate): Promise<Absence> {
-      const response = await api.put(`/rh/absences/${absenceId}`, data);
+      const response = await api.put(`${RH_BASE}/absences/${absenceId}`, data);
       return response.data;
     }
   },
 
   // Stats
   async getDepartmentStats(department: string): Promise<any> {
-    const response = await api.get(`/rh/stats/department/${department}`);
+    const response = await api.get(`${RH_BASE}/stats/department/${department}`);
     return response.data;
   }
 };

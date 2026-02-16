@@ -139,7 +139,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button @click="deleteBranch(branch.branch_id)" class="text-red-600 hover:text-red-800" title="Eliminar">
+                    <button v-if="canDelete" @click="deleteBranch(branch.branch_id)" class="text-red-600 hover:text-red-800" title="Eliminar">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
@@ -241,7 +241,7 @@
           <div v-if="areas.length > 0" class="space-y-2">
             <div v-for="area in areas" :key="area.area_id" class="flex justify-between items-center p-2 border rounded">
               <span>{{ area.name }}</span>
-              <button @click="deleteArea(area.area_id)" class="text-red-600 hover:text-red-800">
+              <button v-if="canDelete" @click="deleteArea(area.area_id)" class="text-red-600 hover:text-red-800">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -265,6 +265,7 @@ import BaseLayout from '@/components/BaseLayout.vue'
 import { clientService } from '@/services/clientService'
 import { contactService } from '@/services/contactService'
 import type { Client, Branch, Contact, Area } from '@/types'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 const router = useRouter()
 const route = useRoute()
@@ -274,6 +275,7 @@ const branches = ref<Branch[]>([])
 const contacts = ref<Contact[]>([])
 const areas = ref<Area[]>([])
 const activeTab = ref('contact')
+const canDelete = computed(() => hasDeleteAccess(getStoredUser()))
 
 const showBranchModal = ref(false)
 const showContactModal = ref(false)
@@ -319,7 +321,6 @@ const loadClient = async () => {
           client.value = { ...client.value, contact: primaryContact }
         }
       } catch (err) {
-        console.warn('No se pudo cargar el contacto principal:', err)
       }
     }
     
@@ -395,6 +396,10 @@ const saveBranch = async () => {
 }
 
 const deleteBranch = async (branchId: number) => {
+  if (!canDelete.value) {
+    alert('No tienes permisos para eliminar sucursales')
+    return
+  }
   if (!confirm('¿Estás seguro de eliminar esta sucursal?')) return
   try {
     await clientService.deleteBranch(branchId)
@@ -438,6 +443,10 @@ const saveContact = async () => {
 }
 
 const deleteContact = async (contactId: number) => {
+  if (!canDelete.value) {
+    alert('No tienes permisos para eliminar contactos')
+    return
+  }
   if (!confirm('¿Estás seguro de eliminar este contacto?')) return
   try {
     await contactService.deleteContact(contactId)
@@ -476,6 +485,10 @@ const addArea = async () => {
 }
 
 const deleteArea = async (areaId: number) => {
+  if (!canDelete.value) {
+    alert('No tienes permisos para eliminar áreas')
+    return
+  }
   if (!confirm('¿Estás seguro de eliminar esta área?')) return
   try {
     await clientService.deleteArea(areaId)

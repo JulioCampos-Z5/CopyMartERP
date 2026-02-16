@@ -94,6 +94,39 @@
             </div>
           </dl>
         </div>
+
+        <!-- Autorización -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Autorización</h2>
+          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Piezas Autorizadas</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ purchase.authorized_amount ?? '-' }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Resolución</dt>
+              <dd class="text-base mt-1" :class="purchase.status === 'Rechazado' ? 'text-red-600 font-medium' : 'text-green-600 font-medium'">
+                {{ purchase.status === 'Rechazado' ? 'Rechazado' : (purchase.authorized_by_area_chief_id || purchase.authorized_by_admin_id ? 'Aprobado' : 'Pendiente') }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Autorizado por Jefe de Área</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ purchase.authorized_by_area_chief?.name || (purchase.authorized_by_area_chief_id ? `ID ${purchase.authorized_by_area_chief_id}` : '-') }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Fecha autorización Jefe de Área</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ formatDate(purchase.authorized_by_area_chief_date) }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Autorizado por Administración</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ purchase.authorized_by_admin?.name || (purchase.authorized_by_admin_id ? `ID ${purchase.authorized_by_admin_id}` : '-') }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Fecha autorización Administración</dt>
+              <dd class="text-base text-gray-900 mt-1">{{ formatDate(purchase.authorized_by_admin_date) }}</dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </div>
   </BaseLayout>

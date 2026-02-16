@@ -58,11 +58,11 @@
 }
 
 .dark .text-gray-600 {
-  color: #9ca3af !important;
+  color: #cbd5e1 !important;
 }
 
 .dark .text-gray-500 {
-  color: #6b7280 !important;
+  color: #94a3b8 !important;
 }
 
 .dark .text-gray-400 {
@@ -94,6 +94,18 @@
 
 .dark .hover\:bg-gray-200:hover {
   background-color: #4b5563 !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #374151 !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: #374151 !important;
+}
+
+.dark .text-gray-300 {
+  color: #e5e7eb !important;
 }
 
 /* Forms - inputs, textarea, select */

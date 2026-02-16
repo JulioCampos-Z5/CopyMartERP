@@ -1,12 +1,12 @@
-import api from '@/config/api';
+import api, { API_BASE_URL } from '@/config/api';
 
 export interface Ticket {
   ticket_id: number;
   client_id: number;
   branch_id: number;
   area_id?: number;
-  report_type: 'PREVENTIVO' | 'CORRECTIVO' | 'INSTALACION' | 'DESINSTALACION' | 'VISITA_CLIENTE';
-  report_status: 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADO' | 'CANCELADO';
+  report_type: 'conectividad' | 'atasco' | 'toner' | 'quejas' | 'copia' | 'ruidos' | 'impresion' | 'otros';
+  report_status: 'pendiente' | 'listo' | 'urgente' | 'programado' | 'informativo' | 'no_quedo_en_la_visita' | 'atencion';
   description: string;
   evidence?: string;
   corrective_action?: string;
@@ -19,7 +19,7 @@ export interface TicketCreate {
   client_id: number;
   branch_id: number;
   area_id?: number;
-  report_type: 'PREVENTIVO' | 'CORRECTIVO' | 'INSTALACION' | 'DESINSTALACION' | 'VISITA_CLIENTE';
+  report_type: 'conectividad' | 'atasco' | 'toner' | 'quejas' | 'copia' | 'ruidos' | 'impresion' | 'otros';
   description: string;
   evidence?: string;
   corrective_action?: string;
@@ -28,11 +28,16 @@ export interface TicketCreate {
 export interface TicketUpdate {
   branch_id?: number;
   area_id?: number;
-  report_status?: 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADO' | 'CANCELADO';
-  report_type?: 'PREVENTIVO' | 'CORRECTIVO' | 'INSTALACION' | 'DESINSTALACION' | 'VISITA_CLIENTE';
+  report_status?: 'pendiente' | 'listo' | 'urgente' | 'programado' | 'informativo' | 'no_quedo_en_la_visita' | 'atencion';
+  report_type?: 'conectividad' | 'atasco' | 'toner' | 'quejas' | 'copia' | 'ruidos' | 'impresion' | 'otros';
   description?: string;
   evidence?: string;
   corrective_action?: string;
+}
+
+export interface EvidenceUploadResponse {
+  file_path: string;
+  filename: string;
 }
 
 const ticketService = {
@@ -70,6 +75,23 @@ const ticketService = {
   async update(ticketId: number, data: TicketUpdate): Promise<Ticket> {
     const response = await api.put(`/api/tickets/${ticketId}`, data);
     return response.data;
+  },
+
+  async uploadEvidence(file: File): Promise<EvidenceUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/api/tickets/evidence/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  getEvidenceUrl(filePath?: string): string {
+    if (!filePath) return '';
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) return filePath;
+    const normalized = filePath.replace(/\\/g, '/');
+    const filename = normalized.split('/').pop();
+    return `${API_BASE_URL}/api/tickets/evidence/${filename}`;
   },
 
   // Eliminar ticket

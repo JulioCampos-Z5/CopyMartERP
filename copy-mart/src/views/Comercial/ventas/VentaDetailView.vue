@@ -279,7 +279,7 @@ const loadBillings = async () => {
 
 // Actions
 const editSale = () => {
-  router.push(`/ventas/${saleId.value}/editar`)
+  router.push(`/comercial/ventas/editar/${saleId.value}`)
 }
 
 const viewBilling = (billingId: number) => {

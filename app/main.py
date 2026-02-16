@@ -1,5 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from logger_config import logger
+from pydantic import BaseModel
+from typing import Any, Optional
+from pathlib import Path
+from datetime import datetime
+import json
 from auth.routers import router as user_router
 from equipment.routers import router as equipment_router
 from rent.routers import router as rent_router
@@ -47,12 +53,57 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:5174",
-        "http://localhost:3000"
+        "http://localhost:5175",
+        "http://localhost:5176",
+        "http://localhost:3000",
+        "http://192.168.1.50:5173",
+        "http://192.168.1.50:5174",
+        "http://192.168.1.50:5175",
+        "http://192.168.1.50:5176",
+        "http://192.168.1.50:3000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class FrontendLogEntry(BaseModel):
+    level: str
+    message: str
+    data: Optional[Any] = None
+    timestamp: Optional[str] = None
+    url: Optional[str] = None
+
+
+def _append_frontend_log(entry: FrontendLogEntry) -> None:
+    log_dir = Path(__file__).parent.parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+    log_file = log_dir / "node.log"
+
+    ts = entry.timestamp or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    payload = ""
+    if entry.data is not None:
+        try:
+            payload = json.dumps(entry.data, ensure_ascii=False)
+        except TypeError:
+            payload = json.dumps(str(entry.data), ensure_ascii=False)
+
+    line = f"[{ts}] [{entry.level.upper()}] {entry.message}"
+    if payload:
+        line += f" | {payload}"
+    if entry.url:
+        line += f" | url={entry.url}"
+    line += "\n"
+
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+
+
+@app.post("/api/logs/frontend")
+def log_frontend(entry: FrontendLogEntry):
+    _append_frontend_log(entry)
+    return {"status": "ok"}
 
 app.include_router(user_router, prefix="/api")
 app.include_router(equipment_router, prefix="/api")

@@ -75,6 +75,8 @@ const DEPARTMENT_PERMISSIONS: Record<string, DepartmentPermissions> = {
 export function usePermissions() {
   const user = ref<User | null>(null)
 
+  const normalizeRole = () => String((user.value as any)?.role || (user.value as any)?.rol || '').toLowerCase()
+
   // Cargar usuario desde localStorage
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
@@ -93,7 +95,7 @@ export function usePermissions() {
   const getAccessibleModules = computed<Module[]>(() => {
     if (!user.value) return []
     
-    const rol = user.value.role?.toLowerCase()
+    const rol = normalizeRole()
     const department = user.value.department?.toLowerCase()
     
     let allowedModuleKeys: string[] = []
@@ -134,19 +136,19 @@ export function usePermissions() {
   // Permisos de acciones (crear, editar, eliminar)
   const canCreate = computed(() => {
     if (!user.value) return false
-    const rol = user.value.role?.toLowerCase()
+    const rol = normalizeRole()
     return ROLE_PERMISSIONS[rol]?.canCreate || false
   })
 
   const canEdit = computed(() => {
     if (!user.value) return false
-    const rol = user.value.role?.toLowerCase()
+    const rol = normalizeRole()
     return ROLE_PERMISSIONS[rol]?.canEdit || false
   })
 
   const canDelete = computed(() => {
     if (!user.value) return false
-    const rol = user.value.role?.toLowerCase()
+    const rol = normalizeRole()
     return ROLE_PERMISSIONS[rol]?.canDelete || false
   })
 
@@ -154,7 +156,7 @@ export function usePermissions() {
   const userInfo = computed(() => ({
     name: user.value?.full_name || 'Usuario',
     email: user.value?.email || '',
-    role: user.value?.role || '',
+    role: (user.value as any)?.role || (user.value as any)?.rol || '',
     department: user.value?.department || '',
     initials: user.value?.full_name
       ?.split(' ')
@@ -165,12 +167,12 @@ export function usePermissions() {
 
   // Verificar si es admin
   const isAdmin = computed(() => {
-    return user.value?.role?.toLowerCase() === 'administrador'
+    return normalizeRole() === 'administrador'
   })
 
   // Verificar si es gerencia
   const isManager = computed(() => {
-    return user.value?.role?.toLowerCase() === 'gerencia'
+    return normalizeRole() === 'gerencia'
   })
 
   return {

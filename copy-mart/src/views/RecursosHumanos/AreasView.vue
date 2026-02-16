@@ -109,7 +109,7 @@
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ getBranchName(area.branch_id) }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button @click="editArea(area)" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</button>
-                    <button @click="deleteArea(area.area_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
+                    <button v-if="canDelete" @click="deleteArea(area.area_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                   </td>
                 </tr>
               </tbody>
@@ -141,7 +141,7 @@
               
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
-                <select v-model="selectedClientId" @change="onClientChange" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <select v-model.number="selectedClientId" @change="onClientChange" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                   <option :value="null">Seleccionar cliente...</option>
                   <option v-for="client in clients" :key="client.client_id" :value="client.client_id">
                     {{ client.name }}
@@ -151,7 +151,7 @@
               
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal *</label>
-                <select v-model="areaForm.branch_id" required :disabled="!selectedClientId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100">
+                <select v-model.number="areaForm.branch_id" required :disabled="!selectedClientId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100">
                   <option :value="null">{{ selectedClientId ? 'Seleccionar sucursal...' : 'Seleccione un cliente primero' }}</option>
                   <option v-for="branch in filteredBranches" :key="branch.branch_id" :value="branch.branch_id">
                     {{ branch.name }}
@@ -180,6 +180,7 @@ import { ref, computed, onMounted } from 'vue'
 import BaseLayout from '@/components/BaseLayout.vue'
 import { clientService } from '@/services/clientService'
 import type { Area, Client, Branch } from '@/types'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 // Estado local
 const areas = ref<Area[]>([])
@@ -191,6 +192,7 @@ const showModal = ref(false)
 const editingArea = ref<Area | null>(null)
 const searchQuery = ref('')
 const selectedClientId = ref<number | null>(null)
+const canDelete = computed(() => hasDeleteAccess(getStoredUser()))
 
 const areaForm = ref({
   name: '',
@@ -205,7 +207,7 @@ const stats = computed(() => ({
 
 const filteredBranches = computed(() => {
   if (!selectedClientId.value) return []
-  return branches.value.filter(b => b.client_id === selectedClientId.value)
+  return branches.value.filter(b => Number(b.client_id) === Number(selectedClientId.value))
 })
 
 const filteredAreas = computed(() => {
@@ -252,7 +254,11 @@ const loadClients = async () => {
     for (const client of clients.value) {
       if (client.client_id) {
         const clientBranches = await clientService.getClientBranches(client.client_id)
-        allBranches.push(...clientBranches)
+        const normalizedBranches = (clientBranches || []).map(branch => ({
+          ...branch,
+          client_id: Number((branch as any).client_id ?? client.client_id)
+        }))
+        allBranches.push(...normalizedBranches)
       }
     }
     branches.value = allBranches
@@ -286,7 +292,7 @@ const editArea = (area: Area) => {
   
   // Encontrar el cliente de esta sucursal
   const branch = branches.value.find(b => b.branch_id === area.branch_id)
-  selectedClientId.value = branch?.client_id || null
+  selectedClientId.value = branch ? Number(branch.client_id) : null
   
   showModal.value = true
 }
@@ -306,7 +312,10 @@ const createArea = async () => {
   if (!areaForm.value.branch_id) return
   
   try {
-    await clientService.createArea(areaForm.value.branch_id, { name: areaForm.value.name })
+    await clientService.createArea(areaForm.value.branch_id, {
+      branch_id: areaForm.value.branch_id,
+      name: areaForm.value.name
+    })
     await loadAreas()
     closeModal()
     alert('Área creada exitosamente')
@@ -329,6 +338,10 @@ const updateArea = async () => {
 }
 
 const deleteArea = async (areaId: number) => {
+  if (!canDelete.value) {
+    alert('No tienes permisos para eliminar áreas')
+    return
+  }
   if (!confirm('¿Está seguro de eliminar esta área?')) return
   
   try {

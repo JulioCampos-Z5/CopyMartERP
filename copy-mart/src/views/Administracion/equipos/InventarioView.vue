@@ -204,7 +204,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button @click="goToEquipmentDetail(item.item_id)" class="text-purple-600 hover:text-purple-900 mr-3">Ver</button>
                       <button @click="goToEditEquipment(item.item_id)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                      <button @click="deleteEquipment(item.item_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
+                      <button v-if="canDeleteAction" @click="deleteEquipment(item.item_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
                 </tbody>
@@ -265,7 +265,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button @click="goToSparepartDetail(part.sparepart_id)" class="text-purple-600 hover:text-purple-900 mr-3">Ver</button>
                       <button @click="goToEditSparepart(part.sparepart_id)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                      <button @click="deleteSparepart(part.sparepart_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
+                      <button v-if="canDeleteAction" @click="deleteSparepart(part.sparepart_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
                 </tbody>
@@ -445,7 +445,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button @click="deleteShelf(shelf)" class="text-red-600 hover:text-red-900">
+                    <button v-if="canDeleteAction" @click="deleteShelf(shelf)" class="text-red-600 hover:text-red-900">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
@@ -577,7 +577,7 @@
               <div v-for="brand in brands" :key="brand.brand_id" 
                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
                 <span class="text-sm font-medium text-gray-900">{{ brand.name }}</span>
-                <button @click="deleteBrand(brand.brand_id)" 
+                <button v-if="canDeleteAction" @click="deleteBrand(brand.brand_id)" 
                         class="text-red-500 hover:text-red-700">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -899,6 +899,7 @@ import { equipmentService } from '@/services/equipmentService'
 import { sparepartService } from '@/services/sparepartService'
 import { catalogService, inventoryService, shelfService } from '@/services/inventoryService'
 import { useModalBus } from '@/composables/useModalBus'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 export default {
   name: 'InventarioView',
@@ -1018,6 +1019,9 @@ export default {
     }
   },
   computed: {
+    canDeleteAction() {
+      return hasDeleteAccess(getStoredUser())
+    },
     filteredEquipment() {
       return this.equipment.filter(item => {
         const matchesCategory = !this.filterCategory || item.category === this.filterCategory
@@ -1109,6 +1113,10 @@ export default {
     },
     
     async deleteEquipment(equipmentId) {
+      if (!this.canDeleteAction) {
+        this.showError('No tienes permisos para eliminar equipos')
+        return
+      }
       if (!confirm('¿Está seguro de eliminar este equipo?')) return
       
       try {
@@ -1177,6 +1185,10 @@ export default {
     },
     
     async deleteBrand(brandId) {
+      if (!this.canDeleteAction) {
+        this.showError('No tienes permisos para eliminar marcas')
+        return
+      }
       if (!confirm('¿Está seguro de eliminar esta marca?')) return
       
       try {
@@ -1242,6 +1254,10 @@ export default {
     },
 
     async deleteSparepart(sparepartId) {
+      if (!this.canDeleteAction) {
+        this.showError('No tienes permisos para eliminar refacciones')
+        return
+      }
       if (!confirm('¿Está seguro de eliminar esta refacción?')) return
       
       try {
@@ -1477,6 +1493,10 @@ export default {
       }
     },
     async deleteShelf(shelf) {
+      if (!this.canDeleteAction) {
+        alert('No tienes permisos para eliminar estantes')
+        return
+      }
       if (!confirm(`¿Eliminar el estante "${shelf.name}"?`)) return
       try {
         await shelfService.deleteShelf(shelf.shelf_id)

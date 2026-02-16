@@ -274,7 +274,7 @@
                     <td class="px-4 py-4 whitespace-nowrap">
                       <div class="flex items-center">
                         <div class="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-semibold">
-                          {{ client.name.charAt(0).toUpperCase() }}
+                          {{ (client.name || '?').charAt(0).toUpperCase() }}
                         </div>
                         <div class="ml-3">
                           <div class="text-sm font-medium text-gray-900">{{ client.name }}</div>
@@ -298,7 +298,7 @@
                         <button @click="editClient(client)" class="text-blue-600 hover:text-blue-800">
                           Editar
                         </button>
-                        <button @click="deleteClient(client.client_id)" class="text-red-600 hover:text-red-800">
+                        <button v-if="canDeleteAction" @click="deleteClient(client.client_id)" class="text-red-600 hover:text-red-800">
                           Eliminar
                         </button>
                       </div>
@@ -396,6 +396,7 @@
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
 import { clientService } from '@/services/clientService.ts'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 export default {
   name: 'AtencionClientesView',
@@ -429,6 +430,11 @@ export default {
         contact_email: '',
         notes: ''
       }
+    }
+  },
+  computed: {
+    canDeleteAction() {
+      return hasDeleteAccess(getStoredUser())
     }
   },
   mounted() {
@@ -532,6 +538,10 @@ export default {
     },
 
     async deleteClient(clientId) {
+      if (!this.canDeleteAction) {
+        alert('No tienes permisos para eliminar clientes')
+        return
+      }
       if (!confirm('¿Está seguro de eliminar este cliente?')) return
       
       try {

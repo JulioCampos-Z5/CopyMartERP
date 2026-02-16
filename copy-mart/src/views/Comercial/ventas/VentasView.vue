@@ -317,7 +317,6 @@ export default {
         this.equipment = equiposDisponibles
         
         if (equiposDisponibles.length === 0) {
-          console.warn('⚠️ No hay equipos disponibles en bodega para venta.')
           this.info('No hay equipos disponibles en bodega. Por favor, agregue equipos al inventario o cambie el estado de equipos existentes a "bodega".', 'Sin equipos disponibles', 6000)
         }
       } catch (err) {
@@ -402,8 +401,7 @@ export default {
     },
 
     viewSale(sale) {
-      const text = `Venta: ${sale.invoice_number || '-'}\nCliente: ${sale.client?.name || '-'}\nEquipo: ${sale.equipment?.model || '-'}\nPrecio: ${this.formatCurrency(sale.sale_price)}`
-      this.info(text, 'Detalle de Venta', 4000)
+      this.goToDetail(sale.sale_id)
     },
 
     async updateStatus(saleId, newStatus) {
@@ -417,16 +415,7 @@ export default {
     },
     
     editSale(sale) {
-      this.editingSaleId = sale.sale_id
-      this.newSale = {
-        client_id: sale.client_id,
-        item_id: sale.item_id,
-        sale_price: sale.sale_price,
-        sale_status: sale.sale_status,
-        is_foreign: sale.is_foreign
-      }
-      this.showEditForm = true
-      this.showCreateForm = false
+      this.goToEditSale(sale.sale_id)
     },
 
     async updateSale() {

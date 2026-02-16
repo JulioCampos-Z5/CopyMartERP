@@ -173,7 +173,6 @@ const loadClient = async () => {
           }
         }
       } catch (err) {
-        console.warn('No se pudo cargar el contacto principal:', err)
       }
     }
     

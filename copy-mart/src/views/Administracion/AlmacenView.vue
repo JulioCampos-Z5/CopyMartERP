@@ -233,7 +233,7 @@
               <div>
                 <h4 class="font-semibold text-gray-900">{{ brand.name }}</h4>
               </div>
-              <button @click="deleteBrand(brand.brand_id)" class="text-red-600 hover:text-red-800">
+              <button v-if="canDelete" @click="deleteBrand(brand.brand_id)" class="text-red-600 hover:text-red-800">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -270,7 +270,7 @@
                 <div>
                   <h4 class="font-semibold text-gray-900">{{ supplier.name }}</h4>
                 </div>
-                <button @click="deleteSupplier(supplier.supplier_id)" class="text-red-600 hover:text-red-800">
+                <button v-if="canDelete" @click="deleteSupplier(supplier.supplier_id)" class="text-red-600 hover:text-red-800">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
@@ -337,8 +337,10 @@ import { supplierService } from '@/services/supplierService'
 import { sparepartService } from '@/services/sparepartService'
 import { purchaseService } from '@/services/purchaseService'
 import type { Brand, Supplier, Sparepart, Purchase } from '@/types'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 const activeTab = ref('inventory')
+const canDelete = computed(() => hasDeleteAccess(getStoredUser()))
 const tabs = [
   { id: 'inventory', label: 'Inventario' },
   { id: 'brands', label: 'Marcas' },
@@ -415,6 +417,10 @@ const saveBrand = async () => {
 }
 
 const deleteBrand = async (brandId: number) => {
+  if (!canDelete.value) {
+    alert('No tienes permisos para eliminar marcas')
+    return
+  }
   if (!confirm('¿Estás seguro de eliminar esta marca?')) return
   try {
     await brandService.deleteBrand(brandId)
@@ -459,6 +465,10 @@ const saveSupplier = async () => {
 }
 
 const deleteSupplier = async (supplierId: number) => {
+  if (!canDelete.value) {
+    alert('No tienes permisos para eliminar proveedores')
+    return
+  }
   if (!confirm('¿Estás seguro de eliminar este proveedor?')) return
   try {
     await supplierService.deleteSupplier(supplierId)

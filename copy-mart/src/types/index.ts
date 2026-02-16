@@ -33,6 +33,8 @@ export type PurchaseStatus =
   | 'Falta Pago Proveedor'
   | 'Falta Factura'
   | 'Por Revisar'
+  | 'Falta Autorización'
+  | 'Falta Orden de Servicio'
   | 'Pausado Back Orders'
   | 'Concluido'
   | 'Rechazado'
@@ -68,6 +70,8 @@ export interface Purchase {
   authorized_by_area_chief_date?: string
   authorized_by_admin_id?: number
   authorized_by_admin_date?: string
+  authorized_by_area_chief?: { contact_id: number; name: string }
+  authorized_by_admin?: { contact_id: number; name: string }
   
   // Archivos
   quotation_file?: string

@@ -81,6 +81,7 @@
           <div class="grid grid-cols-1 gap-3">
             <router-link 
               to="/dashboard"
+              v-if="canAccess('/dashboard')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -100,6 +101,7 @@
           <div class="grid grid-cols-4 gap-3">
             <router-link 
               to="/ventas"
+              v-if="canAccess('/ventas')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -113,6 +115,7 @@
 
             <router-link 
               to="/rentas"
+              v-if="canAccess('/rentas')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -126,6 +129,7 @@
 
             <router-link 
               to="/atencion-clientes"
+              v-if="canAccess('/atencion-clientes')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -139,6 +143,7 @@
 
             <router-link 
               to="/clientes"
+              v-if="canAccess('/clientes')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -152,6 +157,7 @@
 
             <router-link 
               to="/produccion"
+              v-if="canAccess('/produccion')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -171,6 +177,7 @@
           <div class="grid grid-cols-4 gap-3">
             <router-link 
               to="/compras"
+              v-if="canAccess('/compras')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -184,6 +191,7 @@
 
             <router-link 
               to="/almacen"
+              v-if="canAccess('/almacen')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -197,6 +205,7 @@
 
             <router-link 
               to="/cobranza"
+              v-if="canAccess('/cobranza')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -210,6 +219,7 @@
 
             <router-link 
               to="/facturacion"
+              v-if="canAccess('/facturacion')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -223,6 +233,7 @@
 
             <router-link 
               to="/inventario"
+              v-if="canAccess('/inventario')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -236,6 +247,7 @@
 
             <router-link 
               to="/administracion/usuarios"
+              v-if="canAccess('/administracion/usuarios')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -255,6 +267,7 @@
           <div class="grid grid-cols-4 gap-3">
             <router-link 
               to="/rutas"
+              v-if="canAccess('/rutas')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -268,6 +281,7 @@
 
             <router-link 
               to="/ordenes-servicio"
+              v-if="canAccess('/ordenes-servicio')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -282,6 +296,7 @@
 
             <router-link 
               to="/recursos-humanos"
+              v-if="canAccess('/recursos-humanos')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -295,6 +310,7 @@
 
             <router-link 
               to="/ti"
+              v-if="canAccess('/ti')"
               @click="showAppsMenu = false"
               class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
             >
@@ -314,6 +330,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { canAccessPath, getStoredUser } from '@/config/accessControl'
 
 const router = useRouter()
 
@@ -324,6 +341,8 @@ const currentUser = ref({
   email: 'usuario@copymart.com'
 })
 
+const currentAccessUser = ref(null)
+
 const loadCurrentUser = () => {
   try {
     const userDataStr = localStorage.getItem('user')
@@ -333,11 +352,14 @@ const loadCurrentUser = () => {
         name: userData.name || userData.full_name || 'Usuario Demo',
         email: userData.email || 'usuario@copymart.com'
       }
+      currentAccessUser.value = userData
     }
   } catch (error) {
     console.error('Error loading user:', error)
   }
 }
+
+const canAccess = (path) => canAccessPath(currentAccessUser.value || getStoredUser(), path)
 
 const toggleAppsMenu = () => {
   showAppsMenu.value = !showAppsMenu.value

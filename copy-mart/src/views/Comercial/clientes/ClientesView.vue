@@ -144,7 +144,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" @click.stop>
                       <button @click="goToDetail(client.client_id)" class="text-green-600 hover:text-green-900 mr-3">Ver</button>
                       <button @click="goToEditClient(client.client_id)" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                      <button @click="deleteClient(client.client_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
+                      <button v-if="canDeleteAction" @click="deleteClient(client.client_id)" class="text-red-600 hover:text-red-900">Eliminar</button>
                     </td>
                   </tr>
                 </tbody>
@@ -180,7 +180,7 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div v-if="showDeleteConfirm && canDeleteAction" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div class="p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirmar eliminación</h3>
@@ -203,6 +203,7 @@
 import AppNavigation from '@/components/AppNavigation.vue'
 import { clientService } from '@/services/clientService.ts'
 import { contactService } from '@/services/contactService.ts'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 export default {
   name: 'ClientesView',
@@ -248,6 +249,9 @@ export default {
         companies: this.clients.filter(c => c.client_type === 'empresa').length,
         persons: this.clients.filter(c => c.client_type === 'persona').length
       }
+    },
+    canDeleteAction() {
+      return hasDeleteAccess(getStoredUser())
     }
   },
   async mounted() {
@@ -278,7 +282,6 @@ export default {
           const contactsRes = await contactService.getContacts({ pageSize: 500 })
           allContacts = contactsRes.items || []
         } catch (err) {
-          console.warn('No se pudieron cargar contactos:', err)
         }
         
         // Crear mapa de contactos por contact_id para búsqueda rápida O(1)
@@ -342,11 +345,21 @@ export default {
     },
     
     deleteClient(clientId) {
+      if (!this.canDeleteAction) {
+        this.showMessage('error', 'Sin permisos', 'No tienes permisos para eliminar clientes')
+        return
+      }
       this.deleteClientId = clientId
       this.showDeleteConfirm = true
     },
 
     async confirmDelete() {
+      if (!this.canDeleteAction) {
+        this.showDeleteConfirm = false
+        this.deleteClientId = null
+        this.showMessage('error', 'Sin permisos', 'No tienes permisos para eliminar clientes')
+        return
+      }
       try {
         await clientService.deleteClient(this.deleteClientId)
         await this.loadClients()

@@ -8,9 +8,14 @@
 
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import type { ApiError } from '@/types'
+import logger from '@/utils/logger'
+import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
 // URL base del backend
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+export const API_BASE_URL = 'http://192.168.1.50:8000'
+
+logger.debug(`API Base URL: ${API_BASE_URL}`)
 
 // Endpoints de la API (prefijos de los routers del backend)
 export const API_ENDPOINTS = {
@@ -59,6 +64,10 @@ export const API_ENDPOINTS = {
 
 interface ApiRequestConfig extends AxiosRequestConfig {
   skipAuth?: boolean
+  body?: any
+  metadata?: {
+    startTime: number
+  }
 }
 
 // Cliente Axios con manejo de token y errores
@@ -71,7 +80,18 @@ const apiClient: AxiosInstance = axios.create({
 
 // Interceptor para agregar Authorization automáticamente
 apiClient.interceptors.request.use((config: any) => {
+  // Registrar tiempo de inicio
+  config.metadata = { startTime: Date.now() }
+
+  if (String(config.method || '').toLowerCase() === 'delete') {
+    const currentUser = getStoredUser()
+    if (!hasDeleteAccess(currentUser)) {
+      return Promise.reject(new Error('No tienes permisos para eliminar registros.'))
+    }
+  }
+  
   const token = localStorage.getItem('token')
+  logger.debug(`API Request: ${config.method?.toUpperCase() || 'GET'} ${config.url}`)
   if (token && !config.skipAuth) {
     config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${token}`
@@ -81,10 +101,40 @@ apiClient.interceptors.request.use((config: any) => {
 
 // Interceptor de respuesta para normalizar errores
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    // Calcular tiempo de respuesta
+    const startTime = (response.config as any).metadata?.startTime || Date.now()
+    const responseTime = Date.now() - startTime
+    const responseSize = JSON.stringify(response.data).length
+    
+    logger.httpRequest(
+      response.config.method?.toUpperCase() || 'GET',
+      response.config.url || 'unknown',
+      response.status,
+      responseTime,
+      responseSize
+    )
+    
+    return response
+  },
   (error: any) => {
+    // Calcular tiempo de respuesta incluso en error
+    const startTime = error.config?.metadata?.startTime || Date.now()
+    const responseTime = Date.now() - startTime
+    
     const status = error.response?.status
     let detail = error.response?.data?.detail || error.message
+    const url = error.config?.url || 'unknown'
+    const method = error.config?.method?.toUpperCase() || 'GET'
+    
+    // Registrar error de CORS
+    if (error.message === 'Network Error' || !error.response) {
+      logger.corsError(url, API_BASE_URL, status || 'Network Error')
+    } else {
+      // Registrar error con métrica de tiempo
+      logger.httpRequest(method, url, status || 0, responseTime)
+      logger.apiError(method, url, status, detail)
+    }
     
     // Si detail es un array u objeto, convertirlo a string legible
     if (typeof detail === 'object') {
@@ -143,7 +193,11 @@ export async function apiRequest<T = any>(
     const response = await apiClient.request<T>(config)
     return response.data
   } catch (error: any) {
-    console.error(`API Request Error [${options.method || 'GET'}] ${endpoint}:`, error)
+    logger.error(`API Request Error [${options.method || 'GET'}] ${endpoint}`, {
+      message: error.message,
+      status: error.response?.status,
+      detail: error.response?.data?.detail
+    })
     throw error
   }
 }

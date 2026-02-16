@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from pathlib import Path
+import uuid
 from core.database import get_db
 from auth.routers import get_current_user
 from auth.models import User
@@ -9,6 +12,39 @@ from ticket.services import TicketService
 from ticket.models import ReportStatus
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
+
+UPLOADS_DIR = Path(__file__).resolve().parent.parent / "uploads" / "tickets"
+
+
+@router.post("/evidence/upload", status_code=status.HTTP_201_CREATED)
+async def upload_ticket_evidence(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    original_name = Path(file.filename or "evidence").name
+    safe_name = f"{uuid.uuid4().hex}_{original_name}"
+    destination = UPLOADS_DIR / safe_name
+
+    content = await file.read()
+    with destination.open("wb") as output_file:
+        output_file.write(content)
+
+    return {
+        "file_path": f"uploads/tickets/{safe_name}",
+        "filename": original_name
+    }
+
+
+@router.get("/evidence/{filename}")
+def get_ticket_evidence(
+    filename: str,
+    current_user: User = Depends(get_current_user)
+):
+    file_path = UPLOADS_DIR / Path(filename).name
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Archivo no encontrado")
+    return FileResponse(path=file_path, filename=file_path.name)
 
 @router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
 def create_ticket(

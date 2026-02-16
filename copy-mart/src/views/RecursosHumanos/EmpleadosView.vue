@@ -109,7 +109,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700">Usuario</label>
-                <select v-model="form.user_id" required class="input-field">
+                <select v-model.number="form.user_id" required class="input-field">
                   <option value="">Seleccionar usuario</option>
                   <option v-for="user in users" :key="user.user_id" :value="user.user_id">
                     {{ user.full_name }}
@@ -258,16 +258,26 @@ const viewPayrolls = (employee) => {
 
 const saveEmployee = async () => {
   try {
+    const payload = {
+      ...form.value,
+      user_id: Number(form.value.user_id),
+      nss: String(form.value.nss || '').replace(/\D/g, ''),
+      rfc: String(form.value.rfc || '').trim().toUpperCase(),
+      curp: String(form.value.curp || '').trim().toUpperCase(),
+      phone_emergency: String(form.value.phone_emergency || '').trim(),
+      contact_emergency: String(form.value.contact_emergency || '').trim()
+    }
+
     if (editingEmployee.value) {
-      await rhService.employees.update(editingEmployee.value.employee_id, form.value);
+      await rhService.employees.update(editingEmployee.value.employee_id, payload);
     } else {
-      await rhService.employees.create(form.value);
+      await rhService.employees.create(payload);
     }
     closeModal();
     loadEmployees();
   } catch (error) {
     console.error('Error saving employee:', error);
-    alert('Error al guardar el empleado');
+    alert(`Error al guardar el empleado: ${error?.response?.data?.detail || error?.message || 'Error desconocido'}`);
   }
 };
 
