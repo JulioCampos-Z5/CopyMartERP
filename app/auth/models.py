@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, DateTime, Integer, Enum as SQLEnum
+from sqlalchemy import Column, String, Boolean, DateTime, Integer, Enum as SQLEnum, JSON
 from core.database import Base
 from datetime import datetime
 import enum
@@ -19,6 +19,7 @@ class User(Base):
     __tablename__ = "users"
 
     user_id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(150), unique=True, nullable=False, default="")
     email = Column(String(255), unique=True, index=True, nullable=False)
     password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
@@ -26,3 +27,5 @@ class User(Base):
     department = Column(SQLEnum(DepartmentEnum), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime,default= datetime.utcnow)
+    # Permisos granulares por área: {area: {create: bool, edit: bool, delete: bool, view: bool}}
+    permissions = Column(JSON, nullable=True, default=dict)

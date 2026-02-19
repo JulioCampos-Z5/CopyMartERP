@@ -85,7 +85,7 @@
                 <option value="cancelada">Cancelada</option>
               </select>
             </div>
-            <button @click="goToNewSale" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center">
+            <button v-if="permissions.canCreate" @click="goToNewSale" class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 flex items-center">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
@@ -202,10 +202,10 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button @click="viewSale(sale)" class="text-blue-600 hover:text-blue-900 mr-3">Ver</button>
                       <button @click="generateSalePdf(sale)" class="text-red-600 hover:text-red-900 mr-3">PDF</button>
-                      <button @click="editSale(sale)" class="text-purple-600 hover:text-purple-900 mr-3">Editar</button>
-                      <button v-if="sale.sale_status === 'pendiente'" @click="updateStatus(sale.sale_id, 'confirmada')" class="text-green-600 hover:text-green-900 mr-3">Confirmar</button>
-                      <button v-if="sale.sale_status === 'confirmada'" @click="updateStatus(sale.sale_id, 'entregada')" class="text-blue-600 hover:text-blue-900 mr-3">Entregar</button>
-                      <button v-if="sale.sale_status !== 'entregada'" @click="cancelSale(sale.sale_id)" class="text-red-600 hover:text-red-900">Cancelar</button>
+                      <button v-if="permissions.canEdit" @click="editSale(sale)" class="text-purple-600 hover:text-purple-900 mr-3">Editar</button>
+                      <button v-if="permissions.canEdit && sale.sale_status === 'pendiente'" @click="updateStatus(sale.sale_id, 'confirmada')" class="text-green-600 hover:text-green-900 mr-3">Confirmar</button>
+                      <button v-if="permissions.canEdit && sale.sale_status === 'confirmada'" @click="updateStatus(sale.sale_id, 'entregada')" class="text-blue-600 hover:text-blue-900 mr-3">Entregar</button>
+                      <button v-if="permissions.canDelete && sale.sale_status !== 'entregada'" @click="cancelSale(sale.sale_id)" class="text-red-600 hover:text-red-900">Cancelar</button>
                     </td>
                   </tr>
                 </tbody>
@@ -225,6 +225,7 @@ import { clientService } from '@/services/clientService.ts'
 import { equipmentService } from '@/services/equipmentService.ts'
 import { useModalBus } from '@/composables/useModalBus.ts'
 import { usePdfGenerator } from '@/composables/usePdfGenerator.ts'
+import { useGranularPermissions } from '@/composables/useGranularPermissions.ts'
 
 export default {
   name: 'VentasView',
@@ -258,6 +259,14 @@ export default {
       },
       filters: {
         sale_status: ''
+      },
+      // Permisos granulares
+      permissions: {
+        canView: false,
+        canCreate: false,
+        canEdit: false,
+        canDelete: false,
+        loaded: false
       }
     }
   },
@@ -270,6 +279,7 @@ export default {
     }
   },
   async mounted() {
+    await this.loadPermissions()
     await this.loadSales()
     await this.loadClients()
     await this.loadEquipment()
@@ -280,6 +290,40 @@ export default {
       const { generateInvoicePdf } = usePdfGenerator()
       return { success, error, info, confirm, generateInvoicePdf }
     })(),
+    async loadPermissions() {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.warn('⚠️ No hay token, redirigiendo al login')
+          this.$router.push('/login')
+          return
+        }
+        
+        const { hasPermission, loadPermissions } = useGranularPermissions('ventas')
+        await loadPermissions(token)
+        
+        // Obtener permisos del composable
+        const perms = useGranularPermissions('ventas')
+        this.permissions.canView = perms.canView.value
+        this.permissions.canCreate = perms.canCreate.value
+        this.permissions.canEdit = perms.canEdit.value
+        this.permissions.canDelete = perms.canDelete.value
+        this.permissions.loaded = true
+        
+        console.log('✓ Permisos de ventas cargados:', this.permissions)
+        
+        // Si no tiene permiso de ver, mostrar mensaje y salir
+        if (!this.permissions.canView) {
+          this.error('No tienes permisos para ver el módulo de ventas', 'Acceso Denegado')
+          setTimeout(() => {
+            this.$router.push('/dashboard')
+          }, 2000)
+        }
+      } catch (err) {
+        console.error('Error al cargar permisos:', err)
+        this.permissions.loaded = true
+      }
+    },
     async loadSales() {
       this.loading = true
       this.error = null

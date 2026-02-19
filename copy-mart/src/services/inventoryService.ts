@@ -7,10 +7,31 @@
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete, API_ENDPOINTS, buildUrlWithParams } from '@/config/api'
 
 // Enums
-export type ColorType = 'k' | 'c' | 'm' | 'y'
-export type QualityType = 'original' | 'generico' | 'reparado' | 'nueva' | 'usado' | 'n/a'
-export type ItemType = 'toner' | 'refaccion'
-export type SectionLocation = 'seccion_1' | 'seccion_2' | 'seccion_3' | 'seccion_4' | 'seccion_5' | 'seccion_6'
+export type ColorType = 'K' | 'C' | 'M' | 'Y'
+export type QualityType = 'ORIGINAL' | 'GENERICO' | 'REPARADO' | 'NUEVA' | 'USADO' | 'NA'
+export type ItemType = 'TONER' | 'REFACCION'
+export type SectionLocation = 'SECCION_1' | 'SECCION_2' | 'SECCION_3' | 'SECCION_4' | 'SECCION_5' | 'SECCION_6'
+
+function normalizeEnumValue(value?: string): string | undefined {
+  if (value === undefined || value === null) return undefined
+  return String(value).toUpperCase()
+}
+
+function normalizeCatalogPayload<T extends ItemCatalogCreate | ItemCatalogUpdate>(data: T): T {
+  return {
+    ...data,
+    item_type: normalizeEnumValue(data.item_type as string) as ItemType,
+    color: normalizeEnumValue(data.color as string) as ColorType
+  }
+}
+
+function normalizeInventoryPayload<T extends InventoryItemCreate | InventoryItemUpdate | BulkInventoryCreate>(data: T): T {
+  return {
+    ...data,
+    section: normalizeEnumValue((data as any).section) as SectionLocation,
+    quality: normalizeEnumValue((data as any).quality) as QualityType
+  }
+}
 
 // Interfaces
 export interface BrandSimple {
@@ -200,7 +221,7 @@ export interface InventoryStats {
 export const catalogService = {
   async getCatalogItems(filters: CatalogFilters = {}): Promise<ItemCatalog[]> {
     const params: Record<string, any> = {}
-    if (filters.item_type) params.item_type = filters.item_type
+    if (filters.item_type) params.item_type = normalizeEnumValue(filters.item_type)
     if (filters.brand_id) params.brand_id = filters.brand_id
     if (filters.is_active !== undefined) params.is_active = filters.is_active
     if (filters.search) params.search = filters.search
@@ -216,11 +237,11 @@ export const catalogService = {
   },
 
   async createCatalogItem(data: ItemCatalogCreate): Promise<ItemCatalog> {
-    return apiPost<ItemCatalog>(API_ENDPOINTS.CATALOG, data)
+    return apiPost<ItemCatalog>(API_ENDPOINTS.CATALOG, normalizeCatalogPayload(data))
   },
 
   async updateCatalogItem(id: number, data: ItemCatalogUpdate): Promise<ItemCatalog> {
-    return apiPut<ItemCatalog>(`${API_ENDPOINTS.CATALOG}/${id}`, data)
+    return apiPut<ItemCatalog>(`${API_ENDPOINTS.CATALOG}/${id}`, normalizeCatalogPayload(data))
   },
 
   async updateStockLevels(id: number, data: StockUpdate): Promise<any> {
@@ -234,7 +255,11 @@ export const inventoryService = {
     const params: Record<string, any> = {}
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
-        params[key] = value
+        if (key === 'item_type' || key === 'section' || key === 'quality' || key === 'color') {
+          params[key] = normalizeEnumValue(String(value))
+        } else {
+          params[key] = value
+        }
       }
     })
 
@@ -247,15 +272,15 @@ export const inventoryService = {
   },
 
   async createInventoryItem(data: InventoryItemCreate): Promise<InventoryItem> {
-    return apiPost<InventoryItem>(API_ENDPOINTS.INVENTORY, data)
+    return apiPost<InventoryItem>(API_ENDPOINTS.INVENTORY, normalizeInventoryPayload(data))
   },
 
   async createBulkInventory(data: BulkInventoryCreate): Promise<InventoryItem[]> {
-    return apiPost<InventoryItem[]>(`${API_ENDPOINTS.INVENTORY}/bulk`, data)
+    return apiPost<InventoryItem[]>(`${API_ENDPOINTS.INVENTORY}/bulk`, normalizeInventoryPayload(data))
   },
 
   async updateInventoryItem(id: number, data: InventoryItemUpdate): Promise<InventoryItem> {
-    return apiPut<InventoryItem>(`${API_ENDPOINTS.INVENTORY}/${id}`, data)
+    return apiPut<InventoryItem>(`${API_ENDPOINTS.INVENTORY}/${id}`, normalizeInventoryPayload(data))
   },
 
   async deleteInventoryItem(id: number): Promise<void> {
@@ -271,7 +296,7 @@ export const inventoryService = {
 export const shelfService = {
   async getShelves(section?: SectionLocation): Promise<Shelf[]> {
     const params: Record<string, any> = {}
-    if (section) params.section = section
+    if (section) params.section = normalizeEnumValue(section)
     
     const url = buildUrlWithParams(API_ENDPOINTS.SHELVES, params)
     return apiGet<Shelf[]>(url)
@@ -282,11 +307,17 @@ export const shelfService = {
   },
 
   async createShelf(data: ShelfCreate): Promise<Shelf> {
-    return apiPost<Shelf>(API_ENDPOINTS.SHELVES, data)
+    return apiPost<Shelf>(API_ENDPOINTS.SHELVES, {
+      ...data,
+      section: normalizeEnumValue(data.section) as SectionLocation
+    })
   },
 
   async updateShelf(id: number, data: ShelfUpdate): Promise<Shelf> {
-    return apiPut<Shelf>(`${API_ENDPOINTS.SHELVES}/${id}`, data)
+    return apiPut<Shelf>(`${API_ENDPOINTS.SHELVES}/${id}`, {
+      ...data,
+      section: normalizeEnumValue(data.section as string) as SectionLocation
+    })
   },
 
   async deleteShelf(id: number): Promise<void> {

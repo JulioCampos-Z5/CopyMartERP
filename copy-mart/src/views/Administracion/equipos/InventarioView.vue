@@ -773,6 +773,9 @@
               </select>
             </div>
           </div>
+          <div v-if="stockForm.catalog_id" class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+            Prefijo esperado del código: <strong>{{ getExpectedStockPrefix() }}-####</strong>
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Estante</label>
             <select v-model="stockForm.shelf_id" class="input-field">
@@ -836,6 +839,9 @@
                 <option v-for="q in qualities" :key="q.value" :value="q.value">{{ q.label }}</option>
               </select>
             </div>
+          </div>
+          <div v-if="bulkStockForm.catalog_id" class="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+            Prefijo esperado del código: <strong>{{ getExpectedBulkPrefix() }}-####</strong>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
@@ -1039,6 +1045,12 @@ export default {
     },
     filteredShelvesForStock() {
       return this.shelves.filter(s => s.section === this.stockForm.section)
+    },
+    stockCatalogItem() {
+      return this.catalogItems.find(item => item.catalog_id === this.stockForm.catalog_id)
+    },
+    bulkCatalogItem() {
+      return this.catalogItems.find(item => item.catalog_id === this.bulkStockForm.catalog_id)
     },
     stats() {
       return {
@@ -1320,6 +1332,32 @@ export default {
       this.$router.push(`/administracion/refacciones/editar/${sparepartId}`)
     },
 
+    getPrefixByTypeAndQuality(itemType, quality) {
+      const type = String(itemType || '').toUpperCase()
+      const q = String(quality || '').toUpperCase()
+
+      if (type === 'TONER') {
+        if (q === 'ORIGINAL') return 'TO'
+        return 'TG'
+      }
+
+      if (type === 'REFACCION') {
+        if (q === 'REPARADO') return 'RR'
+        if (q === 'USADO') return 'RU'
+        return 'RN'
+      }
+
+      return 'GEN'
+    },
+
+    getExpectedStockPrefix() {
+      return this.getPrefixByTypeAndQuality(this.stockCatalogItem?.item_type, this.stockForm.quality)
+    },
+
+    getExpectedBulkPrefix() {
+      return this.getPrefixByTypeAndQuality(this.bulkCatalogItem?.item_type, this.bulkStockForm.quality)
+    },
+
     // ========== CATÁLOGO ==========
     async loadCatalog() {
       this.loadingCatalog = true
@@ -1470,7 +1508,7 @@ export default {
           section: shelf.section, description: shelf.description || ''
         }
       } else {
-        this.shelfForm = { shelf_id: null, name: '', section: 'seccion_1', description: '' }
+        this.shelfForm = { shelf_id: null, name: '', section: 'SECCION_1', description: '' }
       }
       this.showShelfModal = true
     },

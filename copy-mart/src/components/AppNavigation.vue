@@ -73,7 +73,7 @@
   >
     <div 
       @click.stop
-      class="absolute right-4 top-16 w-auto bg-gray-900 rounded-2xl shadow-2xl p-6"
+      class="absolute left-1/2 -translate-x-1/2 top-16 w-[95vw] sm:w-auto sm:left-auto sm:right-4 sm:translate-x-0 bg-gray-900 rounded-2xl shadow-2xl p-4 sm:p-6 max-h-[calc(100vh-5rem)] overflow-y-auto"
     >
         <!-- General -->
         <div class="mb-6">
@@ -98,7 +98,7 @@
         <!-- Comercial -->
         <div class="mb-6">
           <h3 class="text-xs text-gray-400 uppercase font-semibold mb-3 px-2">Comercial</h3>
-          <div class="grid grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             <router-link 
               to="/ventas"
               v-if="canAccess('/ventas')"
@@ -174,7 +174,7 @@
         <!-- Administración -->
         <div class="mb-6">
           <h3 class="text-xs text-gray-400 uppercase font-semibold mb-3 px-2">Administración</h3>
-          <div class="grid grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             <router-link 
               to="/compras"
               v-if="canAccess('/compras')"
@@ -264,7 +264,7 @@
         <!-- Operaciones y Más -->
         <div>
           <h3 class="text-xs text-gray-400 uppercase font-semibold mb-3 px-2">Operaciones y Más</h3>
-          <div class="grid grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             <router-link 
               to="/rutas"
               v-if="canAccess('/rutas')"

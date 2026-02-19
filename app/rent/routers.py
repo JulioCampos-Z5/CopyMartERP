@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, Body
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from core.database import get_db
 from auth.routers import get_current_user
 from auth.models import User
+from auth.permissions import require_permission
 from rent.schemas import (
     RentCreate,
     RentUpdate,
@@ -26,7 +27,8 @@ router = APIRouter(
 def create_rent(
     rent_data: RentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_permission("rentas", "create"))
 ):
     return RentService.create_rent(
         db, 
@@ -46,7 +48,8 @@ def get_rents(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_permission("rentas", "view"))
 ):
     filters = RentFilter(
         client_id=client_id,
@@ -64,7 +67,8 @@ def get_rents(
 def get_rent(
     rent_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_permission("rentas", "view"))
 ):
     return RentService.get_rent(db, rent_id)
 
@@ -75,7 +79,8 @@ def update_rent(
     rent_id: int,
     rent_data: RentUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_permission("rentas", "edit"))
 ):
     return RentService.update_rent(db, rent_id, rent_data)
 
@@ -84,7 +89,8 @@ def update_rent(
 def delete_rent(
     rent_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    _: None = Depends(require_permission("rentas", "delete"))
 ):
     RentService.delete_rent(db, rent_id)
     return None
@@ -93,11 +99,11 @@ def delete_rent(
 @router.patch("/{rent_id}/status", response_model=RentResponse)
 def update_contract_status(
     rent_id: int,
-    new_status: ContractStatus,
+    contract_status: ContractStatus = Query(..., description="Nuevo estado del contrato"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return RentService.update_contract_status(db, rent_id, new_status)
+    return RentService.update_contract_status(db, rent_id, contract_status)
 
 
 @router.get("/client/{client_id}/summary", response_model=dict)

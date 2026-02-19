@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from core.database import get_db
 from auth.routers import get_current_user
+from auth.permissions import require_permission
 from client.schemas import (
     ClientCreate, ClientUpdate, ClientResponse, ClientListResponse,
     BranchCreate, BranchUpdate, BranchResponse,
@@ -17,7 +18,8 @@ router = APIRouter()
 def create_client(
     client_data: ClientCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(get_current_user),
+    _: None = Depends(require_permission("clientes", "create"))
 ):
     return ClientService.create_client(db, client_data, current_user.user_id)
 
@@ -28,7 +30,8 @@ def get_all_clients(
     limit: int = 100,
     is_active: Optional[bool] = None,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(get_current_user),
+    _: None = Depends(require_permission("clientes", "view"))
 ):
     clients = ClientService.get_all_clients(db, skip, limit, is_active)
 
@@ -65,7 +68,8 @@ def get_all_clients(
 def get_client(
     client_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(get_current_user),
+    _: None = Depends(require_permission("clientes", "view"))
 ):
     client = ClientService.get_client_by_id(db, client_id)
     

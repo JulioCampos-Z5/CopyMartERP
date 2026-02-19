@@ -251,6 +251,12 @@ class RentService:
     ) -> Rent:
         rent = RentService.get_rent(db, rent_id)
         rent.contract_status = new_status
+        
+        # Si se cancela o finaliza el contrato, establecer fecha de fin si no existe
+        if new_status in [ContractStatus.CANCELADO, ContractStatus.FINALIZADO]:
+            if not rent.end_date:
+                rent.end_date = datetime.utcnow().date()
+        
         rent.updated_at = datetime.utcnow()
         
         db.commit()

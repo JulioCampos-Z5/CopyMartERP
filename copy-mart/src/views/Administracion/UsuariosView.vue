@@ -324,6 +324,67 @@
               </div>
             </div>
 
+            <!-- Permisos Granulares -->
+            <div class="mt-6 border-t pt-4">
+              <h4 class="text-md font-semibold text-gray-900 mb-3">Permisos por Área</h4>
+              <p class="text-sm text-gray-600 mb-3">Selecciona las áreas a las que este usuario tendrá acceso:</p>
+              <div class="space-y-2">
+                <div v-for="area in availableAreas" :key="area.id" class="border border-gray-200 rounded-lg">
+                  <!-- Checkbox del área -->
+                  <div class="bg-gray-50 p-3 hover:bg-gray-100 transition-colors">
+                    <label class="flex items-center cursor-pointer">
+                      <input
+                        v-model="selectedAreas[area.id]"
+                        type="checkbox"
+                        @change="toggleArea(area.id)"
+                        class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <span class="ml-2 font-medium text-gray-900">{{ area.label }}</span>
+                    </label>
+                  </div>
+                  
+                  <!-- Permisos específicos (solo si el área está seleccionada) -->
+                  <div v-if="selectedAreas[area.id]" class="bg-white p-4 border-t border-gray-200">
+                    <p class="text-xs text-gray-600 mb-2">Permisos para {{ area.label }}:</p>
+                    <div class="grid grid-cols-2 gap-3">
+                      <label class="flex items-center text-sm">
+                        <input
+                          v-model="formData.permissions[area.id].view"
+                          type="checkbox"
+                          class="mr-2 h-4 w-4 text-purple-600 rounded"
+                        />
+                        <span class="text-gray-700">👁️ Ver</span>
+                      </label>
+                      <label class="flex items-center text-sm">
+                        <input
+                          v-model="formData.permissions[area.id].create"
+                          type="checkbox"
+                          class="mr-2 h-4 w-4 text-green-600 rounded"
+                        />
+                        <span class="text-gray-700">➕ Crear</span>
+                      </label>
+                      <label class="flex items-center text-sm">
+                        <input
+                          v-model="formData.permissions[area.id].edit"
+                          type="checkbox"
+                          class="mr-2 h-4 w-4 text-blue-600 rounded"
+                        />
+                        <span class="text-gray-700">✏️ Editar</span>
+                      </label>
+                      <label class="flex items-center text-sm">
+                        <input
+                          v-model="formData.permissions[area.id].delete"
+                          type="checkbox"
+                          class="mr-2 h-4 w-4 text-red-600 rounded"
+                        />
+                        <span class="text-gray-700">🗑️ Eliminar</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="flex justify-end gap-3 mt-6">
               <button
                 type="button"
@@ -372,8 +433,24 @@ export default {
         rol: '',
         department: '',
         password: '',
-        is_active: true
-      }
+        is_active: true,
+        permissions: {}
+      },
+      selectedAreas: {},
+      availableAreas: [
+        { id: 'ventas', label: 'Ventas' },
+        { id: 'rentas', label: 'Rentas' },
+        { id: 'clientes', label: 'Clientes' },
+        { id: 'inventario', label: 'Inventario' },
+        { id: 'almacen', label: 'Almacén' },
+        { id: 'compras', label: 'Compras' },
+        { id: 'cobranza', label: 'Cobranza' },
+        { id: 'facturacion', label: 'Facturación' },
+        { id: 'produccion', label: 'Producción' },
+        { id: 'ordenes_servicio', label: 'Órdenes de Servicio' },
+        { id: 'recursos_humanos', label: 'Recursos Humanos' },
+        { id: 'usuarios', label: 'Usuarios' },
+      ]
     }
   },
   computed: {
@@ -417,27 +494,68 @@ export default {
         this.loadingUsers = false
       }
     },
+    toggleArea(areaId) {
+      if (this.selectedAreas[areaId]) {
+        // Área seleccionada: inicializar permisos si no existen
+        if (!this.formData.permissions[areaId]) {
+          this.formData.permissions[areaId] = {
+            view: false,
+            create: false,
+            edit: false,
+            delete: false
+          }
+        }
+      } else {
+        // Área deseleccionada: limpiar permisos
+        delete this.formData.permissions[areaId]
+      }
+    },
     openCreateModal() {
       this.editingUser = null
+      // Inicializar permisos vacíos y áreas no seleccionadas
+      const permissions = {}
+      const selectedAreas = {}
+      this.availableAreas.forEach(area => {
+        permissions[area.id] = { view: false, create: false, edit: false, delete: false }
+        selectedAreas[area.id] = false
+      })
+      this.selectedAreas = selectedAreas
       this.formData = {
         full_name: '',
         email: '',
         rol: '',
         department: '',
         password: '',
-        is_active: true
+        is_active: true,
+        permissions
       }
       this.showModal = true
     },
     editUser(user) {
       this.editingUser = user
+      // Inicializar permisos con valores del usuario o vacíos
+      const permissions = {}
+      const selectedAreas = {}
+      this.availableAreas.forEach(area => {
+        const hasPermissions = user.permissions?.[area.id]
+        // Marcar área como seleccionada si tiene algún permiso
+        if (hasPermissions) {
+          selectedAreas[area.id] = true
+          permissions[area.id] = { ...user.permissions[area.id] }
+        } else {
+          selectedAreas[area.id] = false
+          permissions[area.id] = { view: false, create: false, edit: false, delete: false }
+        }
+      })
+      this.selectedAreas = selectedAreas
       this.formData = {
         full_name: user.full_name,
         email: user.email,
         rol: user.rol,
         department: user.department || '',
         password: '',
-        is_active: user.is_active
+        is_active: user.is_active,
+        permissions
       }
       this.showModal = true
     },
@@ -448,6 +566,14 @@ export default {
     async saveUser() {
       this.saving = true
       try {
+        // Filtrar solo los permisos de áreas seleccionadas
+        const filteredPermissions = {}
+        this.availableAreas.forEach(area => {
+          if (this.selectedAreas[area.id]) {
+            filteredPermissions[area.id] = this.formData.permissions[area.id]
+          }
+        })
+
         if (this.editingUser) {
           // Update existing user
           const updateData = {
@@ -455,12 +581,16 @@ export default {
             email: this.formData.email,
             rol: this.formData.rol,
             department: this.formData.department || null,
-            is_active: this.formData.is_active
+            is_active: this.formData.is_active,
+            permissions: filteredPermissions
           }
           await userService.updateUser(this.editingUser.user_id, updateData)
         } else {
           // Create new user
-          await userService.createUser(this.formData)
+          await userService.createUser({
+            ...this.formData,
+            permissions: filteredPermissions
+          })
         }
         await this.loadUsers()
         this.closeModal()

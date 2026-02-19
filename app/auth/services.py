@@ -21,15 +21,27 @@ def create_user(db: Session, user: UserCreate) -> User:
     if get_user_by_email(db, user.email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registrado")
 
+    # Asegurar que permissions sea un dict válido
+    perms_data = user.permissions if user.permissions else {}
+    
+    # Generar username si no se proporciona (usar email sin @dominio)
+    username_value = user.username if user.username else user.email.split('@')[0]
+    
     db_user = User(
         email=user.email,
+        username=username_value,
         password=get_password_hash(user.password),
         full_name=user.full_name,
         rol=user.rol,
-        department=user.department
+        department=user.department,
+        permissions=perms_data
     )
-
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    
+    try:
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error creating user: {str(e)}")

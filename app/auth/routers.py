@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from auth.models import User
 from auth.schemas import (
-    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangeEmail, PermissionsResponse, Token, UserUpdate
+    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangeEmail, PermissionsResponse, Token, UserUpdate, MyPermissionsResponse
 )
 from auth.schemas import TokenData
 from auth.services import get_user_by_id, get_user_by_email, create_user, authenticate_user
@@ -35,6 +35,24 @@ def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Obtiene la información del usuario autenticado"""
     return current_user
 
+@router.get("/me/permissions", response_model=MyPermissionsResponse)
+def get_my_permissions(current_user: User = Depends(get_current_user)):
+    """Obtiene los permisos detallados del usuario autenticado por área"""
+    from auth.permissions import get_user_areas, get_user_permissions
+    
+    areas = get_user_areas(current_user)
+    permissions_by_area = {}
+    
+    for area in areas:
+        permissions_by_area[area] = get_user_permissions(current_user, area)
+    
+    return {
+        "user_id": current_user.user_id,
+        "rol": current_user.rol.value,
+        "areas": areas,
+        "permissions": permissions_by_area
+    }
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     user = get_user_by_id(db, user_id)
@@ -65,6 +83,10 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
         user.department = user_update.department
     if user_update.rol is not None:
         user.rol = user_update.rol
+    if user_update.is_active is not None:
+        user.is_active = user_update.is_active
+    if user_update.permissions is not None:
+        user.permissions = user_update.permissions
     
     db.commit()
     db.refresh(user)

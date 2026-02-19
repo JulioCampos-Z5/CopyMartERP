@@ -3,7 +3,7 @@
  */
 
 const isBrowser = typeof window !== 'undefined';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.50:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://192.168.100.58:8000';
 const LOG_ENDPOINT = '/api/logs/frontend';
 const SEND_LEVELS = new Set(['debug', 'info', 'warn', 'error', 'success']);
 

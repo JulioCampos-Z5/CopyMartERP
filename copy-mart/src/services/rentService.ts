@@ -3,7 +3,7 @@
  * ================================
  */
 
-import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS, buildUrlWithParams } from '@/config/api'
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete, API_ENDPOINTS, buildUrlWithParams } from '@/config/api'
 import type { Rent, RentFilters, PaginatedResponse } from '@/types'
 
 export const rentService = {
@@ -48,5 +48,9 @@ export const rentService = {
 
   async deleteRent(id: number): Promise<void> {
     return apiDelete<void>(`${API_ENDPOINTS.RENTS}/${id}`)
+  },
+
+  async updateContractStatus(id: number, newStatus: string): Promise<Rent> {
+    return apiPatch<Rent>(`${API_ENDPOINTS.RENTS}/${id}`, { contract_status: newStatus })
   }
 }

@@ -95,7 +95,8 @@
             <option value="vigente">Vigente</option>
             <option value="pendiente">Pendiente</option>
             <option value="sin_firmar">Sin Firmar</option>
-            <option value="vencido">Vencido</option>
+            <option value="finalizado">Finalizado</option>
+            <option value="cancelado">Cancelado</option>
           </select>
         </div>
       </div>
@@ -129,6 +130,7 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipo</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fechas</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -145,6 +147,12 @@
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {{ rent.branch?.name || '-' }}
                     <span v-if="rent.area" class="text-xs block">{{ rent.area.name }}</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <div class="text-xs">
+                      <div><span class="font-medium">Inicio:</span> {{ formatDate(rent.start_date) }}</div>
+                      <div v-if="rent.end_date" class="text-red-600"><span class="font-medium">Fin:</span> {{ formatDate(rent.end_date) }}</div>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(rent.contract_status)]">
@@ -212,10 +220,11 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Estado del Contrato</label>
               <select v-model="rentForm.contract_status" class="input-field">
-                <option value="vigente">Vigente</option>
                 <option value="pendiente">Pendiente</option>
                 <option value="sin_firmar">Sin Firmar</option>
-                <option value="vencido">Vencido</option>
+                <option value="vigente">Vigente</option>
+                <option value="finalizado">Finalizado</option>
+                <option value="cancelado">Cancelado</option>
               </select>
             </div>
             <div class="md:col-span-2">
@@ -253,6 +262,14 @@
             <div>
               <p class="text-sm text-gray-500">Renta Mensual</p>
               <p class="text-base font-medium">{{ formatCurrency(selectedRent.rent) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Fecha de Inicio</p>
+              <p class="text-base font-medium">{{ formatDate(selectedRent.start_date) }}</p>
+            </div>
+            <div v-if="selectedRent.end_date">
+              <p class="text-sm text-gray-500">Fecha de Fin</p>
+              <p class="text-base font-medium text-red-600">{{ formatDate(selectedRent.end_date) }}</p>
             </div>
             <div>
               <p class="text-sm text-gray-500">Estado</p>
@@ -336,7 +353,7 @@ export default {
       this.loading = true
       this.error = null
       try {
-        const response = await rentService.getRents({ is_active: true })
+        const response = await rentService.getRents({})
         this.rents = response.items || []
         this.calculateStats()
       } catch (err) {
@@ -369,8 +386,8 @@ export default {
 
     calculateStats() {
       this.stats.active = this.rents.filter(r => r.contract_status === 'vigente').length
-      this.stats.monthlyIncome = this.rents.reduce((sum, r) => sum + parseFloat(r.rent || 0), 0)
-      this.stats.expiringSoon = this.rents.filter(r => r.contract_status === 'vencido' || r.contract_status === 'sin_firmar').length
+      this.stats.monthlyIncome = this.rents.filter(r => r.contract_status === 'vigente').reduce((sum, r) => sum + parseFloat(r.rent || 0), 0)
+      this.stats.expiringSoon = this.rents.filter(r => r.contract_status === 'pendiente' || r.contract_status === 'sin_firmar').length
     },
 
     getStatusClass(status) {
@@ -378,7 +395,8 @@ export default {
         'vigente': 'bg-green-100 text-green-800',
         'pendiente': 'bg-yellow-100 text-yellow-800',
         'sin_firmar': 'bg-orange-100 text-orange-800',
-        'vencido': 'bg-red-100 text-red-800'
+        'finalizado': 'bg-blue-100 text-blue-800',
+        'cancelado': 'bg-red-100 text-red-800'
       }
       return classes[status] || 'bg-gray-100 text-gray-800'
     },
@@ -388,7 +406,8 @@ export default {
         'vigente': 'Vigente',
         'pendiente': 'Pendiente',
         'sin_firmar': 'Sin Firmar',
-        'vencido': 'Vencido'
+        'finalizado': 'Finalizado',
+        'cancelado': 'Cancelado'
       }
       return labels[status] || status
     },
@@ -421,10 +440,11 @@ export default {
     async cancelRent(rentId) {
       if (!confirm('¿Está seguro de cancelar esta renta?')) return
       try {
-        await rentService.deleteRent(rentId)
+        await rentService.updateContractStatus(rentId, 'cancelado')
         await this.loadRents()
       } catch (err) {
-        alert('Error al cancelar renta: ' + err.message)
+        console.error('Error al cancelar renta:', err)
+        alert('Error al cancelar renta: ' + (err.response?.data?.detail || err.message))
       }
     },
 
