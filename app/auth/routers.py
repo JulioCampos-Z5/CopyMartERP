@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from auth.models import User
 from auth.schemas import (
-    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangeEmail, PermissionsResponse, Token, UserUpdate, MyPermissionsResponse
+    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangePassword, ChangeEmail, PermissionsResponse, Token, UserUpdate, MyPermissionsResponse
 )
 from auth.schemas import TokenData
 from auth.services import get_user_by_id, get_user_by_email, create_user, authenticate_user
@@ -126,6 +126,20 @@ def change_email(user_id: int, payload: ChangeEmail, db: Session = Depends(get_d
     if get_user_by_email(db, payload.new_email):
         raise HTTPException(status_code=400, detail="Email already registered")
     user.email = payload.new_email
+    db.commit()
+    return
+
+
+@router.post("/{user_id}/reset-password", status_code=204)
+def admin_reset_password(user_id: int, payload: ChangePassword, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Restablecer contraseña de un usuario (solo admin)"""
+    from auth.models import RolEnum
+    if current_user.rol != RolEnum.ADMINISTRADOR:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Solo administradores pueden restablecer contraseñas")
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.password = get_password_hash(payload.new_password)
     db.commit()
     return
 

@@ -283,7 +283,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <tr v-for="counter in printCounters" :key="counter.counter_id" class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ counter.period_month }}/{{ counter.period_year }}</td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ monthName(counter.period_month) }} {{ counter.period_year }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ formatNumber(counter.bn_printed) }}</td>
                     <td class="px-4 py-3 text-sm" :class="counter.bn_excess > 0 ? 'text-red-600 font-semibold' : 'text-gray-500'">
                       {{ formatNumber(counter.bn_excess) }}
@@ -421,7 +421,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Mes *</label>
                 <select v-model.number="counterForm.period_month" required class="w-full px-3 py-2 border rounded-lg">
-                  <option v-for="m in 12" :key="m" :value="m">{{ m }}</option>
+                  <option v-for="m in 12" :key="m" :value="m">{{ monthName(m) }}</option>
                 </select>
               </div>
               <div>
@@ -668,6 +668,11 @@ const formatDateTime = (dateStr: string) => {
 const formatNumber = (num: any) => {
   if (num === null || num === undefined) return '0'
   return Number(num).toLocaleString('es-MX')
+}
+
+const monthName = (month: number) => {
+  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+  return months[month - 1] || month
 }
 
 const getContractStatusClass = (status: string) => {

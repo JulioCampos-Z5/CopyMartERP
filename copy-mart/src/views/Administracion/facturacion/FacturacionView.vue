@@ -2,9 +2,9 @@
   <BaseLayout>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Header -->
-      <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-lg border border-orange-200 mb-6">
-        <h1 class="text-3xl font-bold text-orange-800 mb-2">Sistema de Facturación</h1>
-        <p class="text-orange-600">Genera y administra facturas fiscales y no fiscales</p>
+      <div class="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 p-6 rounded-lg border border-orange-200 dark:border-orange-800 mb-6">
+        <h1 class="text-3xl font-bold text-orange-800 dark:text-orange-200 mb-2">Sistema de Facturación</h1>
+        <p class="text-orange-600 dark:text-orange-300">Genera y administra facturas fiscales y no fiscales</p>
       </div>
 
       <BaseTable
@@ -269,7 +269,10 @@ const calculateStats = () => {
   stats.value.total = pagination.value.total
   stats.value.pending = billings.value.filter(b => String(b.status).toLowerCase() === 'pendiente').length
   stats.value.paid = billings.value.filter(b => String(b.status).toLowerCase() === 'pagado').length
-  stats.value.totalAmount = billings.value.reduce((sum, b) => sum + (b.amount_total || b.amount || 0), 0)
+  stats.value.totalAmount = billings.value.reduce((sum, b) => {
+    const val = Number(b.amount_total || b.amount || 0)
+    return sum + (isNaN(val) ? 0 : val)
+  }, 0)
 }
 
 const handleSearch = (query: string) => {
@@ -302,12 +305,12 @@ const clearFilters = () => {
 
 const getStatusBadgeClass = (status: string): string => {
   const statusColors: Record<string, string> = {
-    'pendiente': 'bg-yellow-100 text-yellow-800',
-    'pagada': 'bg-green-100 text-green-800',
-    'vencida': 'bg-red-100 text-red-800',
-    'cancelada': 'bg-gray-100 text-gray-800'
+    'pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    'pagada': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    'vencida': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    'cancelada': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
   }
-  return `px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[status] || 'bg-gray-100 text-gray-800'}`
+  return `px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'}`
 }
 
 const viewDetails = (billing: Billing) => {

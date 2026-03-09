@@ -213,6 +213,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Pago -->
+    <div v-if="showPaymentModal && selectedBilling" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="closePaymentModal">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold mb-4">Registrar Pago</h3>
+        <p class="text-sm text-gray-500 mb-4">Factura #{{ selectedBilling.billing_id }} - {{ formatCurrency(selectedBilling.amount) }}</p>
+        <form @submit.prevent="registerPayment" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Pago *</label>
+            <input v-model="paymentForm.payment_date" type="date" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Comentario</label>
+            <textarea v-model="paymentForm.comment" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Nota sobre el pago..."></textarea>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" @click="closePaymentModal" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Registrar Pago</button>
+          </div>
+        </form>
+      </div>
+    </div>
     </div>
   </BaseLayout>
 </template>
@@ -280,8 +302,13 @@ export default {
         this.billings = billingsResponse.items || []
         this.overdueBillings = overdue
         
-        this.stats.totalPending = statsData.pending_amount || 0
-        this.stats.overdueCount = statsData.by_status?.vencido || 0
+        // Calcular total pendiente desde las facturas reales
+        const pendientes = this.billings.filter(b => b.status === 'pendiente' || b.status === 'vencido')
+        this.stats.totalPending = pendientes.reduce((sum, b) => {
+          const val = Number(b.amount || 0)
+          return sum + (isNaN(val) ? 0 : val)
+        }, 0)
+        this.stats.overdueCount = this.overdueBillings.length || statsData.by_status?.vencido || 0
         this.stats.paidThisMonth = statsData.paid_amount || 0
         this.stats.expiringSoon = this.billings.filter(b => b.status === 'pendiente').length
       } catch (err) {

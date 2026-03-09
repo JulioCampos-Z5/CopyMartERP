@@ -3,72 +3,72 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="space-y-6">
         <!-- Header -->
-        <div class="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
-          <h1 class="text-3xl font-bold text-emerald-800 mb-2">Gestión de Ventas</h1>
-          <p class="text-emerald-600">Administra las ventas de equipos</p>
+        <div class="bg-emerald-50 dark:bg-emerald-900/30 p-6 rounded-lg border border-emerald-200 dark:border-emerald-800">
+          <h1 class="text-3xl font-bold text-emerald-800 dark:text-emerald-200 mb-2">Gestión de Ventas</h1>
+          <p class="text-emerald-600 dark:text-emerald-400">Administra las ventas de equipos</p>
         </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div class="bg-white p-6 rounded-lg shadow border">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-8 h-8 bg-emerald-100 dark:bg-emerald-900 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Ventas Activas</h3>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats.active }}</p>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Ventas Activas</h3>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.active }}</p>
               </div>
             </div>
           </div>
           
-          <div class="bg-white p-6 rounded-lg shadow border">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
               </div>
               <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Total Ventas</h3>
-                <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(stats.totalAmount) }}</p>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Ventas</h3>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ formatCurrency(stats.totalAmount) }}</p>
               </div>
             </div>
           </div>
           
-          <div class="bg-white p-6 rounded-lg shadow border">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Pendientes</h3>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats.pending }}</p>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Pendientes</h3>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.pending }}</p>
               </div>
             </div>
           </div>
           
-          <div class="bg-white p-6 rounded-lg shadow border">
+          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                 </svg>
               </div>
               <div class="ml-4">
-                <h3 class="text-sm font-medium text-gray-500">Entregadas</h3>
-                <p class="text-2xl font-semibold text-gray-900">{{ stats.delivered }}</p>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Entregadas</h3>
+                <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.delivered }}</p>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Actions -->
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex flex-wrap gap-4 items-center justify-between">
             <div class="flex gap-4">
               <button @click="loadSales" class="btn-primary">
@@ -165,40 +165,40 @@
         </div>
 
         <!-- Table -->
-        <div v-else class="bg-white rounded-lg shadow border">
-          <div class="p-6 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Listado de Ventas ({{ filteredSales.length }})</h2>
+        <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700">
+          <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Listado de Ventas ({{ filteredSales.length }})</h2>
           </div>
           <div class="p-6">
-            <div v-if="filteredSales.length === 0" class="text-center py-8 text-gray-500">
+            <div v-if="filteredSales.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
               No hay ventas registradas
             </div>
             <div v-else class="overflow-x-auto">
               <table class="min-w-full table-auto">
                 <thead>
-                  <tr class="bg-gray-50">
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Factura</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equipo</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                  <tr class="bg-gray-50 dark:bg-gray-700">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Factura</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cliente</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Equipo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Estado</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Precio</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Acciones</th>
                   </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="sale in filteredSales" :key="sale.sale_id">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-600">{{ sale.invoice_number || '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ sale.client?.name || '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-emerald-600 dark:text-emerald-400">{{ sale.invoice_number || '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ sale.client?.name || '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       {{ sale.equipment?.model || '-' }}
-                      <span class="text-gray-500 text-xs block">{{ sale.equipment?.sku || '' }}</span>
+                      <span class="text-gray-500 dark:text-gray-400 text-xs block">{{ sale.equipment?.sku || '' }}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(sale.sale_status)]">
                         {{ getStatusLabel(sale.sale_status) }}
                       </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ formatCurrency(sale.sale_price) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ formatCurrency(sale.sale_price) }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <button @click="viewSale(sale)" class="text-blue-600 hover:text-blue-900 mr-3">Ver</button>
                       <button @click="generateSalePdf(sale)" class="text-red-600 hover:text-red-900 mr-3">PDF</button>
@@ -299,15 +299,13 @@ export default {
           return
         }
         
-        const { hasPermission, loadPermissions } = useGranularPermissions('ventas')
-        await loadPermissions(token)
+        const { loadPermissions, canView, canCreate, canEdit, canDelete } = useGranularPermissions('ventas')
+        await loadPermissions(token, true)
         
-        // Obtener permisos del composable
-        const perms = useGranularPermissions('ventas')
-        this.permissions.canView = perms.canView.value
-        this.permissions.canCreate = perms.canCreate.value
-        this.permissions.canEdit = perms.canEdit.value
-        this.permissions.canDelete = perms.canDelete.value
+        this.permissions.canView = canView.value
+        this.permissions.canCreate = canCreate.value
+        this.permissions.canEdit = canEdit.value
+        this.permissions.canDelete = canDelete.value
         this.permissions.loaded = true
         
         console.log('✓ Permisos de ventas cargados:', this.permissions)
@@ -419,12 +417,12 @@ export default {
 
     getStatusClass(status) {
       const classes = {
-        'pendiente': 'bg-yellow-100 text-yellow-800',
-        'confirmada': 'bg-blue-100 text-blue-800',
-        'entregada': 'bg-green-100 text-green-800',
-        'cancelada': 'bg-red-100 text-red-800'
+        'pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        'confirmada': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        'entregada': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        'cancelada': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
       }
-      return classes[status] || 'bg-gray-100 text-gray-800'
+      return classes[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
     },
 
     getStatusLabel(status) {
@@ -488,24 +486,25 @@ export default {
     },
     async generateSalePdf(sale) {
       try {
+        const subtotal = parseFloat(sale.sale_price || 0)
+        const tax = subtotal * 0.16
+        const total = subtotal + tax
         const invoiceData = {
-          folio: sale.invoice_number || `V-${sale.sale_id}`,
-          fecha: sale.created_at || new Date().toLocaleDateString('es-MX'),
-          cliente: {
-            nombre: sale.client?.name || 'Cliente',
-            email: sale.client?.contact?.email || '',
-            telefono: sale.client?.contact?.phone || ''
+          invoice_number: sale.invoice_number || `V-${sale.sale_id}`,
+          target_date: sale.created_at ? new Date(sale.created_at).toLocaleDateString('es-MX') : new Date().toLocaleDateString('es-MX'),
+          client_name: sale.client?.name || 'Cliente',
+          branch_name: sale.branch?.name || '',
+          status: sale.sale_status || 'pendiente',
+          billing_type: 'Venta',
+          sale_info: {
+            invoice_number: sale.invoice_number || `V-${sale.sale_id}`,
+            amount: subtotal
           },
-          items: [
-            {
-              descripcion: `${sale.equipment?.model || 'Equipo'} (${sale.equipment?.sku || ''})`,
-              cantidad: 1,
-              precio: parseFloat(sale.sale_price || 0)
-            }
-          ],
-          metodoPago: sale.payment_method || 'Efectivo'
+          amount_subtotal: subtotal,
+          amount_tax: tax,
+          amount_total: total
         }
-        const result = await this.generateInvoicePdf(invoiceData, `Venta_${invoiceData.folio}.pdf`, true)
+        const result = await this.generateInvoicePdf(invoiceData, `Venta_${invoiceData.invoice_number}.pdf`, true)
         if (result?.previewUrl) {
           window.open(result.previewUrl, '_blank')
           this.info('Se abrió la vista previa del PDF en una nueva pestaña.', 'Vista previa')

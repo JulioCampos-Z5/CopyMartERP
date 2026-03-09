@@ -3,9 +3,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="space-y-6">
       <!-- Header -->
-      <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-        <h1 class="text-3xl font-bold text-blue-800 mb-2">Gestión de Rentas</h1>
-        <p class="text-blue-600">Administra los servicios de renta y alquiler de equipos</p>
+      <div class="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+        <h1 class="text-3xl font-bold text-blue-800 dark:text-blue-200 mb-2">Gestión de Rentas</h1>
+        <p class="text-blue-600 dark:text-blue-300">Administra los servicios de renta y alquiler de equipos</p>
       </div>
 
       <!-- Stats Cards -->
@@ -90,6 +90,12 @@
             </svg>
             Actualizar
           </button>
+          <div class="relative flex-1 min-w-[200px]">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input v-model="searchQuery" type="text" placeholder="Buscar por cliente, contrato, equipo..." class="input-field pl-10 w-full" />
+          </div>
           <select v-model="filters.contract_status" class="input-field w-48">
             <option value="">Todos los estados</option>
             <option value="vigente">Vigente</option>
@@ -311,6 +317,7 @@ export default {
       availableEquipment: [],
       loading: false,
       error: null,
+      searchQuery: '',
       stats: {
         active: 0,
         monthlyIncome: 0,
@@ -335,9 +342,20 @@ export default {
   },
   computed: {
     filteredRents() {
+      const query = this.searchQuery.toLowerCase().trim()
       return this.rents.filter(rent => {
         if (this.filters.contract_status && rent.contract_status !== this.filters.contract_status) {
           return false
+        }
+        if (query) {
+          const clientName = (rent.client?.name || '').toLowerCase()
+          const contractNum = (rent.contract_number || '').toLowerCase()
+          const equipModel = (rent.equipment?.model || '').toLowerCase()
+          const equipSku = (rent.equipment?.sku || '').toLowerCase()
+          const branchName = (rent.branch?.name || '').toLowerCase()
+          if (!clientName.includes(query) && !contractNum.includes(query) && !equipModel.includes(query) && !equipSku.includes(query) && !branchName.includes(query)) {
+            return false
+          }
         }
         return true
       })
@@ -353,7 +371,7 @@ export default {
       this.loading = true
       this.error = null
       try {
-        const response = await rentService.getRents({})
+        const response = await rentService.getRents({ pageSize: 1000 })
         this.rents = response.items || []
         this.calculateStats()
       } catch (err) {
@@ -366,7 +384,7 @@ export default {
 
     async loadClients() {
       try {
-        const response = await clientService.getClients()
+        const response = await clientService.getClients({ pageSize: 1000, is_active: true })
         this.clients = response.items || []
       } catch (err) {
         console.error('Error loading clients:', err)
@@ -376,7 +394,7 @@ export default {
     async loadEquipment() {
       try {
         // Cargar solo equipos disponibles (no en renta activa)
-        const response = await equipmentService.getEquipments()
+        const response = await equipmentService.getEquipments({ pageSize: 1000 })
         const allEquipment = response.items || []
         this.availableEquipment = allEquipment.filter(eq => eq.status === 'disponible' || !eq.status)
       } catch (err) {
@@ -392,13 +410,13 @@ export default {
 
     getStatusClass(status) {
       const classes = {
-        'vigente': 'bg-green-100 text-green-800',
-        'pendiente': 'bg-yellow-100 text-yellow-800',
-        'sin_firmar': 'bg-orange-100 text-orange-800',
-        'finalizado': 'bg-blue-100 text-blue-800',
-        'cancelado': 'bg-red-100 text-red-800'
+        'vigente': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        'pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        'sin_firmar': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+        'finalizado': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        'cancelado': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
       }
-      return classes[status] || 'bg-gray-100 text-gray-800'
+      return classes[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
     },
 
     getStatusLabel(status) {

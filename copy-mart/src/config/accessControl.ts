@@ -2,7 +2,6 @@ import type { User } from '@/types'
 
 type AccessUser = Partial<User> & {
   role?: string
-  permissions?: string[]
 }
 
 const MODULE_PATTERNS: Record<string, string[]> = {
@@ -18,7 +17,7 @@ const MODULE_PATTERNS: Record<string, string[]> = {
   inventario: ['/inventario', '/administracion/equipos', '/administracion/refacciones'],
   usuarios: ['/administracion/usuarios'],
   rh: ['/recursos-humanos'],
-  operaciones: ['/rutas', '/ordenes-servicio'],
+  operaciones: ['/rutas', '/ordenes-servicio', '/taller'],
   ti: ['/ti']
 }
 
@@ -67,15 +66,50 @@ export function getAllowedModules(user: AccessUser | null): string[] {
     return ALL_MODULE_KEYS
   }
 
+  // Base modules from department
+  let baseModules: string[]
+
   if (role === 'gerencia' || role === 'manager') {
-    return ALL_MODULE_KEYS.filter(moduleKey => moduleKey !== 'inventario')
+    baseModules = ALL_MODULE_KEYS.filter(moduleKey => moduleKey !== 'inventario')
+  } else if (role === 'usuario') {
+    baseModules = DEPARTMENT_MODULES[department] || ['dashboard']
+  } else {
+    return []
   }
 
-  if (role === 'usuario') {
-    return DEPARTMENT_MODULES[department] || ['dashboard']
+  // If user has granular permissions, further restrict to only areas with view=true
+  const perms = (user as any)?.permissions
+  if (perms && typeof perms === 'object' && !Array.isArray(perms) && Object.keys(perms).length > 0) {
+    const allowedAreas = new Set<string>(['dashboard'])
+    for (const [area, actions] of Object.entries(perms)) {
+      if (actions && typeof actions === 'object' && (actions as any).view) {
+        allowedAreas.add(area)
+      }
+    }
+    // Map permission areas to module keys (most are 1:1 except some)
+    const AREA_TO_MODULE: Record<string, string> = {
+      ventas: 'ventas',
+      rentas: 'rentas',
+      clientes: 'clientes',
+      compras: 'compras',
+      almacen: 'almacen',
+      cobranza: 'cobranza',
+      facturacion: 'facturacion',
+      inventario: 'inventario',
+      produccion: 'produccion',
+      ordenes_servicio: 'operaciones',
+      recursos_humanos: 'rh',
+      usuarios: 'usuarios'
+    }
+    const allowedModules = new Set<string>(['dashboard'])
+    for (const area of allowedAreas) {
+      const moduleKey = AREA_TO_MODULE[area] || area
+      allowedModules.add(moduleKey)
+    }
+    return baseModules.filter(m => allowedModules.has(m))
   }
 
-  return []
+  return baseModules
 }
 
 export function canAccessPath(user: AccessUser | null, path: string): boolean {
@@ -92,14 +126,18 @@ export function canAccessPath(user: AccessUser | null, path: string): boolean {
 
 export function hasDeleteAccess(user: AccessUser | null): boolean {
   const role = getUserRole(user)
-  const explicitPermissions = Array.isArray(user?.permissions) ? user?.permissions : []
 
-  if (explicitPermissions.length > 0) {
-    return explicitPermissions.some(permission => {
-      const normalized = String(permission || '').toLowerCase()
-      return normalized === 'delete' || normalized.startsWith('delete_') || normalized === 'admin'
-    })
+  if (role === 'administrador' || role === 'admin') {
+    return true
   }
 
-  return role === 'administrador' || role === 'admin'
+  // Check if any area has delete=true in granular permissions
+  const perms = user?.permissions
+  if (perms && typeof perms === 'object' && !Array.isArray(perms)) {
+    return Object.values(perms).some(actions => 
+      actions && typeof actions === 'object' && (actions as any).delete
+    )
+  }
+
+  return false
 }

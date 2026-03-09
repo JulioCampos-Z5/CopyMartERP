@@ -103,6 +103,19 @@
             >
           </div>
 
+          <!-- Área -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Área
+            </label>
+            <select v-model="rentForm.area_id" :disabled="!rentForm.branch_id || areas.length === 0" class="input-field">
+              <option value="">Sin área específica</option>
+              <option v-for="area in areas" :key="area.area_id" :value="area.area_id">
+                {{ area.name }}
+              </option>
+            </select>
+          </div>
+
           <!-- Fecha de Inicio -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -114,6 +127,19 @@
               required 
               class="input-field"
             >
+          </div>
+
+          <!-- Fecha de Fin -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Fecha de Fin
+            </label>
+            <input 
+              v-model="rentForm.end_date" 
+              type="date" 
+              class="input-field"
+            >
+            <p class="text-xs text-gray-500 mt-1">Dejar vacío si el contrato es indefinido</p>
           </div>
 
           <!-- Estado del Contrato -->
@@ -258,12 +284,15 @@ export default {
       clients: [],
       equipment: [],
       branches: [],
+      areas: [],
       rentForm: {
         client_id: '',
         branch_id: '',
+        area_id: '',
         item_id: '',
         rent: '',
         start_date: new Date().toISOString().split('T')[0],
+        end_date: '',
         contract_status: 'pendiente',
         is_foreign: false,
         has_print_service: false,
@@ -284,10 +313,22 @@ export default {
     'rentForm.client_id': {
       handler(newVal) {
         this.rentForm.branch_id = ''
+        this.rentForm.area_id = ''
+        this.areas = []
         if (newVal) {
           this.loadBranches(parseInt(newVal))
         } else {
           this.branches = []
+        }
+      }
+    },
+    'rentForm.branch_id': {
+      handler(newVal) {
+        this.rentForm.area_id = ''
+        if (newVal) {
+          this.loadAreas(parseInt(newVal))
+        } else {
+          this.areas = []
         }
       }
     }
@@ -322,9 +363,11 @@ export default {
         this.rentForm = {
           client_id: rent.client_id || '',
           branch_id: '',
+          area_id: '',
           item_id: rent.item_id || '',
           rent: rent.rent || '',
           start_date: rent.start_date || new Date().toISOString().split('T')[0],
+          end_date: rent.end_date || '',
           contract_status: rent.contract_status || 'pendiente',
           is_foreign: rent.is_foreign || false,
           has_print_service: rent.has_print_service || false,
@@ -339,6 +382,10 @@ export default {
           await this.loadBranches(rent.client_id)
           if (rent.branch_id) {
             this.rentForm.branch_id = String(rent.branch_id)
+            await this.loadAreas(rent.branch_id)
+            if (rent.area_id) {
+              this.rentForm.area_id = String(rent.area_id)
+            }
           }
         }
       } catch (err) {
@@ -358,6 +405,15 @@ export default {
       }
     },
 
+    async loadAreas(branchId) {
+      try {
+        const areas = await clientService.getBranchAreas(branchId)
+        this.areas = areas || []
+      } catch (err) {
+        this.areas = []
+      }
+    },
+
     async handleSubmit() {
       this.loading = true
       this.errorMsg = null
@@ -372,9 +428,11 @@ export default {
         const data = {
           client_id: parseInt(this.rentForm.client_id),
           branch_id: this.rentForm.branch_id ? parseInt(this.rentForm.branch_id) : null,
+          area_id: this.rentForm.area_id ? parseInt(this.rentForm.area_id) : null,
           item_id: parseInt(this.rentForm.item_id),
           rent: parseFloat(this.rentForm.rent),
           start_date: this.rentForm.start_date,
+          end_date: this.rentForm.end_date || null,
           contract_status: this.rentForm.contract_status,
           is_foreign: this.rentForm.is_foreign,
           has_print_service: this.rentForm.has_print_service,

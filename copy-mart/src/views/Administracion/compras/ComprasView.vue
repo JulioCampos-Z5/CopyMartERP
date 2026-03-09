@@ -2,9 +2,9 @@
   <BaseLayout>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Header -->
-      <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200 mb-6">
-        <h1 class="text-3xl font-bold text-green-800 mb-2">Gestión de Compras</h1>
-        <p class="text-green-600">Administra las órdenes de compra de refacciones y equipos</p>
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 p-6 rounded-lg border border-green-200 dark:border-green-800 mb-6">
+        <h1 class="text-3xl font-bold text-green-800 dark:text-green-200 mb-2">Gestión de Compras</h1>
+        <p class="text-green-600 dark:text-green-300">Administra las órdenes de compra de refacciones y equipos</p>
       </div>
 
       <BaseTable
@@ -612,19 +612,19 @@ const handlePageChange = (page: number) => {
 
 const getStatusBadgeClass = (status: string): string => {
   const statusColors: Record<string, string> = {
-    'En Curso': 'bg-yellow-100 text-yellow-800',
-    'En Tránsito': 'bg-blue-100 text-blue-800',
-    'Concluido': 'bg-green-100 text-green-800',
-    'Pausado Back Orders': 'bg-orange-100 text-orange-800',
-    'Falta Pago Proveedor': 'bg-red-100 text-red-800',
-    'Falta Factura': 'bg-pink-100 text-pink-800',
-    'Por Revisar': 'bg-purple-100 text-purple-800',
-    'Solicitud Guía Almacén': 'bg-indigo-100 text-indigo-800',
-    'Rechazado': 'bg-gray-100 text-gray-800',
-    'Falta Autorización': 'bg-amber-100 text-amber-800',
-    'Falta Orden de Servicio': 'bg-teal-100 text-teal-800'
+    'En Curso': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    'En Tránsito': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    'Concluido': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    'Pausado Back Orders': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    'Falta Pago Proveedor': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    'Falta Factura': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+    'Por Revisar': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    'Solicitud Guía Almacén': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+    'Rechazado': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+    'Falta Autorización': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+    'Falta Orden de Servicio': 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200'
   }
-  return `px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[status] || 'bg-gray-100 text-gray-800'}`
+  return `px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'}`
 }
 
 const viewDetails = (purchase: Purchase) => {

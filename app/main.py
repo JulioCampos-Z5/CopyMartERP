@@ -20,6 +20,7 @@ from purchase.routers import router as purchase_router
 from print.routers import router as print_router
 from rh.routers import router as rh_router
 from repair.routers import router as repair_router
+from route.routers import router as route_router
 from inventory.routers import (
     catalog_router,
     inventory_router,
@@ -44,6 +45,7 @@ from rh import models as rh_models
 from ticket import models as ticket_models
 from monthlyplan import models as monthlyplan_models
 from inventory import models as inventory_models
+from route import models as route_models
 
 app = FastAPI(title="API de Usuarios")
 
@@ -56,11 +58,11 @@ app.add_middleware(
         "http://localhost:5175",
         "http://localhost:5176",
         "http://localhost:3000",
-        "http://192.168.1.50:5173",
-        "http://192.168.1.50:5174",
-        "http://192.168.1.50:5175",
-        "http://192.168.1.50:5176",
-        "http://192.168.1.50:3000"
+        "http://192.168.100.93:5173",
+        "http://192.168.100.93:5174",
+        "http://192.168.100.93:5175",
+        "http://192.168.100.93:5176",
+        "http://192.168.100.93:3000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -123,6 +125,7 @@ app.include_router(catalog_router, prefix="/api")
 app.include_router(inventory_router, prefix="/api")
 app.include_router(shelf_router, prefix="/api")
 app.include_router(repair_router, prefix="/api")
+app.include_router(route_router, prefix="/api")
 
 
 

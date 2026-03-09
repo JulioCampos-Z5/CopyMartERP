@@ -28,8 +28,8 @@ const permissionsLoading = ref(false)
 
 export function useGranularPermissions(area?: string) {
   // Cargar permisos del usuario actual desde el backend
-  async function loadPermissions(token: string) {
-    if (permissionsLoaded.value || permissionsLoading.value) return
+  async function loadPermissions(token: string, forceReload: boolean = false) {
+    if ((permissionsLoaded.value && !forceReload) || permissionsLoading.value) return
 
     permissionsLoading.value = true
     try {

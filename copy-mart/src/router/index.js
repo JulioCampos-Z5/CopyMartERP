@@ -367,7 +367,34 @@ const router = createRouter({
         requiresAuth: true,
         title: 'Gestión de Áreas - CopyMart ERP'
       }
+    },
+    {
+      path: '/recursos-humanos/registros-administrativos',
+      name: 'RegistrosAdministrativos',
+      component: () => import('../views/RecursosHumanos/RegistrosAdministrativosView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Registros Administrativos - CopyMart ERP'
+      }
+    },
+    {
+      path: '/recursos-humanos/ausentismo',
+      name: 'Ausentismo',
+      component: () => import('../views/RecursosHumanos/AusentismoView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Ausentismo - CopyMart ERP'
+      }
     },    // Rutas del área Operaciones
+    {
+      path: '/taller',
+      name: 'Taller',
+      component: () => import('../views/Operaciones/TallerView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Taller de Reparaciones - CopyMart ERP'
+      }
+    },
     {
       path: '/rutas',
       name: 'Rutas',

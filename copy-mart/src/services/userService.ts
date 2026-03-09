@@ -106,6 +106,13 @@ export const userService = {
     })
   },
 
+  async adminResetPassword(userId: number, newPassword: string): Promise<void> {
+    return apiRequest<void>(`${API_ENDPOINTS.AUTH}/${userId}/reset-password`, {
+      method: 'POST',
+      data: { new_password: newPassword }
+    })
+  },
+
   // Compatibilidad: método para verificar autenticación
   isAuthenticated(): boolean {
     return authStorage.isAuthenticated()

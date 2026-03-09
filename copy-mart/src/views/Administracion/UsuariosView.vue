@@ -199,7 +199,7 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span
-                      :class="user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                      :class="user.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
                       class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                     >
                       {{ user.is_active ? 'Activo' : 'Inactivo' }}
@@ -216,6 +216,15 @@
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      @click="openResetPassword(user)"
+                      class="text-blue-600 hover:text-blue-900 mr-3"
+                      title="Restablecer Contraseña"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                       </svg>
                     </button>
                     <button
@@ -405,6 +414,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Reset Password Modal -->
+    <div v-if="showResetPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Restablecer Contraseña</h3>
+        <p class="text-sm text-gray-600 mb-4">Usuario: <strong>{{ resetPasswordUser?.full_name }}</strong></p>
+        <form @submit.prevent="submitResetPassword">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña *</label>
+            <input v-model="resetPasswordForm.new_password" type="password" required minlength="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="flex justify-end gap-3">
+            <button type="button" @click="showResetPasswordModal = false" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancelar</button>
+            <button type="submit" :disabled="saving" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">Restablecer</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </BaseLayout>
 </template>
 
@@ -427,6 +454,9 @@ export default {
       showModal: false,
       editingUser: null,
       saving: false,
+      showResetPasswordModal: false,
+      resetPasswordUser: null,
+      resetPasswordForm: { new_password: '' },
       formData: {
         full_name: '',
         email: '',
@@ -617,6 +647,27 @@ export default {
         alert('Error al actualizar el estado del usuario')
       }
     },
+    openResetPassword(user) {
+      this.resetPasswordUser = user
+      this.resetPasswordForm.new_password = ''
+      this.showResetPasswordModal = true
+    },
+    async submitResetPassword() {
+      if (!this.resetPasswordForm.new_password || this.resetPasswordForm.new_password.length < 6) {
+        alert('La contraseña debe tener al menos 6 caracteres')
+        return
+      }
+      this.saving = true
+      try {
+        await userService.adminResetPassword(this.resetPasswordUser.user_id, this.resetPasswordForm.new_password)
+        alert('Contraseña restablecida exitosamente')
+        this.showResetPasswordModal = false
+      } catch (error) {
+        alert('Error al restablecer contraseña: ' + (error.response?.data?.detail || error.message))
+      } finally {
+        this.saving = false
+      }
+    },
     getInitials(name) {
       if (!name) return '??'
       const parts = name.split(' ')
@@ -644,11 +695,11 @@ export default {
     },
     getRoleBadgeClass(rol) {
       const classes = {
-        'administrador': 'bg-red-100 text-red-800',
-        'gerencia': 'bg-blue-100 text-blue-800',
-        'usuario': 'bg-gray-100 text-gray-800'
+        'administrador': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+        'gerencia': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        'usuario': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
       }
-      return classes[rol] || 'bg-gray-100 text-gray-800'
+      return classes[rol] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
     },
     getDepartmentLabel(dept) {
       const labels = {

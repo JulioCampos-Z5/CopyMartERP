@@ -101,8 +101,11 @@ export interface VacationUpdate {
 export interface AdministrativeRecord {
   record_id: number;
   employee_id: number;
-  type: 'RETROALIMENTACION_ESCRITA' | 'AMONESTACION' | 'ACTA_ADMINISTRATIVA' | 'ENTREVISTA_AUSENTISMO';
-  issue_date: string;
+  type_administrative: 'retroalimentacion_escrita' | 'amonestacion' | 'acta_administrativa' | 'entrevista_ausentismo';
+  suspended_days: number;
+  start_date: string | null;
+  end_date: string | null;
+  file_path: string | null;
   description: string;
   issued_by: number;
   created_at: string;
@@ -111,28 +114,36 @@ export interface AdministrativeRecord {
 
 export interface AdministrativeRecordCreate {
   employee_id: number;
-  type: 'RETROALIMENTACION_ESCRITA' | 'AMONESTACION' | 'ACTA_ADMINISTRATIVA' | 'ENTREVISTA_AUSENTISMO';
-  issue_date: string;
+  type_administrative: 'retroalimentacion_escrita' | 'amonestacion' | 'acta_administrativa' | 'entrevista_ausentismo';
+  suspended_days?: number;
+  start_date?: string;
+  end_date?: string;
   description: string;
+  file_path?: string;
   issued_by: number;
 }
 
 export interface AdministrativeRecordUpdate {
-  type?: 'RETROALIMENTACION_ESCRITA' | 'AMONESTACION' | 'ACTA_ADMINISTRATIVA' | 'ENTREVISTA_AUSENTISMO';
-  issue_date?: string;
+  type_administrative?: 'retroalimentacion_escrita' | 'amonestacion' | 'acta_administrativa' | 'entrevista_ausentismo';
+  suspended_days?: number;
+  start_date?: string;
+  end_date?: string;
   description?: string;
+  file_path?: string;
 }
 
 // Absences
 export interface Absence {
   absence_id: number;
   employee_id: number;
-  absence_type: 'ENFERMEDAD' | 'AUSENTISMO' | 'PERMISO_PERSONAL' | 'OTRO';
+  absence_type: 'enfermedad' | 'ausentismo' | 'permiso_personal' | 'otro';
   start_date: string;
   end_date: string;
   is_justified: boolean;
   justification?: string;
   file_path?: string;
+  status: 'pendiente' | 'aprobado' | 'rechazado';
+  reviewed_by?: number;
   notes?: string;
   created_at: string;
   updated_at: string;
@@ -140,7 +151,7 @@ export interface Absence {
 
 export interface AbsenceCreate {
   employee_id: number;
-  absence_type: 'ENFERMEDAD' | 'AUSENTISMO' | 'PERMISO_PERSONAL' | 'OTRO';
+  absence_type: 'enfermedad' | 'ausentismo' | 'permiso_personal' | 'otro';
   start_date: string;
   end_date: string;
   is_justified?: boolean;
@@ -150,13 +161,15 @@ export interface AbsenceCreate {
 }
 
 export interface AbsenceUpdate {
-  absence_type?: 'ENFERMEDAD' | 'AUSENTISMO' | 'PERMISO_PERSONAL' | 'OTRO';
+  absence_type?: 'enfermedad' | 'ausentismo' | 'permiso_personal' | 'otro';
   start_date?: string;
   end_date?: string;
   is_justified?: boolean;
   justification?: string;
   file_path?: string;
+  status?: 'pendiente' | 'aprobado' | 'rechazado';
   notes?: string;
+  reviewed_by?: number;
 }
 
 const RH_BASE = '/api/rh';

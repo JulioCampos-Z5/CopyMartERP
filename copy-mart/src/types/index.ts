@@ -447,6 +447,7 @@ export interface User {
   department: string
   is_active: boolean
   created_at: string
+  permissions?: Record<string, Record<string, boolean>> | null
 }
 
 export interface LoginCredentials {

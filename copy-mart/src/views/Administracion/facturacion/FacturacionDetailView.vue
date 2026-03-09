@@ -81,13 +81,13 @@
           <div class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-4">Montos</h2>
             <dl class="space-y-3">
-              <div v-if="billing.amount_subtotal || billing.amount">
+              <div v-if="billing.amount">
                 <dt class="text-sm font-medium text-gray-500">Subtotal</dt>
-                <dd class="text-base text-gray-900 mt-1">{{ formatCurrency(billing.amount_subtotal || (billing.amount * 0.86)) }}</dd>
+                <dd class="text-base text-gray-900 mt-1">{{ formatCurrency(Number(billing.amount) / 1.16) }}</dd>
               </div>
-              <div v-if="billing.amount_tax || billing.amount">
-                <dt class="text-sm font-medium text-gray-500">IVA</dt>
-                <dd class="text-base text-gray-900 mt-1">{{ formatCurrency(billing.amount_tax || (billing.amount * 0.16)) }}</dd>
+              <div v-if="billing.amount">
+                <dt class="text-sm font-medium text-gray-500">IVA (16%)</dt>
+                <dd class="text-base text-gray-900 mt-1">{{ formatCurrency(Number(billing.amount) - Number(billing.amount) / 1.16) }}</dd>
               </div>
               <div class="pt-2 border-t">
                 <dt class="text-sm font-medium text-gray-500">Total</dt>
@@ -166,9 +166,9 @@ const generatePdf = () => {
       due_date: formatDate(billing.value.due_date),
       payment_date: billing.value.payment_date ? formatDate(billing.value.payment_date) : null,
       status: String(billing.value.status || 'pendiente'),
-      amount_subtotal: Number(billing.value.amount_subtotal || (billing.value.amount * 0.86)),
-      amount_tax: Number(billing.value.amount_tax || (billing.value.amount * 0.16)),
-      amount_total: Number(billing.value.amount_total || billing.value.amount),
+      amount_subtotal: Number(billing.value.amount) / 1.16,
+      amount_tax: Number(billing.value.amount) - Number(billing.value.amount) / 1.16,
+      amount_total: Number(billing.value.amount),
       sale_info: billing.value.sale ? {
         invoice_number: billing.value.sale.invoice_number || `#${billing.value.sale.sale_id}`,
         amount: Number(billing.value.sale.sale_price)

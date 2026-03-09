@@ -5,9 +5,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="space-y-6">
         <!-- Header -->
-        <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
-          <h1 class="text-3xl font-bold text-blue-800 mb-2">Gestión de Clientes</h1>
-          <p class="text-blue-600">Administra la información de tus clientes</p>
+        <div class="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+          <h1 class="text-3xl font-bold text-blue-800 dark:text-blue-200 mb-2">Gestión de Clientes</h1>
+          <p class="text-blue-600 dark:text-blue-300">Administra la información de tus clientes</p>
         </div>
 
         <!-- Stats Cards -->
@@ -137,7 +137,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ client.client_type || '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <span :class="['px-2 py-1 text-xs font-medium rounded-full', client.status === 'activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800']">
+                      <span :class="['px-2 py-1 text-xs font-medium rounded-full', client.status === 'activo' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200']">
                         {{ client.status || 'activo' }}
                       </span>
                     </td>
