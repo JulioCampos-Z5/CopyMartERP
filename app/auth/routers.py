@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from auth.models import User
 from auth.schemas import (
-    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangePassword, ChangeEmail, PermissionsResponse, Token, UserUpdate, MyPermissionsResponse
+    UserCreate, UserResponse, LoginRequest, ChangePasswordMe, ChangePassword, ChangeEmail, PermissionsResponse, Token, LoginResponse, UserUpdate, MyPermissionsResponse
 )
 from auth.schemas import TokenData
 from auth.services import get_user_by_id, get_user_by_email, create_user, authenticate_user
@@ -92,7 +92,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
     db.refresh(user)
     return user
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=LoginResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = authenticate_user(db, data.email, data.password)
     if not user:
@@ -105,7 +105,11 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
     }
     access_token = create_access_token(data=token_data)
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user
+    }
 
 @router.put("/{user_id}/password", status_code=204)
 def change_password(user_id: int, payload: ChangePasswordMe, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

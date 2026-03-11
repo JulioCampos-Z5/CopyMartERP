@@ -47,6 +47,11 @@ class Token(BaseModel):
     access_token: str
     token_type: str =  "bearer"
 
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
 class TokenData(BaseModel):
     user_id: int | None = None
     rol: RolEnum | None = None

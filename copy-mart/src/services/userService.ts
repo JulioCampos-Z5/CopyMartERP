@@ -5,6 +5,7 @@
 
 import { apiRequest, API_ENDPOINTS, authStorage } from '@/config/api'
 import type { User, LoginCredentials, AuthResponse } from '@/types'
+import { useAuthStore } from '@/stores/auth'
 
 interface UserListResponse {
   users: User[]
@@ -27,19 +28,30 @@ export const userService = {
     authStorage.setToken(data.access_token)
     localStorage.setItem('isAuthenticated', 'true')
 
-    // Obtener datos completos del usuario
-    try {
-      const userData = await apiRequest<User>(`${API_ENDPOINTS.AUTH}/me`)
-      localStorage.setItem('user', JSON.stringify(userData))
-    } catch (error) {
-      console.error('Error getting user data:', error)
-      // Fallback mínimo
-      const userData: Partial<User> = {
-        email: credentials.email,
-        full_name: 'Usuario',
-        role: 'user'
+    // El backend ahora devuelve user en la respuesta de login
+    if (data.user) {
+      localStorage.setItem('user', JSON.stringify(data.user))
+      // Actualizar el Pinia auth store
+      try {
+        const authStore = useAuthStore()
+        authStore.user = data.user
+        authStore.token = data.access_token
+        authStore.isAuthenticated = true
+      } catch (e) { /* store puede no estar inicializado */ }
+    } else {
+      // Fallback: obtener datos del usuario desde /me
+      try {
+        const userData = await apiRequest<User>(`${API_ENDPOINTS.AUTH}/me`)
+        localStorage.setItem('user', JSON.stringify(userData))
+        try {
+          const authStore = useAuthStore()
+          authStore.user = userData
+          authStore.token = data.access_token
+          authStore.isAuthenticated = true
+        } catch (e) { /* store puede no estar inicializado */ }
+      } catch (error) {
+        console.error('Error getting user data:', error)
       }
-      localStorage.setItem('user', JSON.stringify(userData))
     }
 
     return data

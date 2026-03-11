@@ -96,7 +96,7 @@
         </div>
 
         <!-- Comercial -->
-        <div class="mb-6">
+        <div v-if="hasComercialAccess" class="mb-6">
           <h3 class="text-xs text-gray-400 uppercase font-semibold mb-3 px-2">Comercial</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             <router-link 
@@ -158,7 +158,7 @@
         </div>
 
         <!-- Administración -->
-        <div class="mb-6">
+        <div v-if="hasAdminAccess" class="mb-6">
           <h3 class="text-xs text-gray-400 uppercase font-semibold mb-3 px-2">Administración</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             <router-link 
@@ -248,7 +248,7 @@
         </div>
 
         <!-- Operaciones y Más -->
-        <div>
+        <div v-if="hasOperacionesAccess">
           <h3 class="text-xs text-gray-400 uppercase font-semibold mb-3 px-2">Operaciones y Más</h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             <router-link 
@@ -329,38 +329,39 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { canAccessPath, getStoredUser } from '@/config/accessControl'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const showAppsMenu = ref(false)
 const showUserMenu = ref(false)
-const currentUser = ref({
-  name: 'Usuario Demo',
-  email: 'usuario@copymart.com'
+
+const currentUser = computed(() => {
+  const u = authStore.user || getStoredUser()
+  return {
+    name: u?.full_name || u?.name || 'Usuario Demo',
+    email: u?.email || 'usuario@copymart.com'
+  }
 })
 
-const currentAccessUser = ref(null)
+const canAccess = (path) => canAccessPath(authStore.user || getStoredUser(), path)
 
-const loadCurrentUser = () => {
-  try {
-    const userDataStr = localStorage.getItem('user')
-    if (userDataStr) {
-      const userData = JSON.parse(userDataStr)
-      currentUser.value = {
-        name: userData.name || userData.full_name || 'Usuario Demo',
-        email: userData.email || 'usuario@copymart.com'
-      }
-      currentAccessUser.value = userData
-    }
-  } catch (error) {
-    console.error('Error loading user:', error)
-  }
-}
-
-const canAccess = (path) => canAccessPath(currentAccessUser.value || getStoredUser(), path)
+// Visibilidad por sección
+const hasComercialAccess = computed(() =>
+  canAccess('/ventas') || canAccess('/rentas') || canAccess('/clientes') || canAccess('/produccion')
+)
+const hasAdminAccess = computed(() =>
+  canAccess('/compras') || canAccess('/almacen') || canAccess('/cobranza') ||
+  canAccess('/facturacion') || canAccess('/inventario') || canAccess('/administracion/usuarios')
+)
+const hasOperacionesAccess = computed(() =>
+  canAccess('/rutas') || canAccess('/ordenes-servicio') || canAccess('/taller') ||
+  canAccess('/recursos-humanos') || canAccess('/ti')
+)
 
 const toggleAppsMenu = () => {
   showAppsMenu.value = !showAppsMenu.value
@@ -374,11 +375,7 @@ const toggleUserMenu = () => {
 
 const logout = async () => {
   try {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    localStorage.removeItem('isAuthenticated')
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_data')
+    authStore.logout()
     await router.push('/login')
   } catch (error) {
     console.error('Error during logout:', error)
@@ -386,8 +383,4 @@ const logout = async () => {
     await router.push('/login')
   }
 }
-
-onMounted(() => {
-  loadCurrentUser()
-})
 </script>
