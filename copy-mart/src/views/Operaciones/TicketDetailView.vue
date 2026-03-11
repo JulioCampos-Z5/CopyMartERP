@@ -357,7 +357,7 @@ const openEvidenceModal = async () => {
     
     // Obtener el nombre del archivo
     const filename = ticket.value.evidence.split('/').pop() || ''
-    const url = `http://192.168.100.93:8000/api/tickets/evidence/${filename}`
+    const url = `http://192.168.1.50:8000/api/tickets/evidence/${filename}`
     
     // Hacer fetch con autenticación
     const response = await fetch(url, {
@@ -424,7 +424,7 @@ const downloadEvidenceFromUrl = async () => {
     
     // Obtener el nombre del archivo
     const filename = ticket.value.evidence.split('/').pop() || ''
-    const url = `http://192.168.100.93:8000/api/tickets/evidence/${filename}`
+    const url = `http://192.168.1.50:8000/api/tickets/evidence/${filename}`
     
     // Hacer fetch con autenticación
     const response = await fetch(url, {

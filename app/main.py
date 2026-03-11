@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from logger_config import logger
 from pydantic import BaseModel
@@ -6,6 +6,9 @@ from typing import Any, Optional
 from pathlib import Path
 from datetime import datetime
 import json
+import psutil
+import platform
+import shutil
 from auth.routers import router as user_router
 from equipment.routers import router as equipment_router
 from rent.routers import router as rent_router
@@ -58,11 +61,11 @@ app.add_middleware(
         "http://localhost:5175",
         "http://localhost:5176",
         "http://localhost:3000",
-        "http://192.168.100.93:5173",
-        "http://192.168.100.93:5174",
-        "http://192.168.100.93:5175",
-        "http://192.168.100.93:5176",
-        "http://192.168.100.93:3000"
+        "http://192.168.1.50:5173",
+        "http://192.168.1.50:5174",
+        "http://192.168.1.50:5175",
+        "http://192.168.1.50:5176",
+        "http://192.168.1.50:3000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -106,6 +109,73 @@ def _append_frontend_log(entry: FrontendLogEntry) -> None:
 def log_frontend(entry: FrontendLogEntry):
     _append_frontend_log(entry)
     return {"status": "ok"}
+
+
+# ── System Info endpoint for TI module ──
+from auth.routers import get_current_user
+
+@app.get("/api/system-info")
+def get_system_info(current_user = Depends(get_current_user)):
+    """Return real system metrics for the TI dashboard."""
+    # CPU
+    cpu_percent = psutil.cpu_percent(interval=0.5)
+    cpu_count = psutil.cpu_count()
+
+    # RAM
+    mem = psutil.virtual_memory()
+    ram_total_gb = round(mem.total / (1024**3), 1)
+    ram_used_gb = round(mem.used / (1024**3), 1)
+    ram_percent = mem.percent
+
+    # Disk
+    disk = shutil.disk_usage("/")
+    disk_total_gb = round(disk.total / (1024**3), 1)
+    disk_used_gb = round(disk.used / (1024**3), 1)
+    disk_percent = round((disk.used / disk.total) * 100, 1)
+
+    # Network
+    net = psutil.net_io_counters()
+    net_sent_mb = round(net.bytes_sent / (1024**2), 1)
+    net_recv_mb = round(net.bytes_recv / (1024**2), 1)
+
+    # Uptime
+    boot_time = datetime.fromtimestamp(psutil.boot_time())
+    uptime_seconds = (datetime.now() - boot_time).total_seconds()
+    uptime_hours = int(uptime_seconds // 3600)
+    uptime_minutes = int((uptime_seconds % 3600) // 60)
+
+    # DB check
+    db_online = False
+    try:
+        from core.database import SessionLocal
+        from sqlalchemy import text
+        db = SessionLocal()
+        db.execute(text("SELECT 1"))
+        db_online = True
+        db.close()
+    except Exception:
+        db_online = False
+
+    # Backend status
+    backend_online = True  # If we reached here, backend is up
+
+    return {
+        "cpu": {"percent": cpu_percent, "cores": cpu_count},
+        "ram": {"total_gb": ram_total_gb, "used_gb": ram_used_gb, "percent": ram_percent},
+        "disk": {"total_gb": disk_total_gb, "used_gb": disk_used_gb, "percent": disk_percent},
+        "network": {"sent_mb": net_sent_mb, "recv_mb": net_recv_mb},
+        "uptime": {"hours": uptime_hours, "minutes": uptime_minutes, "boot_time": boot_time.isoformat()},
+        "services": {
+            "backend": backend_online,
+            "database": db_online
+        },
+        "system": {
+            "os": platform.system(),
+            "os_version": platform.version(),
+            "hostname": platform.node(),
+            "python_version": platform.python_version()
+        }
+    }
 
 app.include_router(user_router, prefix="/api")
 app.include_router(equipment_router, prefix="/api")

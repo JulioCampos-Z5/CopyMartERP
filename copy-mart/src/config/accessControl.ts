@@ -8,7 +8,7 @@ const MODULE_PATTERNS: Record<string, string[]> = {
   dashboard: ['/dashboard', '/perfil'],
   ventas: ['/ventas', '/comercial/ventas'],
   rentas: ['/rentas', '/comercial/rentas'],
-  clientes: ['/clientes', '/comercial/clientes', '/atencion-clientes'],
+  clientes: ['/clientes', '/comercial/clientes'],
   produccion: ['/produccion'],
   compras: ['/compras', '/administracion/compras'],
   almacen: ['/almacen'],

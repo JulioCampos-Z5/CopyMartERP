@@ -3,80 +3,80 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="space-y-6">
       <!-- Header -->
-      <div class="bg-cyan-50 p-6 rounded-lg border border-cyan-200">
-        <h1 class="text-3xl font-bold text-cyan-800 mb-2">Órdenes de Servicio</h1>
-        <p class="text-cyan-600">Gestión y seguimiento de órdenes de trabajo y mantenimiento</p>
+      <div class="bg-cyan-50 dark:bg-cyan-900/30 p-6 rounded-lg border border-cyan-200 dark:border-cyan-700">
+        <h1 class="text-3xl font-bold text-cyan-800 dark:text-cyan-200 mb-2">Órdenes de Servicio</h1>
+        <p class="text-cyan-600 dark:text-cyan-400">Gestión y seguimiento de órdenes de trabajo y mantenimiento</p>
       </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-cyan-100 dark:bg-cyan-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Tickets Pendientes</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ tickets.filter(t => t.report_status === 'pendiente').length }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Tickets Pendientes</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ tickets.filter(t => t.report_status === 'pendiente').length }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">En Proceso</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ tickets.filter(t => ['urgente', 'programado', 'atencion'].includes(t.report_status)).length }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">En Proceso</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ tickets.filter(t => ['urgente', 'programado', 'atencion'].includes(t.report_status)).length }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Completados Hoy</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ ticketsCompletedToday }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Completados Hoy</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ ticketsCompletedToday }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Total Tickets</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ tickets.length }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Tickets</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ tickets.length }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="bg-white p-6 rounded-lg shadow border">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
         <div class="flex flex-wrap gap-4">
           <button @click="openTicketModal()" class="btn-primary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,9 +94,9 @@
       </div>
 
       <!-- Main Content -->
-      <div class="bg-white rounded-lg shadow border">
-        <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-semibold text-gray-900">Tickets de Servicio</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Tickets de Servicio</h2>
         </div>
 
         <div v-if="loading" class="flex justify-center py-8">
@@ -107,28 +107,28 @@
           <div class="overflow-x-auto">
             <table class="min-w-full table-auto">
               <thead>
-                <tr class="bg-gray-50">
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <tr class="bg-gray-50 dark:bg-gray-700">
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cliente</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipo</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descripción</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fecha</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr v-for="ticket in tickets" :key="ticket.ticket_id">
-                  <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ ticket.ticket_id }}</td>
-                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ getClientName(ticket.client_id) }}</td>
-                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ getTypeBadge(ticket.report_type) }}</td>
-                  <td class="px-4 py-4 text-sm text-gray-900 max-w-xs truncate">{{ ticket.description }}</td>
+                  <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">#{{ ticket.ticket_id }}</td>
+                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ getClientName(ticket.client_id) }}</td>
+                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ getTypeBadge(ticket.report_type) }}</td>
+                  <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-200 max-w-xs truncate">{{ ticket.description }}</td>
                   <td class="px-4 py-4 whitespace-nowrap">
                     <span :class="getStatusClass(ticket.report_status)" class="px-2 py-1 text-xs font-medium rounded-full">
                       {{ getStatusLabel(ticket.report_status) }}
                     </span>
                   </td>
-                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(ticket.created_at) }}</td>
+                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ formatDate(ticket.created_at) }}</td>
                   <td class="px-4 py-4 whitespace-nowrap text-sm">
                     <div class="flex gap-2">
                       <button @click="viewTicket(ticket.ticket_id)" class="text-blue-600 hover:text-blue-800" title="Ver detalle">
@@ -155,15 +155,15 @@
           </div>
         </div>
 
-        <div v-else class="p-6 text-center text-gray-500">
+        <div v-else class="p-6 text-center text-gray-500 dark:text-gray-400">
           No hay tickets registrados
         </div>
       </div>
 
       <!-- Modal Ticket -->
       <div v-if="showTicketModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showTicketModal = false">
-        <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          <h3 class="text-xl font-semibold mb-4">{{ ticketForm.ticket_id ? 'Editar' : 'Nuevo' }} Ticket</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <h3 class="text-xl font-semibold mb-4 dark:text-white">{{ ticketForm.ticket_id ? 'Editar' : 'Nuevo' }} Ticket</h3>
           <form @submit.prevent="saveTicket" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

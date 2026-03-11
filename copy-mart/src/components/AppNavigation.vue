@@ -128,20 +128,6 @@
             </router-link>
 
             <router-link 
-              to="/atencion-clientes"
-              v-if="canAccess('/atencion-clientes')"
-              @click="showAppsMenu = false"
-              class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-800 transition-colors"
-            >
-              <div class="w-12 h-12 mb-2 flex items-center justify-center">
-                <svg class="w-10 h-10 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-              </div>
-              <span class="text-xs text-white text-center">Atención</span>
-            </router-link>
-
-            <router-link 
               to="/clientes"
               v-if="canAccess('/clientes')"
               @click="showAppsMenu = false"

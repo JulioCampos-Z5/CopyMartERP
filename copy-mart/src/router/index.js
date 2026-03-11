@@ -106,15 +106,6 @@ const router = createRouter({
       }
     },
     {
-      path: '/atencion-clientes',
-      name: 'AtencionClientes',
-      component: () => import('../views/Comercial/AtencionClientesView.vue'),
-      meta: { 
-        requiresAuth: true,
-        title: 'Atención a Clientes - CopyMart ERP'
-      }
-    },
-    {
       path: '/clientes',
       name: 'Clientes',
       component: () => import('../views/Comercial/clientes/ClientesView.vue'),

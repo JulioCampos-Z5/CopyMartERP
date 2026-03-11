@@ -3,80 +3,80 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="space-y-6">
       <!-- Header -->
-      <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
-        <h1 class="text-3xl font-bold text-indigo-800 mb-2">Gestión de Cobranza</h1>
-        <p class="text-indigo-600">Administra las cuentas por cobrar y seguimiento de pagos</p>
+      <div class="bg-indigo-50 dark:bg-indigo-900/30 p-6 rounded-lg border border-indigo-200 dark:border-indigo-700">
+        <h1 class="text-3xl font-bold text-indigo-800 dark:text-indigo-200 mb-2">Gestión de Cobranza</h1>
+        <p class="text-indigo-600 dark:text-indigo-400">Administra las cuentas por cobrar y seguimiento de pagos</p>
       </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Total por Cobrar</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(stats.totalPending) }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total por Cobrar</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ formatCurrency(stats.totalPending) }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Facturas Vencidas</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.overdueCount }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Facturas Vencidas</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.overdueCount }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Cobrado este Mes</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(stats.paidThisMonth) }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Cobrado este Mes</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ formatCurrency(stats.paidThisMonth) }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Pendientes</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.expiringSoon }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Pendientes</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.expiringSoon }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="bg-white p-6 rounded-lg shadow border">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
         <div class="flex flex-wrap gap-4">
           <button @click="loadData" class="btn-primary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,13 +105,13 @@
       </div>
 
       <!-- Loading -->
-      <div v-if="loading" class="bg-white p-12 rounded-lg shadow border text-center">
+      <div v-if="loading" class="bg-white dark:bg-gray-800 p-12 rounded-lg shadow border dark:border-gray-700 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-        <p class="mt-4 text-gray-600">Cargando facturaciones...</p>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando facturaciones...</p>
       </div>
 
       <!-- Error -->
-      <div v-else-if="error" class="bg-red-50 p-6 rounded-lg border border-red-200">
+      <div v-else-if="error" class="bg-red-50 dark:bg-red-900/30 p-6 rounded-lg border border-red-200 dark:border-red-700">
         <p class="text-red-600">{{ error }}</p>
         <button @click="loadData" class="mt-2 text-red-700 underline">Reintentar</button>
       </div>
@@ -119,32 +119,32 @@
       <!-- Main Content -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Facturas por Cobrar -->
-        <div class="lg:col-span-2 bg-white rounded-lg shadow border">
-          <div class="p-6 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Facturas Pendientes de Cobro ({{ filteredBillings.length }})</h2>
+        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700">
+          <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Facturas Pendientes de Cobro ({{ filteredBillings.length }})</h2>
           </div>
           <div class="p-6">
-            <div v-if="filteredBillings.length === 0" class="text-center py-8 text-gray-500">
+            <div v-if="filteredBillings.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
               No hay facturaciones registradas
             </div>
             <div v-else class="overflow-x-auto">
               <table class="min-w-full table-auto">
                 <thead>
-                  <tr class="bg-gray-50">
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Factura #</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vencimiento</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <tr class="bg-gray-50 dark:bg-gray-700">
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Factura #</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cliente</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monto</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vencimiento</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="billing in filteredBillings" :key="billing.billing_id">
-                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">{{ billing.invoice_number || '-' }}</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ billing.client?.name || billing.rent?.client?.name || '-' }}</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatCurrency(billing.amount) }}</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(billing.due_date) }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-indigo-400">{{ billing.invoice_number || '-' }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ billing.client?.name || billing.rent?.client?.name || '-' }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ formatCurrency(billing.amount) }}</td>
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ formatDate(billing.due_date) }}</td>
                     <td class="px-4 py-4 whitespace-nowrap">
                       <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(billing.status)]">
                         {{ getStatusLabel(billing.status) }}
@@ -163,37 +163,37 @@
         </div>
 
         <!-- Gestión de Cobranza -->
-        <div class="bg-white rounded-lg shadow border">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Acciones de Cobranza</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700">
+          <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Acciones de Cobranza</h3>
           </div>
           <div class="p-6">
             <div class="space-y-4">
-              <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h4 class="text-sm font-medium text-red-800 mb-2">Vencidas ({{ overdueBillings.length }})</h4>
+              <div class="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg">
+                <h4 class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">Vencidas ({{ overdueBillings.length }})</h4>
                 <div class="space-y-2" v-if="overdueBillings.length > 0">
                   <div v-for="billing in overdueBillings.slice(0, 5)" :key="billing.billing_id" class="flex justify-between items-center">
-                    <span class="text-sm text-red-700">{{ billing.client?.name || billing.rent?.client?.name || 'Sin cliente' }}</span>
-                    <span class="text-xs text-red-600">{{ formatCurrency(billing.amount) }}</span>
+                    <span class="text-sm text-red-700 dark:text-red-300">{{ billing.client?.name || billing.rent?.client?.name || 'Sin cliente' }}</span>
+                    <span class="text-xs text-red-600 dark:text-red-400">{{ formatCurrency(billing.amount) }}</span>
                   </div>
                 </div>
-                <p v-else class="text-sm text-red-600">No hay facturas vencidas</p>
+                <p v-else class="text-sm text-red-600 dark:text-red-400">No hay facturas vencidas</p>
               </div>
 
-              <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h4 class="text-sm font-medium text-yellow-800 mb-2">Próximas a Vencer</h4>
+              <div class="p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">Próximas a Vencer</h4>
                 <div class="space-y-2" v-if="pendingBillings.length > 0">
                   <div v-for="billing in pendingBillings.slice(0, 5)" :key="billing.billing_id" class="flex justify-between items-center">
-                    <span class="text-sm text-yellow-700">{{ billing.client?.name || billing.rent?.client?.name || 'Sin cliente' }}</span>
-                    <span class="text-xs text-yellow-600">{{ formatDate(billing.due_date) }}</span>
+                    <span class="text-sm text-yellow-700 dark:text-yellow-300">{{ billing.client?.name || billing.rent?.client?.name || 'Sin cliente' }}</span>
+                    <span class="text-xs text-yellow-600 dark:text-yellow-400">{{ formatDate(billing.due_date) }}</span>
                   </div>
                 </div>
-                <p v-else class="text-sm text-yellow-600">No hay facturas próximas a vencer</p>
+                <p v-else class="text-sm text-yellow-600 dark:text-yellow-400">No hay facturas próximas a vencer</p>
               </div>
 
-              <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 class="text-sm font-medium text-blue-800 mb-2">Estadísticas</h4>
-                <div class="space-y-1 text-sm text-blue-700">
+              <div class="p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">Estadísticas</h4>
+                <div class="space-y-1 text-sm text-blue-700 dark:text-blue-300">
                   <div class="flex justify-between">
                     <span>Total Facturas:</span>
                     <span>{{ billings.length }}</span>
@@ -216,9 +216,9 @@
 
     <!-- Modal de Pago -->
     <div v-if="showPaymentModal && selectedBilling" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="closePaymentModal">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-xl font-semibold mb-4">Registrar Pago</h3>
-        <p class="text-sm text-gray-500 mb-4">Factura #{{ selectedBilling.billing_id }} - {{ formatCurrency(selectedBilling.amount) }}</p>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold mb-4 dark:text-white">Registrar Pago</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Factura #{{ selectedBilling.billing_id }} - {{ formatCurrency(selectedBilling.amount) }}</p>
         <form @submit.prevent="registerPayment" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Pago *</label>
