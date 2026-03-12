@@ -438,6 +438,7 @@
 <script>
 import BaseLayout from '@/components/BaseLayout.vue'
 import { userService } from '@/services/userService'
+import { useAuthStore } from '@/stores/auth'
 
 export default {
   name: 'UsuariosView',
@@ -471,14 +472,17 @@ export default {
         { id: 'ventas', label: 'Ventas' },
         { id: 'rentas', label: 'Rentas' },
         { id: 'clientes', label: 'Clientes' },
-        { id: 'inventario', label: 'Inventario' },
-        { id: 'almacen', label: 'Almacén' },
+        { id: 'produccion', label: 'Producción' },
         { id: 'compras', label: 'Compras' },
+        { id: 'almacen', label: 'Almacén' },
         { id: 'cobranza', label: 'Cobranza' },
         { id: 'facturacion', label: 'Facturación' },
-        { id: 'produccion', label: 'Producción' },
+        { id: 'inventario', label: 'Inventario' },
+        { id: 'rutas', label: 'Rutas' },
         { id: 'ordenes_servicio', label: 'Órdenes de Servicio' },
+        { id: 'taller', label: 'Taller' },
         { id: 'recursos_humanos', label: 'Recursos Humanos' },
+        { id: 'ti', label: 'Tecnologías de la Información' },
         { id: 'usuarios', label: 'Usuarios' },
       ]
     }
@@ -526,14 +530,12 @@ export default {
     },
     toggleArea(areaId) {
       if (this.selectedAreas[areaId]) {
-        // Área seleccionada: inicializar permisos si no existen
-        if (!this.formData.permissions[areaId]) {
-          this.formData.permissions[areaId] = {
-            view: false,
-            create: false,
-            edit: false,
-            delete: false
-          }
+        // Área seleccionada: activar todos los permisos
+        this.formData.permissions[areaId] = {
+          view: true,
+          create: true,
+          edit: true,
+          delete: true
         }
       } else {
         // Área deseleccionada: limpiar permisos
@@ -615,6 +617,21 @@ export default {
             permissions: filteredPermissions
           }
           await userService.updateUser(this.editingUser.user_id, updateData)
+
+          // If editing the current logged-in user, update localStorage and store
+          const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+          if (storedUser.user_id === this.editingUser.user_id) {
+            storedUser.permissions = filteredPermissions
+            storedUser.full_name = updateData.full_name
+            storedUser.email = updateData.email
+            storedUser.rol = updateData.rol
+            storedUser.department = updateData.department
+            localStorage.setItem('user', JSON.stringify(storedUser))
+            try {
+              const authStore = useAuthStore()
+              authStore.user = storedUser
+            } catch (e) { /* ignore */ }
+          }
         } else {
           // Create new user
           await userService.createUser({

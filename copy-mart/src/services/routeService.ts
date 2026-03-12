@@ -1,5 +1,29 @@
 import { apiGet, apiPost, apiPut, apiDelete, API_ENDPOINTS } from '@/config/api'
 
+export interface RouteStop {
+  stop_id: number
+  route_id: number
+  client_id: number | null
+  branch_id: number | null
+  client_name: string | null
+  branch_name: string | null
+  stop_order: number
+  address: string | null
+  city: string | null
+  notes: string | null
+  is_completed: boolean
+  created_at: string
+}
+
+export interface RouteStopCreate {
+  client_id?: number | null
+  branch_id?: number | null
+  stop_order?: number
+  address?: string
+  city?: string
+  notes?: string
+}
+
 export interface Route {
   route_id: number
   route_code: string
@@ -13,6 +37,7 @@ export interface Route {
   is_active: boolean
   created_at: string
   updated_at: string
+  stops: RouteStop[]
 }
 
 export interface RouteCreate {
@@ -50,5 +75,22 @@ export const routeService = {
 
   async deleteRoute(id: number): Promise<void> {
     return apiDelete<void>(`${API_ENDPOINTS.ROUTES}/${id}`)
+  },
+
+  // Stops
+  async getStops(routeId: number): Promise<RouteStop[]> {
+    return apiGet<RouteStop[]>(`${API_ENDPOINTS.ROUTES}/${routeId}/stops`)
+  },
+
+  async addStop(routeId: number, data: RouteStopCreate): Promise<RouteStop> {
+    return apiPost<RouteStop>(`${API_ENDPOINTS.ROUTES}/${routeId}/stops`, data)
+  },
+
+  async updateStop(stopId: number, data: Partial<RouteStopCreate & { is_completed?: boolean }>): Promise<RouteStop> {
+    return apiPut<RouteStop>(`${API_ENDPOINTS.ROUTES}/stops/${stopId}`, data)
+  },
+
+  async deleteStop(stopId: number): Promise<void> {
+    return apiDelete<void>(`${API_ENDPOINTS.ROUTES}/stops/${stopId}`)
   }
 }

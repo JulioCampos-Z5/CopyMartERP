@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 
 
@@ -11,6 +11,46 @@ class RouteStatus(str, Enum):
     COMPLETADA = "completada"
     CANCELADA = "cancelada"
 
+
+# ---- RouteStop schemas ----
+
+class RouteStopCreate(BaseModel):
+    client_id: Optional[int] = None
+    branch_id: Optional[int] = None
+    stop_order: int = 0
+    address: Optional[str] = None
+    city: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class RouteStopUpdate(BaseModel):
+    client_id: Optional[int] = None
+    branch_id: Optional[int] = None
+    stop_order: Optional[int] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    notes: Optional[str] = None
+    is_completed: Optional[bool] = None
+
+
+class RouteStopResponse(BaseModel):
+    stop_id: int
+    route_id: int
+    client_id: Optional[int] = None
+    branch_id: Optional[int] = None
+    client_name: Optional[str] = None
+    branch_name: Optional[str] = None
+    stop_order: int
+    address: Optional[str] = None
+    city: Optional[str] = None
+    notes: Optional[str] = None
+    is_completed: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ---- Route schemas ----
 
 class RouteCreate(BaseModel):
     route_code: str
@@ -47,5 +87,6 @@ class RouteResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    stops: List[RouteStopResponse] = []
 
     model_config = {"from_attributes": True}

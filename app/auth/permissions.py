@@ -16,6 +16,9 @@ ROUTE_TO_AREA = {
     "/tickets": "ordenes_servicio",
     "/rh": "recursos_humanos",
     "/users": "usuarios",
+    "/routes": "rutas",
+    "/repairs": "taller",
+    "/ti": "ti",
 }
 
 # Mapeo legacy para compatibilidad con departamentos
