@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from core.database import Base
@@ -12,6 +12,8 @@ class Contact(Base):
     email = Column(String(255), nullable=True)
     company = Column(String(255), nullable=True)
     rol = Column(String(100), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
     is_client = Column(Boolean, default=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)

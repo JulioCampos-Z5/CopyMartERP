@@ -1,12 +1,13 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# MariaDB/MySQL
-DATABASE_URL = "mysql+pymysql://root:@localhost:3306/copymart"
+load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env')
 
-# PostgreSQL 
-#DATABASE_URL = "postgresql://usuario:password@localhost:5432/copymart_erp"
+DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost:3306/copymart")
 
 engine = create_engine(DATABASE_URL)
 

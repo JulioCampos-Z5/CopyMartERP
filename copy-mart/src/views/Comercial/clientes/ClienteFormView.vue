@@ -67,6 +67,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input v-model="form.contact_email" type="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
             </div>
+
           </div>
         </div>
 
@@ -100,6 +101,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
               <input v-model="branch.city" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
             </div>
+
           </div>
         </div>
 
@@ -113,6 +115,8 @@
           </button>
         </div>
       </form>
+
+
     </div>
   </BaseLayout>
 </template>
@@ -215,7 +219,7 @@ const handleSubmit = async () => {
     // Agregar sucursal si se marcó el checkbox
     if (!isEditing.value && addBranch.value && branch.value.name) {
       payload.branches = [{
-        client_id: 0, // Se asignará en el backend
+        client_id: 0,
         name: branch.value.name,
         is_main: true,
         address: branch.value.address || null,

@@ -7,6 +7,8 @@ class ContactBase(BaseModel):
     email: str | None = None
     company: str | None = None
     rol: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
     is_client: bool | None = True
 
 
@@ -20,6 +22,8 @@ class ContactUpdate(BaseModel):
     email: str | None = None
     company: str | None = None
     rol: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
     is_client: bool | None = None
     is_active: bool | None = None
 

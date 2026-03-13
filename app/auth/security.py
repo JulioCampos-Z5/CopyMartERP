@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from passlib.context import CryptContext
 from jose import JWTError, jwt 
 from datetime import datetime, timedelta
@@ -5,9 +8,11 @@ from fastapi import HTTPException, status
 from auth.schemas import TokenData
 from auth.models import RolEnum, DepartmentEnum
 
-SECRET_KEY = "JindnsniuNkna"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 480
+load_dotenv(Path(__file__).resolve().parent.parent.parent / '.env')
+
+SECRET_KEY = os.getenv("SECRET_KEY", "JindnsniuNkna")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 
 pwd_context = CryptContext(
     schemes=["argon2"],

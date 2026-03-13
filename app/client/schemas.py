@@ -25,6 +25,8 @@ class BranchCreate(BaseModel):
     colonia: Optional[str] = None
     zip_code: Optional[str] = None
     city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     areas: Optional[List[str]] = None
 
 
@@ -35,6 +37,8 @@ class BranchUpdate(BaseModel):
     colonia: Optional[str] = None
     zip_code: Optional[str] = None
     city: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class BranchResponse(BaseModel):
@@ -45,6 +49,8 @@ class BranchResponse(BaseModel):
     colonia: Optional[str]
     zip_code: Optional[str]
     city: Optional[str]
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     created_at: datetime
     areas: Optional[List[AreaResponse]] = None
 
@@ -65,6 +71,8 @@ class ClientCreate(BaseModel):
     contact_phone: Optional[str] = None
     contact_email: Optional[str] = None
     contact_rol: Optional[str] = None
+    contact_latitude: Optional[float] = None
+    contact_longitude: Optional[float] = None
     branches: Optional[List[BranchCreate]] = None
 
 

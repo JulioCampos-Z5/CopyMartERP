@@ -219,6 +219,7 @@ export interface Client {
   colonia?: string
   zip_code?: string
   city?: string
+  contact_id?: number
   is_active?: boolean
   created_at: string
   branches?: Branch[]
@@ -249,6 +250,8 @@ export interface Branch {
   colonia?: string
   zip_code?: string
   city?: string
+  latitude?: number
+  longitude?: number
   created_at?: string
   areas?: Area[]
 }
@@ -294,6 +297,8 @@ export interface Contact {
   email?: string
   company?: string
   rol?: string
+  latitude?: number
+  longitude?: number
   is_primary?: boolean
   is_client?: boolean
   is_active?: boolean

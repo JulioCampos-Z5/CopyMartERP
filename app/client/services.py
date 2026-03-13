@@ -37,6 +37,8 @@ class ClientService:
                 email=getattr(client_data, 'contact_email', None),
                 company=client_data.name,
                 rol=getattr(client_data, 'contact_rol', None),
+                latitude=getattr(client_data, 'contact_latitude', None),
+                longitude=getattr(client_data, 'contact_longitude', None),
                 is_client=True
             )
             db.add(new_contact)
@@ -68,7 +70,9 @@ class ClientService:
                     address=branch_data.address,
                     colonia=branch_data.colonia,
                     zip_code=branch_data.zip_code,
-                    city=branch_data.city
+                    city=branch_data.city,
+                    latitude=branch_data.latitude,
+                    longitude=branch_data.longitude
                 )
                 db.add(new_branch)
                 db.flush()

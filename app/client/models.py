@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Float
+
 from sqlalchemy.orm import relationship
 from core.database import Base
 from datetime import datetime
@@ -36,6 +37,8 @@ class Branch(Base):
     colonia = Column(String(100), nullable=True)
     zip_code = Column(String(20), nullable=True)
     city = Column(String(100), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     client = relationship("Client", back_populates="branches")
