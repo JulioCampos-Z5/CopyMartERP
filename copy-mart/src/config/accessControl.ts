@@ -20,7 +20,11 @@ const MODULE_PATTERNS: Record<string, string[]> = {
   rutas: ['/rutas'],
   ordenes_servicio: ['/ordenes-servicio'],
   taller: ['/taller'],
-  ti: ['/ti']
+  ti: ['/ti'],
+  reportes: ['/reportes'],
+  auditoria: ['/auditoria'],
+  configuracion: ['/configuracion'],
+  migraciones: ['/migraciones']
 }
 
 const DEPARTMENT_MODULES: Record<string, string[]> = {

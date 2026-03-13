@@ -29,6 +29,9 @@ from inventory.routers import (
     inventory_router,
     shelf_router
 )
+from audit.routers import router as audit_router
+from notification.routers import router as notification_router
+from system.routers import router as system_router
 
 
 from core.database import Base, engine
@@ -49,6 +52,8 @@ from ticket import models as ticket_models
 from monthlyplan import models as monthlyplan_models
 from inventory import models as inventory_models
 from route import models as route_models
+from audit import models as audit_models
+from notification import models as notification_models
 
 app = FastAPI(title="API de Usuarios")
 
@@ -196,6 +201,9 @@ app.include_router(inventory_router, prefix="/api")
 app.include_router(shelf_router, prefix="/api")
 app.include_router(repair_router, prefix="/api")
 app.include_router(route_router, prefix="/api")
+app.include_router(audit_router, prefix="/api")
+app.include_router(notification_router, prefix="/api")
+app.include_router(system_router, prefix="/api")
 
 
 
