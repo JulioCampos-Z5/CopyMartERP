@@ -153,6 +153,60 @@
             </div>
           </div>
 
+          <!-- Tab: Historial / Timeline -->
+          <div v-if="activeTab === 'timeline'" class="p-6">
+            <div v-if="timelineLoading" class="flex justify-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+            </div>
+            <div v-else-if="timelineItems.length === 0" class="text-center py-8 text-gray-500">
+              No hay registros asociados a este cliente
+            </div>
+            <div v-else class="space-y-1">
+              <!-- Summary cards -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                  <p class="text-2xl font-bold text-yellow-700">{{ sales.length }}</p>
+                  <p class="text-xs text-yellow-600">Ventas</p>
+                </div>
+                <div class="bg-teal-50 border border-teal-200 rounded-lg p-3 text-center">
+                  <p class="text-2xl font-bold text-teal-700">{{ rents.length }}</p>
+                  <p class="text-xs text-teal-600">Rentas</p>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+                  <p class="text-2xl font-bold text-amber-700">{{ tickets.length }}</p>
+                  <p class="text-xs text-amber-600">Tickets</p>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+                  <p class="text-2xl font-bold text-red-700">{{ billings.length }}</p>
+                  <p class="text-xs text-red-600">Facturas</p>
+                </div>
+              </div>
+              <!-- Timeline -->
+              <div class="relative border-l-2 border-gray-200 ml-4">
+                <div 
+                  v-for="(item, idx) in timelineItems" 
+                  :key="idx" 
+                  class="mb-4 ml-6 cursor-pointer group"
+                  @click="goToTimelineItem(item)"
+                >
+                  <span :class="[timelineTypeConfig[item.type]?.color || 'bg-gray-400']" class="absolute -left-[13px] w-6 h-6 rounded-full flex items-center justify-center text-xs text-white ring-4 ring-white">
+                    {{ timelineTypeConfig[item.type]?.icon }}
+                  </span>
+                  <div class="bg-gray-50 group-hover:bg-orange-50 rounded-lg p-3 transition-colors">
+                    <div class="flex items-center justify-between mb-1">
+                      <span :class="[timelineTypeConfig[item.type]?.color.replace('bg-', 'text-')]" class="text-xs font-semibold uppercase">
+                        {{ timelineTypeConfig[item.type]?.label }}
+                      </span>
+                      <span class="text-xs text-gray-400">{{ formatDate(item.date) }}</span>
+                    </div>
+                    <p class="text-sm font-medium text-gray-900">{{ getTimelineTitle(item) }}</p>
+                    <p class="text-xs text-gray-500 mt-1">{{ getTimelineSubtitle(item) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -264,6 +318,10 @@ import { useRouter, useRoute } from 'vue-router'
 import BaseLayout from '@/components/BaseLayout.vue'
 import { clientService } from '@/services/clientService'
 import { contactService } from '@/services/contactService'
+import { saleService } from '@/services/saleService'
+import { rentService } from '@/services/rentService'
+import ticketService from '@/services/ticketService'
+import { billingService } from '@/services/billingService'
 import type { Client, Branch, Contact, Area } from '@/types'
 import { getStoredUser, hasDeleteAccess } from '@/config/accessControl'
 
@@ -282,6 +340,13 @@ const showContactModal = ref(false)
 const showAreasModal = ref(false)
 const selectedBranch = ref<Branch | null>(null)
 const newAreaName = ref('')
+
+// Timeline data
+const sales = ref<any[]>([])
+const rents = ref<any[]>([])
+const tickets = ref<any[]>([])
+const billings = ref<any[]>([])
+const timelineLoading = ref(false)
 
 const branchForm = ref({
   branch_id: 0,
@@ -304,7 +369,8 @@ const contactForm = ref({
 
 const tabs = computed(() => [
   { id: 'contact', label: 'Contacto Principal', count: client.value?.contact ? 1 : 0 },
-  { id: 'branches', label: 'Sucursales', count: branches.value.length }
+  { id: 'branches', label: 'Sucursales', count: branches.value.length },
+  { id: 'timeline', label: 'Historial', count: sales.value.length + rents.value.length + tickets.value.length + billings.value.length }
 ])
 
 const loadClient = async () => {
@@ -324,7 +390,7 @@ const loadClient = async () => {
       }
     }
     
-    await Promise.all([loadBranches(), loadContacts()])
+    await Promise.all([loadBranches(), loadContacts(), loadTimeline()])
   } catch (error) {
     console.error('Error loading client:', error)
     alert('Error al cargar el cliente')
@@ -500,6 +566,73 @@ const deleteArea = async (areaId: number) => {
     console.error('Error deleting area:', error)
     alert(`Error al eliminar área: ${error.message || error}`)
   }
+}
+
+// Timeline
+const loadTimeline = async () => {
+  const clientId = Number(route.params.id)
+  timelineLoading.value = true
+  try {
+    const [salesRes, rentsRes, ticketsRes, billingsRes] = await Promise.all([
+      saleService.getSales({ client_id: clientId, pageSize: 50 }).catch(() => ({ items: [] })),
+      rentService.getRents({ client_id: clientId, pageSize: 50 }).catch(() => ({ items: [] })),
+      ticketService.getAll({ client_id: clientId }).catch(() => []),
+      billingService.getBillings({ client_id: clientId, pageSize: 50 }).catch(() => ({ items: [] }))
+    ])
+    sales.value = salesRes.items || []
+    rents.value = rentsRes.items || []
+    tickets.value = Array.isArray(ticketsRes) ? ticketsRes : (ticketsRes as any).items || []
+    billings.value = billingsRes.items || []
+  } catch (error) {
+    console.error('Error loading timeline:', error)
+  } finally {
+    timelineLoading.value = false
+  }
+}
+
+const timelineItems = computed(() => {
+  const items: any[] = []
+  sales.value.forEach(s => items.push({ type: 'venta', date: s.created_at || s.sale_date, data: s }))
+  rents.value.forEach(r => items.push({ type: 'renta', date: r.created_at || r.start_date, data: r }))
+  tickets.value.forEach(t => items.push({ type: 'ticket', date: t.created_at || t.report_date, data: t }))
+  billings.value.forEach(b => items.push({ type: 'factura', date: b.created_at || b.target_date, data: b }))
+  items.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime())
+  return items
+})
+
+const formatDate = (d: string) => {
+  if (!d) return '-'
+  return new Date(d).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+const timelineTypeConfig: Record<string, { label: string, color: string, icon: string, route: string }> = {
+  venta: { label: 'Venta', color: 'bg-yellow-500', icon: '🛒', route: 'VentaDetalle' },
+  renta: { label: 'Renta', color: 'bg-teal-500', icon: '📄', route: 'RentaDetalle' },
+  ticket: { label: 'Ticket', color: 'bg-amber-500', icon: '🔧', route: 'TicketDetail' },
+  factura: { label: 'Factura', color: 'bg-red-500', icon: '📑', route: 'FacturacionDetalle' }
+}
+
+const goToTimelineItem = (item: any) => {
+  const config = timelineTypeConfig[item.type]
+  if (!config) return
+  const id = item.data.sale_id || item.data.rent_id || item.data.ticket_id || item.data.billing_id || item.data.id
+  if (id) router.push({ name: config.route, params: { id } })
+}
+
+const getTimelineTitle = (item: any) => {
+  if (item.type === 'venta') return `Venta #${item.data.sale_id || ''} - ${item.data.invoice_number || 'Sin folio'}`
+  if (item.type === 'renta') return `Renta #${item.data.rent_id || ''} - ${item.data.contract_status || ''}`
+  if (item.type === 'ticket') return `Ticket #${item.data.ticket_id || ''} - ${item.data.report_type || ''}`
+  if (item.type === 'factura') return `Factura #${item.data.billing_id || ''} - $${(item.data.total || 0).toLocaleString()}`
+  return ''
+}
+
+const getTimelineSubtitle = (item: any) => {
+  if (item.type === 'venta') return `Total: $${(item.data.total || 0).toLocaleString()} | ${item.data.sale_status || ''}`
+  if (item.type === 'renta') return `${item.data.start_date ? formatDate(item.data.start_date) : ''} → ${item.data.end_date ? formatDate(item.data.end_date) : ''}`
+  if (item.type === 'ticket') return `${item.data.report_status || ''} | ${item.data.description?.substring(0, 60) || ''}`
+  if (item.type === 'factura') return `${item.data.billing_type || ''} | ${item.data.status || ''} | Vence: ${formatDate(item.data.target_date)}`
+  return ''
 }
 
 onMounted(() => {

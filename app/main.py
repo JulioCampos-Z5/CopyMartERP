@@ -1,3 +1,9 @@
+import os
+import sys
+
+# Asegurar que el directorio app/ esté en el path cuando se ejecuta directamente
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from logger_config import logger
@@ -29,6 +35,9 @@ from inventory.routers import (
     inventory_router,
     shelf_router
 )
+from audit.routers import router as audit_router
+from notification.routers import router as notification_router
+from system.routers import router as system_router
 
 
 from core.database import Base, engine
@@ -49,6 +58,8 @@ from ticket import models as ticket_models
 from monthlyplan import models as monthlyplan_models
 from inventory import models as inventory_models
 from route import models as route_models
+from audit import models as audit_models
+from notification import models as notification_models
 
 app = FastAPI(title="API de Usuarios")
 
@@ -196,11 +207,27 @@ app.include_router(inventory_router, prefix="/api")
 app.include_router(shelf_router, prefix="/api")
 app.include_router(repair_router, prefix="/api")
 app.include_router(route_router, prefix="/api")
+app.include_router(audit_router, prefix="/api")
+app.include_router(notification_router, prefix="/api")
+app.include_router(system_router, prefix="/api")
 
 
 
 @app.get("/")
 def root():
-    return {"message": "Copy mart Api,  "}
+    return {"message": "CopyMart ERP API"}
 
 Base.metadata.create_all(bind=engine)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+    host = os.getenv("BACKEND_HOST", "0.0.0.0")
+    port = int(os.getenv("BACKEND_PORT", "8000"))
+
+    logger.info(f"Servidor iniciando en http://{host}:{port}")
+    uvicorn.run("main:app", host=host, port=port, reload=True)

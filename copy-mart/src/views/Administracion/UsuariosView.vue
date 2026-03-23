@@ -484,6 +484,10 @@ export default {
         { id: 'recursos_humanos', label: 'Recursos Humanos' },
         { id: 'ti', label: 'Tecnologías de la Información' },
         { id: 'usuarios', label: 'Usuarios' },
+        { id: 'reportes', label: 'Reportes' },
+        { id: 'auditoria', label: 'Auditoría' },
+        { id: 'configuracion', label: 'Configuración' },
+        { id: 'migraciones', label: 'Migraciones BD' },
       ]
     }
   },

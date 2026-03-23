@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -6,6 +6,7 @@ from core.database import get_db
 from auth.routers import get_current_user
 from auth.models import User
 from auth.permissions import require_permission
+from audit.services import AuditService
 from sale.schemas import (
     SaleCreate,
     SaleUpdate,
@@ -25,17 +26,24 @@ router = APIRouter(
 
 @router.post("/", response_model=SaleResponse, status_code=status.HTTP_201_CREATED)
 def create_sale(
+    request: Request,
     sale_data: SaleCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     _: None = Depends(require_permission("ventas", "create"))
 ):
     """Crea una nueva venta"""
-    return SaleService.create_sale(
-        db, 
-        sale_data, 
-        current_user.user_id
+    sale = SaleService.create_sale(db, sale_data, current_user.user_id)
+    AuditService.log(
+        db,
+        user_id=current_user.user_id,
+        action="create",
+        module="ventas",
+        record_id=sale.sale_id,
+        detail=f"Venta creada para cliente_id={sale.client_id}, precio={sale.sale_price}",
+        ip_address=request.client.host if request.client else None,
     )
+    return sale
 
 
 @router.get("/", response_model=List[SaleResponse])
@@ -78,6 +86,7 @@ def get_sale(
 
 @router.put("/{sale_id}", response_model=SaleResponse)
 def update_sale(
+    request: Request,
     sale_id: int,
     sale_data: SaleUpdate,
     db: Session = Depends(get_db),
@@ -85,11 +94,22 @@ def update_sale(
     _: None = Depends(require_permission("ventas", "edit"))
 ):
     """Actualiza una venta existente"""
-    return SaleService.update_sale(db, sale_id, sale_data)
+    sale = SaleService.update_sale(db, sale_id, sale_data)
+    AuditService.log(
+        db,
+        user_id=current_user.user_id,
+        action="update",
+        module="ventas",
+        record_id=sale_id,
+        detail=f"Venta actualizada",
+        ip_address=request.client.host if request.client else None,
+    )
+    return sale
 
 
 @router.delete("/{sale_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_sale(
+    request: Request,
     sale_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -97,6 +117,15 @@ def delete_sale(
 ):
     """Cancela una venta y devuelve el equipo a bodega"""
     SaleService.delete_sale(db, sale_id)
+    AuditService.log(
+        db,
+        user_id=current_user.user_id,
+        action="delete",
+        module="ventas",
+        record_id=sale_id,
+        detail=f"Venta eliminada/cancelada",
+        ip_address=request.client.host if request.client else None,
+    )
     return None
 
 

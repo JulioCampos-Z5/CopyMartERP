@@ -423,6 +423,43 @@ const router = createRouter({
         title: 'Tecnologías de la Información - CopyMart ERP'
       }
     },
+    // Rutas v2.0 - Administración avanzada
+    {
+      path: '/reportes',
+      name: 'Reportes',
+      component: () => import('../views/Administracion/reportes/ReportesView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Reportes - CopyMart ERP'
+      }
+    },
+    {
+      path: '/auditoria',
+      name: 'Auditoria',
+      component: () => import('../views/Administracion/auditoria/AuditoriaView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Auditoría - CopyMart ERP'
+      }
+    },
+    {
+      path: '/configuracion',
+      name: 'Configuracion',
+      component: () => import('../views/Administracion/configuracion/ConfiguracionView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Configuración del Sistema - CopyMart ERP'
+      }
+    },
+    {
+      path: '/migraciones',
+      name: 'Migraciones',
+      component: () => import('../views/Administracion/migraciones/MigracionesView.vue'),
+      meta: { 
+        requiresAuth: true,
+        title: 'Migraciones de BD - CopyMart ERP'
+      }
+    },
     {
       path: '/perfil',
       name: 'Perfil',
