@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from core.database import get_db
 from auth.routers import get_current_user
 from auth.permissions import require_permission
+from audit.services import AuditService
 from client.schemas import (
     ClientCreate, ClientUpdate, ClientResponse, ClientListResponse,
     BranchCreate, BranchUpdate, BranchResponse,
@@ -16,12 +17,23 @@ router = APIRouter()
 
 @router.post("/", response_model=ClientResponse, status_code=status.HTTP_201_CREATED)
 def create_client(
+    request: Request,
     client_data: ClientCreate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
     _: None = Depends(require_permission("clientes", "create"))
 ):
-    return ClientService.create_client(db, client_data, current_user.user_id)
+    client = ClientService.create_client(db, client_data, current_user.user_id)
+    AuditService.log(
+        db,
+        user_id=current_user.user_id,
+        action="create",
+        module="clientes",
+        record_id=client.client_id,
+        detail=f"Cliente creado: {client.name}",
+        ip_address=request.client.host if request.client else None,
+    )
+    return client
 
 
 @router.get("/", response_model=List[ClientListResponse])
@@ -81,21 +93,42 @@ def get_client(
 
 @router.patch("/{client_id}", response_model=ClientResponse)
 def update_client(
+    request: Request,
     client_id: int,
     client_data: ClientUpdate,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    return ClientService.update_client(db, client_id, client_data)
+    client = ClientService.update_client(db, client_id, client_data)
+    AuditService.log(
+        db,
+        user_id=current_user.user_id,
+        action="update",
+        module="clientes",
+        record_id=client_id,
+        detail=f"Cliente actualizado",
+        ip_address=request.client.host if request.client else None,
+    )
+    return client
 
 
 @router.delete("/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_client(
+    request: Request,
     client_id: int,
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
     ClientService.delete_client(db, client_id)
+    AuditService.log(
+        db,
+        user_id=current_user.user_id,
+        action="delete",
+        module="clientes",
+        record_id=client_id,
+        detail="Cliente eliminado",
+        ip_address=request.client.host if request.client else None,
+    )
     return None
 
 

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text, inspect
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from core.database import get_db, engine, Base
 from auth.routers import get_current_user
 from auth.models import User, RolEnum
@@ -14,6 +14,7 @@ from ticket.models import Ticket
 from equipment.models import Equipment
 from repair.models import Repair
 from purchase.models import Purchase
+from print.models import PrintCounter  # noqa: F401 — necesario para inicializar el mapper de Rent
 
 router = APIRouter(prefix="/system", tags=["Sistema"])
 
@@ -26,45 +27,49 @@ def get_reports_summary(
     current_user: User = Depends(get_current_user)
 ):
     """Resumen general para el dashboard de reportes."""
-    now = datetime.utcnow()
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    try:
+        now = datetime.now(timezone.utc)
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-    total_clients = db.query(func.count(Client.client_id)).scalar() or 0
-    total_sales = db.query(func.count(Sale.sale_id)).scalar() or 0
-    sales_this_month = db.query(func.count(Sale.sale_id)).filter(
-        Sale.created_at >= month_start
-    ).scalar() or 0
-    active_rents = db.query(func.count(Rent.rent_id)).filter(
-        Rent.status == "vigente"
-    ).scalar() or 0
-    total_rents = db.query(func.count(Rent.rent_id)).scalar() or 0
-    overdue_billing = db.query(func.count(Billing.billing_id)).filter(
-        Billing.status == "vencido"
-    ).scalar() or 0
-    pending_billing = db.query(func.count(Billing.billing_id)).filter(
-        Billing.status == "pendiente"
-    ).scalar() or 0
-    open_tickets = db.query(func.count(Ticket.ticket_id)).filter(
-        Ticket.report_status.in_(["pendiente", "urgente"])
-    ).scalar() or 0
-    equipment_count = db.query(func.count(Equipment.equipment_id)).scalar() or 0
-    repairs_pending = db.query(func.count(Repair.repair_id)).filter(
-        Repair.status == "pendiente"
-    ).scalar() or 0
-    purchases_active = db.query(func.count(Purchase.purchase_id)).filter(
-        Purchase.status.in_(["en_curso", "en_transito"])
-    ).scalar() or 0
+        total_clients = db.query(func.count(Client.client_id)).scalar() or 0
+        total_sales = db.query(func.count(Sale.sale_id)).scalar() or 0
+        sales_this_month = db.query(func.count(Sale.sale_id)).filter(
+            Sale.created_at >= month_start
+        ).scalar() or 0
+        active_rents = db.query(func.count(Rent.rent_id)).filter(
+            Rent.contract_status == "vigente"
+        ).scalar() or 0
+        total_rents = db.query(func.count(Rent.rent_id)).scalar() or 0
+        overdue_billing = db.query(func.count(Billing.billing_id)).filter(
+            Billing.status == "vencido"
+        ).scalar() or 0
+        pending_billing = db.query(func.count(Billing.billing_id)).filter(
+            Billing.status == "pendiente"
+        ).scalar() or 0
+        open_tickets = db.query(func.count(Ticket.ticket_id)).filter(
+            Ticket.report_status.in_(["pendiente", "urgente"])
+        ).scalar() or 0
+        equipment_count = db.query(func.count(Equipment.item_id)).scalar() or 0
+        repairs_pending = db.query(func.count(Repair.repair_id)).filter(
+            Repair.estado_taller == "pendiente"
+        ).scalar() or 0
+        purchases_active = db.query(func.count(Purchase.purchase_id)).filter(
+            Purchase.status.in_(["en_curso", "en_transito"])
+        ).scalar() or 0
 
-    return {
-        "clients": total_clients,
-        "sales": {"total": total_sales, "this_month": sales_this_month},
-        "rents": {"total": total_rents, "active": active_rents},
-        "billing": {"overdue": overdue_billing, "pending": pending_billing},
-        "tickets": {"open": open_tickets},
-        "equipment": {"total": equipment_count},
-        "repairs": {"pending": repairs_pending},
-        "purchases": {"active": purchases_active}
-    }
+        return {
+            "clients": total_clients,
+            "sales": {"total": total_sales, "this_month": sales_this_month},
+            "rents": {"total": total_rents, "active": active_rents},
+            "billing": {"overdue": overdue_billing, "pending": pending_billing},
+            "tickets": {"open": open_tickets},
+            "equipment": {"total": equipment_count},
+            "repairs": {"pending": repairs_pending},
+            "purchases": {"active": purchases_active}
+        }
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.get("/reports/sales-by-month")
@@ -74,7 +79,7 @@ def get_sales_by_month(
     current_user: User = Depends(get_current_user)
 ):
     """Ventas agrupadas por mes."""
-    since = datetime.utcnow() - timedelta(days=months * 30)
+    since = datetime.now(timezone.utc) - timedelta(days=months * 30)
     rows = db.execute(text("""
         SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count
         FROM sales WHERE created_at >= :since
@@ -89,10 +94,14 @@ def get_rents_by_status(
     current_user: User = Depends(get_current_user)
 ):
     """Rentas agrupadas por estado."""
-    rows = db.execute(text("""
-        SELECT status, COUNT(*) as count FROM rents GROUP BY status
-    """)).fetchall()
-    return [{"status": r[0], "count": r[1]} for r in rows]
+    try:
+        rows = db.execute(text("""
+            SELECT contract_status, COUNT(*) as count FROM rents GROUP BY contract_status
+        """)).fetchall()
+        return [{"status": r[0], "count": r[1]} for r in rows]
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.get("/reports/billing-aging")
@@ -101,7 +110,7 @@ def get_billing_aging(
     current_user: User = Depends(get_current_user)
 ):
     """Antigüedad de cobranza."""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     rows = db.execute(text("""
         SELECT
             SUM(CASE WHEN status = 'pagado' THEN 1 ELSE 0 END) as pagado,
@@ -136,10 +145,14 @@ def get_equipment_by_location(
     current_user: User = Depends(get_current_user)
 ):
     """Equipos por ubicación."""
-    rows = db.execute(text("""
-        SELECT location_status, COUNT(*) as count FROM equipment GROUP BY location_status
-    """)).fetchall()
-    return [{"location": r[0], "count": r[1]} for r in rows]
+    try:
+        rows = db.execute(text("""
+            SELECT location_status, COUNT(*) as count FROM items GROUP BY location_status
+        """)).fetchall()
+        return [{"location": r[0], "count": r[1]} for r in rows]
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 # ─── BÚSQUEDA GLOBAL ───────────────────────────────────────────────────

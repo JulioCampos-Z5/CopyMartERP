@@ -1,3 +1,9 @@
+import os
+import sys
+
+# Asegurar que el directorio app/ esté en el path cuando se ejecuta directamente
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from logger_config import logger
@@ -209,6 +215,19 @@ app.include_router(system_router, prefix="/api")
 
 @app.get("/")
 def root():
-    return {"message": "Copy mart Api,  "}
+    return {"message": "CopyMart ERP API"}
 
 Base.metadata.create_all(bind=engine)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+    host = os.getenv("BACKEND_HOST", "0.0.0.0")
+    port = int(os.getenv("BACKEND_PORT", "8000"))
+
+    logger.info(f"Servidor iniciando en http://{host}:{port}")
+    uvicorn.run("main:app", host=host, port=port, reload=True)
