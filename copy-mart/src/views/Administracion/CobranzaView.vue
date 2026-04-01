@@ -294,22 +294,22 @@ export default {
       this.error = null
       try {
         const [billingsResponse, overdue, statsData] = await Promise.all([
-          billingService.getBillings({ is_active: true }),
+          billingService.getBillings({ is_active: true, page_size: 500 }),
           billingService.getOverdueBillings(),
           billingService.getStats()
         ])
-        
+
         this.billings = billingsResponse.items || []
         this.overdueBillings = overdue
-        
+
         // Calcular total pendiente desde las facturas reales
         const pendientes = this.billings.filter(b => b.status === 'pendiente' || b.status === 'vencido')
         this.stats.totalPending = pendientes.reduce((sum, b) => {
-          const val = Number(b.amount || 0)
+          const val = Number(b.amount ?? 0)
           return sum + (isNaN(val) ? 0 : val)
         }, 0)
-        this.stats.overdueCount = this.overdueBillings.length || statsData.by_status?.vencido || 0
-        this.stats.paidThisMonth = statsData.paid_amount || 0
+        this.stats.overdueCount = this.overdueBillings.length || 0
+        this.stats.paidThisMonth = Number(statsData.paid_amount ?? 0)
         this.stats.expiringSoon = this.billings.filter(b => b.status === 'pendiente').length
       } catch (err) {
         this.error = err.message
@@ -338,10 +338,13 @@ export default {
     },
 
     formatCurrency(amount) {
+      if (amount === null || amount === undefined) return '-'
+      const num = Number(amount)
+      if (isNaN(num)) return '-'
       return new Intl.NumberFormat('es-MX', {
         style: 'currency',
         currency: 'MXN'
-      }).format(amount)
+      }).format(num)
     },
 
     formatDate(dateStr) {

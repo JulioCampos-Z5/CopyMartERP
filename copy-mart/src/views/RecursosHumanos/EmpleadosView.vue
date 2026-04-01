@@ -43,10 +43,9 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NSS</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RFC</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CURP</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Contratación</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -54,17 +53,15 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="employee in filteredEmployees" :key="employee.employee_id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {{ employee.employee_id }}
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">{{ getEmployeeName(employee) }}</div>
+                <div v-if="!employee.user_id" class="text-xs text-gray-400">Sin cuenta de usuario</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ employee.nss }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ employee.rfc }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {{ employee.curp }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(employee.hire_date) }}
@@ -106,15 +103,34 @@
           </div>
           
           <form @submit.prevent="saveEmployee" class="space-y-4">
+            <!-- Tipo de vinculación -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Vinculación</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" v-model="form.linkType" value="user" class="text-orange-600" />
+                  <span class="text-sm">Usuario del sistema</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" v-model="form.linkType" value="nombre" class="text-orange-600" />
+                  <span class="text-sm">Sin cuenta (solo nombre)</span>
+                </label>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div v-if="form.linkType === 'user'">
                 <label class="block text-sm font-medium text-gray-700">Usuario</label>
-                <select v-model.number="form.user_id" required class="input-field">
+                <select v-model.number="form.user_id" :required="form.linkType === 'user'" class="input-field">
                   <option value="">Seleccionar usuario</option>
                   <option v-for="user in users" :key="user.user_id" :value="user.user_id">
                     {{ user.full_name }}
                   </option>
                 </select>
+              </div>
+              <div v-else>
+                <label class="block text-sm font-medium text-gray-700">Nombre del Empleado</label>
+                <input v-model="form.nombre" type="text" :required="form.linkType === 'nombre'" class="input-field" placeholder="Nombre completo" />
               </div>
               
               <div>
@@ -183,7 +199,9 @@ const filters = ref({
 });
 
 const form = ref({
+  linkType: 'user',
   user_id: '',
+  nombre: '',
   nss: '',
   rfc: '',
   curp: '',
@@ -193,12 +211,18 @@ const form = ref({
   contact_emergency: ''
 });
 
+const getEmployeeName = (employee) => {
+  return employee.user?.full_name || employee.nombre || employee.rfc;
+};
+
 const filteredEmployees = computed(() => {
   let result = employees.value;
-  
+
   if (filters.value.search) {
     const search = filters.value.search.toLowerCase();
-    result = result.filter(emp => 
+    result = result.filter(emp =>
+      (emp.user?.full_name || '').toLowerCase().includes(search) ||
+      (emp.nombre || '').toLowerCase().includes(search) ||
       emp.nss.toLowerCase().includes(search) ||
       emp.rfc.toLowerCase().includes(search) ||
       emp.curp.toLowerCase().includes(search)
@@ -240,7 +264,9 @@ const viewEmployee = async (employee) => {
 const editEmployee = (employee) => {
   editingEmployee.value = employee;
   form.value = {
-    user_id: employee.user_id,
+    linkType: employee.user_id ? 'user' : 'nombre',
+    user_id: employee.user_id || '',
+    nombre: employee.nombre || '',
     nss: employee.nss,
     rfc: employee.rfc,
     curp: employee.curp,
@@ -259,14 +285,16 @@ const viewPayrolls = (employee) => {
 const saveEmployee = async () => {
   try {
     const payload = {
-      ...form.value,
-      user_id: Number(form.value.user_id),
       nss: String(form.value.nss || '').replace(/\D/g, ''),
       rfc: String(form.value.rfc || '').trim().toUpperCase(),
       curp: String(form.value.curp || '').trim().toUpperCase(),
+      birthday: form.value.birthday,
+      hire_date: form.value.hire_date,
       phone_emergency: String(form.value.phone_emergency || '').trim(),
-      contact_emergency: String(form.value.contact_emergency || '').trim()
-    }
+      contact_emergency: String(form.value.contact_emergency || '').trim(),
+      user_id: form.value.linkType === 'user' && form.value.user_id ? Number(form.value.user_id) : null,
+      nombre: form.value.linkType === 'nombre' ? String(form.value.nombre || '').trim() : null
+    };
 
     if (editingEmployee.value) {
       await rhService.employees.update(editingEmployee.value.employee_id, payload);
@@ -285,7 +313,9 @@ const closeModal = () => {
   showCreateModal.value = false;
   editingEmployee.value = null;
   form.value = {
+    linkType: 'user',
     user_id: '',
+    nombre: '',
     nss: '',
     rfc: '',
     curp: '',

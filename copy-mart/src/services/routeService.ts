@@ -12,6 +12,8 @@ export interface RouteStop {
   city: string | null
   notes: string | null
   is_completed: boolean
+  visit_status: 'pendiente' | 'visitado' | 'no_visitado' | 'reagendado'
+  no_visit_reason: string | null
   created_at: string
 }
 

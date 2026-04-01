@@ -41,7 +41,7 @@
           <select v-model="filters.employeeId" class="input-field" @change="loadRecords">
             <option value="">Todos los empleados</option>
             <option v-for="emp in employees" :key="emp.employee_id" :value="emp.employee_id">
-              ID: {{ emp.employee_id }} - {{ emp.rfc }}
+              {{ emp.user?.full_name || emp.nombre || emp.rfc }}
             </option>
           </select>
 
@@ -122,7 +122,7 @@
                 <select v-model="form.employee_id" class="input-field" required :disabled="!!editingRecord">
                   <option value="">Seleccionar empleado</option>
                   <option v-for="emp in employees" :key="emp.employee_id" :value="emp.employee_id">
-                    ID: {{ emp.employee_id }} - {{ emp.rfc }}
+                    {{ emp.user?.full_name || emp.nombre || emp.rfc }}
                   </option>
                 </select>
               </div>
@@ -250,7 +250,8 @@ function getTypeClass(type) {
 
 function getEmployeeName(empId) {
   const emp = employees.value.find(e => e.employee_id === empId);
-  return emp ? `${emp.employee_id} - ${emp.rfc}` : `ID: ${empId}`;
+  if (!emp) return `ID: ${empId}`;
+  return emp.user?.full_name || emp.nombre || emp.rfc;
 }
 
 function formatDate(dateStr) {

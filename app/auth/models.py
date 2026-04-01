@@ -11,9 +11,10 @@ class RolEnum(str, enum.Enum):
 
 class DepartmentEnum(str, enum.Enum):
     RH = "rh"
-    ADMINISTRACION = "administracion" #Credito cobranza, almacen 
+    ADMINISTRACION = "administracion" #Credito cobranza, almacen
     COMERCIAL = "comercial" #VENTAS Y ATENCION A CLIENTES RENTAS #sOPORTE
-    OPERACIONES = "operaciones" #lO QUE ES DE DON PACO 
+    OPERACIONES = "operaciones" #lO QUE ES DE DON PACO
+    TI = "ti"  # Investigación y Desarrollo / Tecnologías de la Información
 
 class User(Base):
     __tablename__ = "users"

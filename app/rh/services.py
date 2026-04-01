@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from datetime import date, timedelta
@@ -45,7 +45,9 @@ class EmployeeService:
     
     @staticmethod
     def get_employee(db: Session, employee_id: int) -> Optional[models.Employee]:
-        employee = db.query(models.Employee).filter(
+        employee = db.query(models.Employee).options(
+            joinedload(models.Employee.user)
+        ).filter(
             models.Employee.employee_id == employee_id
         ).first()
         if not employee:
@@ -54,16 +56,16 @@ class EmployeeService:
                 detail="Empleado no encontrado"
             )
         return employee
-    
+
     @staticmethod
     def get_employee_by_user_id(db: Session, user_id: int) -> Optional[models.Employee]:
         return db.query(models.Employee).filter(
             models.Employee.user_id == user_id
         ).first()
-    
+
     @staticmethod
     def get_employees(db: Session, skip: int = 0, limit: int = 100, is_active: Optional[bool] = None) -> List[models.Employee]:
-        query = db.query(models.Employee)
+        query = db.query(models.Employee).options(joinedload(models.Employee.user))
         if is_active is not None:
             query = query.filter(models.Employee.is_active == is_active)
         return query.offset(skip).limit(limit).all()

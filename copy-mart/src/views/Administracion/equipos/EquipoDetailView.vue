@@ -139,7 +139,7 @@
                   <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                       <p class="text-xs text-gray-500">Período</p>
-                      <p class="text-sm font-medium">{{ counter.period_month }}/{{ counter.period_year }}</p>
+                      <p class="text-sm font-medium">{{ monthName(counter.period_month) }} {{ counter.period_year }}</p>
                     </div>
                     <div>
                       <p class="text-xs text-gray-500">B/N Impresas</p>
@@ -286,6 +286,11 @@ const formatCurrency = (value: number) => {
 const formatDate = (dateString: string) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleDateString('es-MX')
+}
+
+const monthName = (month: number) => {
+  const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+  return months[month - 1] || month
 }
 
 const getStatusClass = (status: string) => {

@@ -26,6 +26,8 @@ def _serialize_stop(stop) -> dict:
         "city": stop.city,
         "notes": stop.notes,
         "is_completed": stop.is_completed,
+        "visit_status": stop.visit_status,
+        "no_visit_reason": stop.no_visit_reason,
         "created_at": stop.created_at
     }
 

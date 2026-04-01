@@ -299,7 +299,7 @@ export default {
           return
         }
         
-        const { loadPermissions, canView, canCreate, canEdit, canDelete } = useGranularPermissions('ventas')
+        const { loadPermissions, canView, canCreate, canEdit, canDelete, permissionsLoaded } = useGranularPermissions('ventas')
         await loadPermissions(token, true)
         
         this.permissions.canView = canView.value
@@ -307,11 +307,9 @@ export default {
         this.permissions.canEdit = canEdit.value
         this.permissions.canDelete = canDelete.value
         this.permissions.loaded = true
-        
-        console.log('✓ Permisos de ventas cargados:', this.permissions)
-        
-        // Si no tiene permiso de ver, mostrar mensaje y salir
-        if (!this.permissions.canView) {
+
+        // Solo redirigir si los permisos se cargaron exitosamente y no tiene acceso
+        if (!this.permissions.canView && permissionsLoaded.value) {
           this.error('No tienes permisos para ver el módulo de ventas', 'Acceso Denegado')
           setTimeout(() => {
             this.$router.push('/dashboard')

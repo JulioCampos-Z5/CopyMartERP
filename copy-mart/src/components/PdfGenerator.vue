@@ -339,36 +339,34 @@ export default {
     
     async generateInvoice() {
       this.generating = true
-      
-      // Datos de ejemplo para la factura
+
+      const today = new Date()
+      const due = new Date(today)
+      due.setDate(due.getDate() + 30)
+      const fmt = (d) => d.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })
+
+      // Datos de ejemplo en el formato que espera generateInvoicePdf
       const invoiceData = {
-        folio: 'F-001234',
-        fecha: new Date().toLocaleDateString('es-ES'),
-        cliente: {
-          nombre: 'María González López',
-          email: 'maria.gonzalez@email.com',
-          telefono: '+52 55 1234-5678'
+        billing_id: 'EJEMPLO',
+        invoice_number: 'F-001234',
+        client_name: 'María González López',
+        branch_name: 'Sucursal Centro',
+        billing_type: 'venta',
+        target_date: fmt(today),
+        due_date: fmt(due),
+        payment_date: null,
+        status: 'pendiente',
+        amount_subtotal: 318.97,
+        amount_tax: 51.03,
+        amount_total: 370.00,
+        sale_info: {
+          invoice_number: 'VTA-001',
+          amount: 370.00
         },
-        items: [
-          {
-            descripcion: 'Papel A4 - 500 hojas',
-            cantidad: 2,
-            precio: 125.00
-          },
-          {
-            descripcion: 'Copias B/N',
-            cantidad: 500,
-            precio: 0.90
-          },
-          {
-            descripcion: 'Encuadernación',
-            cantidad: 1,
-            precio: 85.00
-          }
-        ],
-        metodoPago: 'Efectivo'
+        rent_info: null,
+        comment: 'Factura de ejemplo generada automáticamente'
       }
-      
+
       const result = this.generateInvoicePdf(invoiceData, 'factura-ejemplo.pdf', true)
       
       this.generating = false

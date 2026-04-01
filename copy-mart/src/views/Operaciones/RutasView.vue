@@ -177,27 +177,37 @@
                 <div v-else class="space-y-3">
                   <div v-for="(stop, idx) in route.stops" :key="stop.stop_id"
                     class="flex items-start gap-3 p-3 rounded-lg border dark:border-gray-600"
-                    :class="stop.is_completed ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' : 'bg-gray-50 dark:bg-gray-700/30'"
+                    :class="{
+                      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700': stop.visit_status === 'visitado',
+                      'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700': stop.visit_status === 'no_visitado',
+                      'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700': stop.visit_status === 'reagendado',
+                      'bg-gray-50 dark:bg-gray-700/30': !stop.visit_status || stop.visit_status === 'pendiente'
+                    }"
                   >
                     <!-- Stop number -->
                     <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                      :class="stop.is_completed ? 'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200' : 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'"
+                      :class="{
+                        'bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200': stop.visit_status === 'visitado',
+                        'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200': stop.visit_status === 'no_visitado',
+                        'bg-yellow-200 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200': stop.visit_status === 'reagendado',
+                        'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300': !stop.visit_status || stop.visit_status === 'pendiente'
+                      }"
                     >
                       {{ idx + 1 }}
                     </div>
 
                     <!-- Stop info -->
                     <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-2 flex-wrap">
                         <span class="font-medium text-sm text-gray-900 dark:text-white">
                           {{ stop.client_name || 'Sin cliente' }}
                         </span>
                         <span v-if="stop.branch_name" class="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full">
                           {{ stop.branch_name }}
                         </span>
-                        <span v-if="stop.is_completed" class="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full">
-                          Completada
-                        </span>
+                        <span v-if="stop.visit_status === 'visitado'" class="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full">Visitado</span>
+                        <span v-else-if="stop.visit_status === 'no_visitado'" class="text-xs px-2 py-0.5 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-full">No visitado</span>
+                        <span v-else-if="stop.visit_status === 'reagendado'" class="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-full">Reagendado</span>
                       </div>
                       <div v-if="stop.address" class="flex items-center gap-1 mt-1">
                         <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,7 +222,7 @@
                     <!-- Stop actions -->
                     <div class="flex items-center gap-1 flex-shrink-0">
                       <!-- Google Maps button -->
-                      <button v-if="stop.address" @click="openGoogleMaps(stop)" 
+                      <button v-if="stop.address" @click="openGoogleMaps(stop)"
                         class="p-1.5 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400"
                         title="Abrir en Google Maps"
                       >
@@ -220,15 +230,28 @@
                           <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                         </svg>
                       </button>
-                      <!-- Complete toggle -->
-                      <button v-if="!stop.is_completed" @click="toggleStopComplete(route, stop)" 
-                        class="p-1.5 rounded hover:bg-green-100 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400"
-                        title="Marcar completada"
-                      >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                      </button>
+                      <!-- Visit status actions (only when not yet resolved) -->
+                      <template v-if="stop.visit_status === 'pendiente'">
+                        <button @click="markStopVisited(route, stop)"
+                          class="text-xs px-2 py-1 rounded bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 hover:bg-green-200"
+                          title="Marcar visitado"
+                        >Visitado</button>
+                        <button @click="openNoVisitModal(route, stop)"
+                          class="text-xs px-2 py-1 rounded bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 hover:bg-red-200"
+                          title="No visitado"
+                        >No visitado</button>
+                        <button @click="markStopRescheduled(route, stop)"
+                          class="text-xs px-2 py-1 rounded bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200"
+                          title="Reagendar"
+                        >Reagendar</button>
+                      </template>
+                      <!-- Show reason if no_visitado -->
+                      <span v-if="stop.visit_status === 'no_visitado' && stop.no_visit_reason"
+                        class="text-xs text-red-600 dark:text-red-400 italic max-w-xs truncate"
+                        :title="stop.no_visit_reason"
+                      >Motivo: {{ stop.no_visit_reason }}</span>
                       <!-- Delete stop -->
-                      <button @click="removeStop(route, stop.stop_id)" 
+                      <button @click="removeStop(route, stop.stop_id)"
                         class="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400"
                         title="Eliminar parada"
                       >
@@ -350,6 +373,25 @@
         </form>
       </div>
     </div>
+    <!-- No Visit Reason Modal -->
+    <div v-if="showNoVisitModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Motivo de no visita</h3>
+          <button @click="showNoVisitModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div class="p-6 space-y-4">
+          <p class="text-sm text-gray-600 dark:text-gray-400">Indica el motivo por el cual no se pudo visitar esta parada.</p>
+          <textarea v-model="noVisitReason" rows="3" class="input-field" placeholder="Ej: Cliente no se encontraba, acceso restringido..."></textarea>
+          <div class="flex justify-end gap-3">
+            <button @click="showNoVisitModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">Cancelar</button>
+            <button @click="confirmNoVisit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Confirmar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </BaseLayout>
 </template>
 
@@ -371,6 +413,9 @@ export default {
       statusFilter: '',
       showCreateModal: false,
       showStopModal: false,
+      showNoVisitModal: false,
+      noVisitReason: '',
+      noVisitTarget: null,  // { route, stop }
       expandedRoute: null,
       currentRouteId: null,
       form: {
@@ -507,9 +552,36 @@ export default {
         alert('Error al agregar parada: ' + (err.message || err))
       }
     },
-    async toggleStopComplete(route, stop) {
+    async markStopVisited(route, stop) {
       try {
-        await routeService.updateStop(stop.stop_id, { is_completed: true })
+        await routeService.updateStop(stop.stop_id, { is_completed: true, visit_status: 'visitado' })
+        await this.loadRoutes()
+      } catch (err) {
+        alert('Error: ' + err.message)
+      }
+    },
+    openNoVisitModal(route, stop) {
+      this.noVisitTarget = { route, stop }
+      this.noVisitReason = ''
+      this.showNoVisitModal = true
+    },
+    async confirmNoVisit() {
+      if (!this.noVisitTarget) return
+      try {
+        await routeService.updateStop(this.noVisitTarget.stop.stop_id, {
+          visit_status: 'no_visitado',
+          no_visit_reason: this.noVisitReason || 'Sin motivo especificado'
+        })
+        this.showNoVisitModal = false
+        this.noVisitTarget = null
+        await this.loadRoutes()
+      } catch (err) {
+        alert('Error: ' + err.message)
+      }
+    },
+    async markStopRescheduled(route, stop) {
+      try {
+        await routeService.updateStop(stop.stop_id, { visit_status: 'reagendado' })
         await this.loadRoutes()
       } catch (err) {
         alert('Error: ' + err.message)

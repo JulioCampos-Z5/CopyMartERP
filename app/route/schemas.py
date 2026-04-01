@@ -31,6 +31,8 @@ class RouteStopUpdate(BaseModel):
     city: Optional[str] = None
     notes: Optional[str] = None
     is_completed: Optional[bool] = None
+    visit_status: Optional[str] = None   # pendiente | visitado | no_visitado | reagendado
+    no_visit_reason: Optional[str] = None
 
 
 class RouteStopResponse(BaseModel):
@@ -45,6 +47,8 @@ class RouteStopResponse(BaseModel):
     city: Optional[str] = None
     notes: Optional[str] = None
     is_completed: bool
+    visit_status: str = "pendiente"
+    no_visit_reason: Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

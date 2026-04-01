@@ -16,10 +16,10 @@
 
       <div v-else-if="billing" class="space-y-6">
         <!-- Header con acciones -->
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div class="flex justify-between items-start">
             <div>
-              <h1 class="text-3xl font-bold text-gray-900 mb-2">Factura {{ billing.client?.name || billing.client_name || 'Sin cliente' }}</h1>
+              <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Factura {{ billing.client?.name || billing.client_name || 'Sin cliente' }}</h1>
               <div class="flex gap-2 items-center">
                 <span :class="getStatusBadgeClass(billing.status)">{{ billing.status }}</span>
                 <span v-if="billing.follow_up" class="px-3 py-1 bg-amber-100 text-amber-800 text-sm font-semibold rounded-full">
@@ -46,31 +46,31 @@
 
         <!-- Información principal -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Información General</h2>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Información General</h2>
             <dl class="space-y-3">
               <div>
-                <dt class="text-sm font-medium text-gray-500">Cliente</dt>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Cliente</dt>
                 <dd class="text-base text-gray-900 mt-1 font-medium">{{ billing.client?.name || billing.client_name || '-' }}</dd>
               </div>
               <div v-if="billing.branch?.name || billing.branch?.name || billing.branch_name">
-                <dt class="text-sm font-medium text-gray-500">Sucursal</dt>
-                <dd class="text-base text-gray-900 mt-1">{{ billing.branch?.name || billing.branch_name }}</dd>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Sucursal</dt>
+                <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">{{ billing.branch?.name || billing.branch_name }}</dd>
               </div>
               <div>
-                <dt class="text-sm font-medium text-gray-500">Tipo de Factura</dt>
-                <dd class="text-base text-gray-900 mt-1">{{ billing.billing_type }}</dd>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tipo de Factura</dt>
+                <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">{{ billing.billing_type }}</dd>
               </div>
               <div v-if="billing.sale">
-                <dt class="text-sm font-medium text-gray-500">Venta Asociada</dt>
-                <dd class="text-base text-gray-900 mt-1">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Venta Asociada</dt>
+                <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">
                   <span class="font-medium">{{ billing.sale.invoice_number || `#${billing.sale.sale_id}` }}</span>
                   <span class="text-gray-600"> - {{ formatCurrency(billing.sale.sale_price) }}</span>
                 </dd>
               </div>
               <div v-if="billing.rent">
-                <dt class="text-sm font-medium text-gray-500">Renta Asociada</dt>
-                <dd class="text-base text-gray-900 mt-1">
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Renta Asociada</dt>
+                <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">
                   <span class="font-medium">{{ billing.rent.contract_number || `#${billing.rent.rent_id}` }}</span>
                   <span class="text-gray-600"> - {{ formatCurrency(billing.rent.rent) }}/mes</span>
                 </dd>
@@ -78,39 +78,39 @@
             </dl>
           </div>
 
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Montos</h2>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Montos</h2>
             <dl class="space-y-3">
               <div v-if="billing.amount">
-                <dt class="text-sm font-medium text-gray-500">Subtotal</dt>
-                <dd class="text-base text-gray-900 mt-1">{{ formatCurrency(Number(billing.amount) / 1.16) }}</dd>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Subtotal</dt>
+                <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">{{ formatCurrency(Number(billing.amount) / 1.16) }}</dd>
               </div>
               <div v-if="billing.amount">
-                <dt class="text-sm font-medium text-gray-500">IVA (16%)</dt>
-                <dd class="text-base text-gray-900 mt-1">{{ formatCurrency(Number(billing.amount) - Number(billing.amount) / 1.16) }}</dd>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">IVA (16%)</dt>
+                <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">{{ formatCurrency(Number(billing.amount) - Number(billing.amount) / 1.16) }}</dd>
               </div>
               <div class="pt-2 border-t">
-                <dt class="text-sm font-medium text-gray-500">Total</dt>
-                <dd class="text-2xl font-bold text-gray-900 mt-1">{{ formatCurrency(billing.amount_total || billing.amount) }}</dd>
+                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total</dt>
+                <dd class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ formatCurrency(billing.amount_total || billing.amount) }}</dd>
               </div>
             </dl>
           </div>
         </div>
 
         <!-- Fechas -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Fechas</h2>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Fechas</h2>
           <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <dt class="text-sm font-medium text-gray-500">Fecha Objetivo</dt>
-              <dd class="text-base text-gray-900 mt-1">{{ formatDate(billing.target_date) }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha Objetivo</dt>
+              <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">{{ formatDate(billing.target_date) }}</dd>
             </div>
             <div>
-              <dt class="text-sm font-medium text-gray-500">Fecha Vencimiento</dt>
-              <dd class="text-base text-gray-900 mt-1">{{ formatDate(billing.due_date) }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha Vencimiento</dt>
+              <dd class="text-base text-gray-900 dark:text-gray-200 mt-1">{{ formatDate(billing.due_date) }}</dd>
             </div>
             <div v-if="billing.payment_date">
-              <dt class="text-sm font-medium text-gray-500">Fecha de Pago</dt>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Pago</dt>
               <dd class="text-base text-green-600 mt-1 font-medium">{{ formatDate(billing.payment_date) }}</dd>
             </div>
           </dl>
@@ -215,8 +215,10 @@ const formatDate = (dateString) => {
 }
 
 const formatCurrency = (amount) => {
-  if (!amount) return '$0.00'
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
+  if (amount === null || amount === undefined) return '-'
+  const num = Number(amount)
+  if (isNaN(num)) return '-'
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(num)
 }
 
 onMounted(() => {

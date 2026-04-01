@@ -31,7 +31,8 @@ const DEPARTMENT_MODULES: Record<string, string[]> = {
   rh: ['dashboard', 'usuarios', 'recursos_humanos'],
   administracion: ['dashboard', 'ventas', 'rentas', 'compras', 'almacen', 'cobranza', 'facturacion', 'inventario'],
   comercial: ['dashboard', 'ventas', 'rentas', 'clientes', 'produccion', 'cobranza', 'facturacion'],
-  operaciones: ['dashboard', 'inventario', 'rutas', 'ordenes_servicio', 'taller']
+  operaciones: ['dashboard', 'inventario', 'rutas', 'ordenes_servicio', 'taller'],
+  ti: ['dashboard', 'ti', 'inventario', 'reportes', 'auditoria', 'configuracion', 'migraciones']
 }
 
 const ALL_MODULE_KEYS = Object.keys(MODULE_PATTERNS)

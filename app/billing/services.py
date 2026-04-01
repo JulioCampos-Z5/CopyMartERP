@@ -433,16 +433,16 @@ class BillingService:
         
         billing.payment_date = payment_data.payment_date
         billing.status = BillingStatus.PAGADO
-        
+
         if payment_data.comment:
             billing.comment = payment_data.comment
-        
+
         billing.updated_at = datetime.utcnow()
-        
+
         db.commit()
-        db.refresh(billing)
-        
-        return billing
+
+        # Re-cargar con joinedload para que el serializador tenga todas las relaciones disponibles
+        return BillingService.get_billing(db, billing_id)
     
     @staticmethod
     def update_overdue_billings(db: Session) -> int:

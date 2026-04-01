@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 from datetime import datetime, date
 from typing import Optional
 from enum import Enum
@@ -37,28 +37,45 @@ class EmployeeBase(BaseModel):
 
 
 class EmployeeCreate(EmployeeBase):
-    user_id: int
-    
+    user_id: Optional[int] = None
+    nombre: Optional[str] = Field(None, max_length=255)
+
+    @model_validator(mode='after')
+    def require_user_id_or_nombre(self):
+        if not self.user_id and not self.nombre:
+            raise ValueError('Se requiere user_id o nombre para registrar el empleado')
+        return self
+
     @field_validator('nss')
     @classmethod
     def validate_nss(cls, v):
         if not v.isdigit():
             raise ValueError('NSS debe contener solo números')
         return v
-    
+
     @field_validator('rfc')
     @classmethod
     def validate_rfc(cls, v):
         return v.upper()
-    
+
     @field_validator('curp')
     @classmethod
     def validate_curp(cls, v):
         return v.upper()
 
 
+class UserBasic(BaseModel):
+    user_id: int
+    full_name: str
+    email: str
+
+    class Config:
+        from_attributes = True
+
+
 class EmployeeUpdate(BaseModel):
     nss: Optional[str] = None
+    nombre: Optional[str] = None
     rfc: Optional[str] = None
     curp: Optional[str] = None
     birthday: Optional[date] = None
@@ -70,11 +87,13 @@ class EmployeeUpdate(BaseModel):
 
 class EmployeeResponse(EmployeeBase):
     employee_id: int
-    user_id: int
+    user_id: Optional[int] = None
+    nombre: Optional[str] = None
+    user: Optional[UserBasic] = None
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    
+
     class Config:
         from_attributes = True
 

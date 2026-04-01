@@ -21,7 +21,7 @@
           <select v-model="filters.employeeId" class="input-field">
             <option value="">Todos los empleados</option>
             <option v-for="emp in employees" :key="emp.employee_id" :value="emp.employee_id">
-              ID: {{ emp.employee_id }} - {{ emp.rfc }}
+              {{ emp.user?.full_name || emp.nombre || emp.rfc }}
             </option>
           </select>
           
@@ -112,7 +112,7 @@
               <select v-model="form.employee_id" @change="loadVacationDays" required class="input-field">
                 <option value="">Seleccionar empleado</option>
                 <option v-for="emp in employees" :key="emp.employee_id" :value="emp.employee_id">
-                  ID: {{ emp.employee_id }} - {{ emp.rfc }}
+                  {{ emp.user?.full_name || emp.nombre || emp.rfc }}
                 </option>
               </select>
               <p v-if="availableDays !== null" class="mt-1 text-sm text-gray-500">
@@ -231,7 +231,8 @@ const loadVacationDays = async () => {
 
 const getEmployeeName = (employeeId) => {
   const emp = employees.value.find(e => e.employee_id === employeeId);
-  return emp ? `${emp.rfc} (ID: ${employeeId})` : `ID: ${employeeId}`;
+  if (!emp) return `ID: ${employeeId}`;
+  return emp.user?.full_name || emp.nombre || emp.rfc;
 };
 
 const getStatusClass = (status) => {

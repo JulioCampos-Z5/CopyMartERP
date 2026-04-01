@@ -36,11 +36,11 @@
       </div>
 
       <!-- Form -->
-      <form v-if="!loading" @submit.prevent="handleSubmit" class="bg-white shadow rounded-lg p-6 space-y-6">
+      <form v-if="!loading" @submit.prevent="handleSubmit" class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Cliente -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Cliente *
             </label>
             <select v-model="rentForm.client_id" required class="input-field">
@@ -53,7 +53,7 @@
 
           <!-- Sucursal -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Sucursal <span v-if="branches.length > 0">*</span>
             </label>
             <select v-model="rentForm.branch_id" :disabled="!rentForm.client_id" :required="branches.length > 0" class="input-field">
@@ -62,11 +62,17 @@
                 {{ branch.name }}<span v-if="branch.is_main"> (Principal)</span>
               </option>
             </select>
+            <p v-if="rentForm.client_id && branches.length > 0" class="text-xs text-blue-600 mt-1">
+              {{ branches.length }} sucursal{{ branches.length !== 1 ? 'es' : '' }} registrada{{ branches.length !== 1 ? 's' : '' }} para este cliente
+            </p>
+            <p v-else-if="rentForm.client_id && branches.length === 0" class="text-xs text-gray-400 mt-1">
+              Este cliente no tiene sucursales registradas
+            </p>
           </div>
 
           <!-- Equipo -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Equipo *
             </label>
             <select v-model="rentForm.item_id" required class="input-field">
@@ -85,12 +91,12 @@
                 <template v-else>⚠️ {{ item.location_status }}</template>
               </option>
             </select>
-            <p class="text-xs text-gray-500 mt-1">Solo equipos en bodega están disponibles para renta</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Solo equipos en bodega están disponibles para renta</p>
           </div>
 
           <!-- Renta Mensual -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Renta Mensual *
             </label>
             <input 
@@ -105,7 +111,7 @@
 
           <!-- Área -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Área
             </label>
             <select v-model="rentForm.area_id" :disabled="!rentForm.branch_id || areas.length === 0" class="input-field">
@@ -118,7 +124,7 @@
 
           <!-- Fecha de Inicio -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Fecha de Inicio *
             </label>
             <input 
@@ -131,7 +137,7 @@
 
           <!-- Fecha de Fin -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Fecha de Fin
             </label>
             <input 
@@ -139,12 +145,12 @@
               type="date" 
               class="input-field"
             >
-            <p class="text-xs text-gray-500 mt-1">Dejar vacío si el contrato es indefinido</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Dejar vacío si el contrato es indefinido</p>
           </div>
 
           <!-- Estado del Contrato -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Estado del Contrato
             </label>
             <select v-model="rentForm.contract_status" class="input-field">
@@ -167,13 +173,13 @@
           <div class="md:col-span-2 border-t pt-4 mt-4">
             <label class="flex items-center mb-4">
               <input v-model="rentForm.has_print_service" type="checkbox" class="mr-2">
-              <span class="text-sm font-medium text-gray-700">Incluye Servicio de Impresión</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Incluye Servicio de Impresión</span>
             </label>
 
             <div v-if="rentForm.has_print_service" class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-blue-200">
               <!-- Contadores B/N -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Impresiones B/N Incluidas *
                 </label>
                 <input 
@@ -187,7 +193,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Costo Exceso B/N (por página) *
                 </label>
                 <input 
@@ -203,7 +209,7 @@
 
               <!-- Contadores Color -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Impresiones Color Incluidas *
                 </label>
                 <input 
@@ -217,7 +223,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Costo Exceso Color (por página) *
                 </label>
                 <input 
@@ -233,7 +239,7 @@
 
               <!-- Notas de Impresión -->
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Notas sobre Impresión
                 </label>
                 <textarea 

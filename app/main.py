@@ -1,8 +1,13 @@
 import os
 import sys
+from pathlib import Path
+from dotenv import load_dotenv
 
 # Asegurar que el directorio app/ esté en el path cuando se ejecuta directamente
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# Cargar .env desde la raíz del proyecto
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -64,20 +69,22 @@ from notification import models as notification_models
 app = FastAPI(title="API de Usuarios")
 
 # Configurar CORS
+# LOCAL_IP en .env permite acceso desde otros dispositivos en la red local
+_local_ip = os.getenv("LOCAL_IP", "")
+_cors_origins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:5176",
+    "http://localhost:3000",
+]
+if _local_ip:
+    for _port in [5173, 5174, 5175, 5176, 3000]:
+        _cors_origins.append(f"http://{_local_ip}:{_port}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-        "http://localhost:5176",
-        "http://localhost:3000",
-        "http://192.168.100.93:5173",
-        "http://192.168.100.93:5174",
-        "http://192.168.100.93:5175",
-        "http://192.168.100.93:5176",
-        "http://192.168.100.93:3000"
-    ],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -222,9 +229,6 @@ Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
     import uvicorn
-    from dotenv import load_dotenv
-
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
     host = os.getenv("BACKEND_HOST", "0.0.0.0")
     port = int(os.getenv("BACKEND_PORT", "8000"))

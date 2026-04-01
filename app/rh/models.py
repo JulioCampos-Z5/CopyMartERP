@@ -31,10 +31,13 @@ class Employee(Base):
     __tablename__ = "employees"
 
     employee_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False, unique=True)
-    nss = Column(String(11), unique=True, nullable=False, index=True) 
-    rfc = Column(String(13), unique=True, nullable=False, index=True)  
-    curp = Column(String(18), unique=True, nullable=False, index=True) 
+    # user_id es opcional: un empleado puede existir sin cuenta de usuario en el sistema
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="SET NULL"), nullable=True, unique=True)
+    # nombre se usa cuando el empleado no tiene cuenta de usuario vinculada
+    nombre = Column(String(255), nullable=True)
+    nss = Column(String(11), unique=True, nullable=False, index=True)
+    rfc = Column(String(13), unique=True, nullable=False, index=True)
+    curp = Column(String(18), unique=True, nullable=False, index=True)
     birthday = Column(Date, nullable=False)
     hire_date = Column(Date, nullable=False, default=date.today)
     phone_emergency = Column(String(15), nullable=False)
@@ -42,8 +45,9 @@ class Employee(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relacion
+
+    # Relaciones
+    user = relationship("User", foreign_keys=[user_id])
     payrolls = relationship("Payroll", back_populates="employee", cascade="all, delete-orphan")
     vacations = relationship("Vacation", back_populates="employee", cascade="all, delete-orphan")
     administrative_records = relationship("AdministrativeRecord", back_populates="employee", cascade="all, delete-orphan")

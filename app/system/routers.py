@@ -177,7 +177,7 @@ def global_search(
 
     # Equipos
     equips = db.execute(text(
-        "SELECT equipment_id, sku, serial_number, model FROM equipment WHERE sku LIKE :t OR serial_number LIKE :t OR model LIKE :t LIMIT 10"
+        "SELECT item_id, sku, serial_number, model FROM items WHERE sku LIKE :t OR serial_number LIKE :t OR model LIKE :t LIMIT 10"
     ), {"t": term}).fetchall()
     for e in equips:
         results.append({"type": "equipment", "id": e[0], "title": f"{e[1]} - {e[2]}",
@@ -407,3 +407,101 @@ def run_migration(
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+@router.post("/db/migrate/employees")
+def migrate_employees_table(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Migra la tabla employees: hace user_id nullable y agrega columna nombre."""
+    if current_user.rol != RolEnum.ADMINISTRADOR:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Solo administradores")
+
+    results = []
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("employees")}
+
+    try:
+        # Hacer user_id nullable si no lo es ya
+        db.execute(text(
+            "ALTER TABLE employees MODIFY COLUMN user_id INT NULL"
+        ))
+        results.append("user_id → nullable OK")
+    except Exception as e:
+        results.append(f"user_id modify: {e}")
+
+    try:
+        if "nombre" not in columns:
+            db.execute(text(
+                "ALTER TABLE employees ADD COLUMN nombre VARCHAR(255) NULL"
+            ))
+            results.append("nombre → agregado OK")
+        else:
+            results.append("nombre → ya existe")
+    except Exception as e:
+        results.append(f"nombre add: {e}")
+
+    db.commit()
+    return {"success": True, "results": results}
+
+
+@router.post("/db/migrate/users-department")
+def migrate_users_department(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Agrega el valor 'ti' al ENUM department de la tabla users."""
+    if current_user.rol != RolEnum.ADMINISTRADOR:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Solo administradores")
+    try:
+        db.execute(text(
+            "ALTER TABLE users MODIFY COLUMN department ENUM('rh','administracion','comercial','operaciones','ti') NOT NULL"
+        ))
+        db.commit()
+        return {"success": True, "message": "ENUM department actualizado con valor 'ti'"}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "error": str(e)}
+
+
+@router.post("/db/migrate/route-stops")
+def migrate_route_stops_table(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Migra la tabla route_stops: agrega columnas visit_status y no_visit_reason."""
+    if current_user.rol != RolEnum.ADMINISTRADOR:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Solo administradores")
+
+    results = []
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("route_stops")}
+
+    try:
+        if "visit_status" not in columns:
+            db.execute(text(
+                "ALTER TABLE route_stops ADD COLUMN visit_status VARCHAR(20) NOT NULL DEFAULT 'pendiente'"
+            ))
+            results.append("visit_status → agregado OK")
+        else:
+            results.append("visit_status → ya existe")
+    except Exception as e:
+        results.append(f"visit_status add: {e}")
+
+    try:
+        if "no_visit_reason" not in columns:
+            db.execute(text(
+                "ALTER TABLE route_stops ADD COLUMN no_visit_reason TEXT NULL"
+            ))
+            results.append("no_visit_reason → agregado OK")
+        else:
+            results.append("no_visit_reason → ya existe")
+    except Exception as e:
+        results.append(f"no_visit_reason add: {e}")
+
+    db.commit()
+    return {"success": True, "results": results}

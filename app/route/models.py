@@ -44,6 +44,8 @@ class RouteStop(Base):
     city = Column(String(100), nullable=True)
     notes = Column(Text, nullable=True)
     is_completed = Column(Boolean, default=False)
+    visit_status = Column(String(20), nullable=False, default="pendiente")  # pendiente | visitado | no_visitado | reagendado
+    no_visit_reason = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     route = relationship("Route", back_populates="stops")

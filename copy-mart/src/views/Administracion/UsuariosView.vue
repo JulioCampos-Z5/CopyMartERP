@@ -219,6 +219,7 @@
                       </svg>
                     </button>
                     <button
+                      v-if="isAdmin"
                       @click="openResetPassword(user)"
                       class="text-blue-600 hover:text-blue-900 mr-3"
                       title="Restablecer Contraseña"
@@ -288,6 +289,7 @@
                   v-model="formData.rol"
                   required
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  @change="onRolChange"
                 >
                   <option value="">Seleccionar...</option>
                   <option value="administrador">Administrador</option>
@@ -308,6 +310,7 @@
                   <option value="administracion">Administración</option>
                   <option value="comercial">Comercial</option>
                   <option value="operaciones">Operaciones</option>
+                  <option value="ti">Investigación y Desarrollo / TI</option>
                 </select>
               </div>
               <div v-if="!editingUser">
@@ -380,7 +383,7 @@
                         />
                         <span class="text-gray-700">✏️ Editar</span>
                       </label>
-                      <label class="flex items-center text-sm">
+                      <label class="flex items-center text-sm" v-if="formData.rol !== 'gerencia'">
                         <input
                           v-model="formData.permissions[area.id].delete"
                           type="checkbox"
@@ -388,6 +391,7 @@
                         />
                         <span class="text-gray-700">🗑️ Eliminar</span>
                       </label>
+                      <span v-else class="text-xs text-gray-400 italic">Sin permiso de eliminar (Gerencia)</span>
                     </div>
                   </div>
                 </div>
@@ -501,6 +505,10 @@ export default {
     adminCount() {
       return this.users.filter(u => u.rol === 'administrador').length
     },
+    isAdmin() {
+      const authStore = useAuthStore()
+      return authStore.user?.rol === 'administrador'
+    },
     filteredUsers() {
       return this.users.filter(user => {
         const matchesSearch = !this.searchTerm ||
@@ -530,6 +538,16 @@ export default {
         alert('Error al cargar los usuarios')
       } finally {
         this.loadingUsers = false
+      }
+    },
+    onRolChange() {
+      if (this.formData.rol === 'gerencia') {
+        // Gerencia no puede tener permisos de eliminar
+        for (const areaId of Object.keys(this.formData.permissions || {})) {
+          if (this.formData.permissions[areaId]) {
+            this.formData.permissions[areaId].delete = false
+          }
+        }
       }
     },
     toggleArea(areaId) {
@@ -727,7 +745,8 @@ export default {
         'rh': 'Recursos Humanos',
         'administracion': 'Administración',
         'comercial': 'Comercial',
-        'operaciones': 'Operaciones'
+        'operaciones': 'Operaciones',
+        'ti': 'Investigación y Desarrollo / TI'
       }
       return labels[dept] || dept
     }

@@ -23,7 +23,7 @@
         <template #filters>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado</label>
               <select v-model="localFilters.status" @change="handleFilterChange('status', localFilters.status)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 <option value="">Todos</option>
                 <option value="pendiente">Pendiente</option>
@@ -33,7 +33,7 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tipo</label>
               <select v-model="localFilters.type" @change="handleFilterChange('type', localFilters.type)" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 <option value="">Todos</option>
                 <option value="venta">Venta</option>
@@ -41,11 +41,11 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Desde</label>
               <input v-model="localFilters.startDate" @change="handleFilterChange('startDate', localFilters.startDate)" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hasta</label>
               <input v-model="localFilters.endDate" @change="handleFilterChange('endDate', localFilters.endDate)" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" />
             </div>
           </div>
@@ -53,20 +53,20 @@
 
         <!-- Estadísticas -->
         <template #stats>
-          <div class="bg-white p-4 rounded-lg shadow border">
-            <div class="text-sm text-gray-500 mb-1">Total Facturas</div>
-            <div class="text-2xl font-bold text-gray-900">{{ stats.total || 0 }}</div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border dark:border-gray-700">
+            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Facturas</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total || 0 }}</div>
           </div>
-          <div class="bg-white p-4 rounded-lg shadow border">
-            <div class="text-sm text-gray-500 mb-1">Pendientes</div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border dark:border-gray-700">
+            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Pendientes</div>
             <div class="text-2xl font-bold text-red-600">{{ stats.pending || 0 }}</div>
           </div>
-          <div class="bg-white p-4 rounded-lg shadow border">
-            <div class="text-sm text-gray-500 mb-1">Pagadas</div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border dark:border-gray-700">
+            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Pagadas</div>
             <div class="text-2xl font-bold text-green-600">{{ stats.paid || 0 }}</div>
           </div>
-          <div class="bg-white p-4 rounded-lg shadow border">
-            <div class="text-sm text-gray-500 mb-1">Total Monto</div>
+          <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border dark:border-gray-700">
+            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Monto</div>
             <div class="text-2xl font-bold text-blue-600">{{ formatCurrency(stats.totalAmount) }}</div>
           </div>
         </template>
@@ -224,7 +224,7 @@ const columns = [
   {
     key: 'amount_total',
     label: 'Monto',
-    format: (row: Billing) => formatCurrency(row.amount_total || row.amount),
+    format: (row: Billing) => formatCurrency(row.amount_total ?? row.amount),
     cellClass: 'text-sm text-gray-900'
   },
   {
@@ -270,7 +270,8 @@ const calculateStats = () => {
   stats.value.pending = billings.value.filter(b => String(b.status).toLowerCase() === 'pendiente').length
   stats.value.paid = billings.value.filter(b => String(b.status).toLowerCase() === 'pagado').length
   stats.value.totalAmount = billings.value.reduce((sum, b) => {
-    const val = Number(b.amount_total || b.amount || 0)
+    const raw = b.amount_total ?? b.amount ?? 0
+    const val = Number(raw)
     return sum + (isNaN(val) ? 0 : val)
   }, 0)
 }
@@ -372,9 +373,11 @@ const formatDate = (dateString: string | null | undefined): string => {
   return date.toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
-const formatCurrency = (amount: number | null | undefined): string => {
-  if (!amount) return '-'
-  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
+const formatCurrency = (amount: number | string | null | undefined): string => {
+  if (amount === null || amount === undefined) return '-'
+  const num = Number(amount)
+  if (isNaN(num)) return '-'
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(num)
 }
 
 onMounted(() => {

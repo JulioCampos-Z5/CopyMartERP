@@ -10,7 +10,7 @@
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -20,13 +20,13 @@
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Rentas Activas</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.active }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Rentas Activas</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.active }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -36,13 +36,13 @@
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Ingresos del Mes</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(stats.monthlyIncome) }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Ingresos del Mes</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ formatCurrency(stats.monthlyIncome) }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -52,13 +52,13 @@
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Próximos Vencimientos</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ stats.expiringSoon }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Próximos Vencimientos</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ stats.expiringSoon }}</p>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-6 rounded-lg shadow border">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
           <div class="flex items-center">
             <div class="flex-shrink-0">
               <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -68,15 +68,15 @@
               </div>
             </div>
             <div class="ml-4">
-              <h3 class="text-sm font-medium text-gray-500">Total Contratos</h3>
-              <p class="text-2xl font-semibold text-gray-900">{{ rents.length }}</p>
+              <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Contratos</h3>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ rents.length }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="bg-white p-6 rounded-lg shadow border">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border dark:border-gray-700">
         <div class="flex flex-wrap gap-4">
           <button @click="goToNewRent" class="btn-primary">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,9 +108,9 @@
       </div>
 
       <!-- Loading -->
-      <div v-if="loading" class="bg-white p-12 rounded-lg shadow border text-center">
+      <div v-if="loading" class="bg-white dark:bg-gray-800 p-12 rounded-lg shadow border dark:border-gray-700 text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="mt-4 text-gray-600">Cargando rentas...</p>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando rentas...</p>
       </div>
 
       <!-- Error -->
@@ -120,9 +120,9 @@
       </div>
 
       <!-- Main Content -->
-      <div v-else class="bg-white rounded-lg shadow border">
-        <div class="p-6 border-b border-gray-200">
-          <h2 class="text-xl font-semibold text-gray-900">Contratos de Renta ({{ filteredRents.length }})</h2>
+      <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow border dark:border-gray-700">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Contratos de Renta ({{ filteredRents.length }})</h2>
         </div>
         <div class="p-6">
           <div v-if="filteredRents.length === 0" class="text-center py-8 text-gray-500">
@@ -131,33 +131,36 @@
           <div v-else class="overflow-x-auto">
             <table class="min-w-full table-auto">
               <thead>
-                <tr class="bg-gray-50">
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contrato</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipo</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fechas</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <tr class="bg-gray-50 dark:bg-gray-700">
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contrato</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cliente</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Equipo</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ubicación</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fechas</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monto</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <tr v-for="rent in filteredRents" :key="rent.rent_id">
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ rent.contract_number || '-' }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ rent.client?.name || '-' }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">{{ rent.client?.name || '-' }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
                     {{ rent.equipment?.model || '-' }}
                     <span class="text-gray-500 text-xs block">{{ rent.equipment?.sku || '' }}</span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {{ rent.branch?.name || '-' }}
                     <span v-if="rent.area" class="text-xs block">{{ rent.area.name }}</span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                     <div class="text-xs">
                       <div><span class="font-medium">Inicio:</span> {{ formatDate(rent.start_date) }}</div>
                       <div v-if="rent.end_date" class="text-red-600"><span class="font-medium">Fin:</span> {{ formatDate(rent.end_date) }}</div>
+                      <span v-if="expiringRentIds.has(rent.rent_id)" class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                        ⚠ Vence pronto
+                      </span>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -165,8 +168,8 @@
                       {{ getStatusLabel(rent.contract_status) }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ formatCurrency(rent.rent) }}/mes</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ formatCurrency(rent.rent) }}/mes</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     <button @click="viewRent(rent)" class="text-blue-600 hover:text-blue-900 mr-3">Ver</button>
                     <button v-if="rent.contract_status !== 'vigente'" @click="updateStatus(rent.rent_id, 'vigente')" class="text-green-600 hover:text-green-900 mr-3">Activar</button>
                     <button @click="cancelRent(rent.rent_id)" class="text-red-600 hover:text-red-900">Cancelar</button>
@@ -182,10 +185,10 @@
 
     <!-- Create/Edit Modal -->
     <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6 border-b border-gray-200">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
-            <h3 class="text-xl font-semibold text-gray-900">{{ selectedRent ? 'Ver Renta' : 'Nueva Renta' }}</h3>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ selectedRent ? 'Ver Renta' : 'Nueva Renta' }}</h3>
             <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -359,6 +362,19 @@ export default {
         }
         return true
       })
+    },
+    expiringRentIds() {
+      const now = new Date()
+      const in30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+      return new Set(
+        this.rents
+          .filter(r => r.end_date && r.contract_status === 'vigente')
+          .filter(r => {
+            const end = new Date(r.end_date)
+            return end >= now && end <= in30
+          })
+          .map(r => r.rent_id)
+      )
     }
   },
   async mounted() {

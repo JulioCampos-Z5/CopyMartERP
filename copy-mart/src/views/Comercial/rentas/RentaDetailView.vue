@@ -46,6 +46,16 @@
           </span>
         </div>
 
+        <!-- Recordatorio vencimiento -->
+        <div v-if="isExpiringSoon" class="bg-orange-50 border border-orange-200 rounded-lg p-4 flex items-center gap-3">
+          <svg class="w-5 h-5 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-orange-800 font-medium">
+            Este contrato vence el {{ formatDate(rent.end_date) }} — falta menos de 30 días. Considera renovarlo o actualizarlo.
+          </p>
+        </div>
+
         <!-- Tabs -->
         <div class="bg-white rounded-lg shadow border">
           <div class="border-b border-gray-200">
@@ -514,6 +524,14 @@ const tabs = computed(() => [
   { id: 'counters', label: 'Contadores', count: printCounters.value.length },
   { id: 'plans', label: 'Planes', count: monthlyPlans.value.length }
 ])
+
+const isExpiringSoon = computed(() => {
+  if (!rent.value?.end_date || rent.value.contract_status !== 'vigente') return false
+  const now = new Date()
+  const end = new Date(rent.value.end_date)
+  const diffMs = end.getTime() - now.getTime()
+  return diffMs >= 0 && diffMs <= 30 * 24 * 60 * 60 * 1000
+})
 
 // Load Data
 const loadRent = async () => {

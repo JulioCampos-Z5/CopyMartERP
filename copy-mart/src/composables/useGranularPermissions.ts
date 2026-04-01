@@ -25,32 +25,66 @@ export interface PermissionsResponse {
 const userPermissions = ref<PermissionsResponse | null>(null)
 const permissionsLoaded = ref(false)
 const permissionsLoading = ref(false)
+let _loadingPromise: Promise<void> | null = null
 
 export function useGranularPermissions(area?: string) {
   // Cargar permisos del usuario actual desde el backend
   async function loadPermissions(token: string, forceReload: boolean = false) {
-    if ((permissionsLoaded.value && !forceReload) || permissionsLoading.value) return
+    // Si ya está cargado y no se fuerza recarga, no hacer nada
+    if (permissionsLoaded.value && !forceReload) return
+
+    // Si ya hay una carga en progreso, esperar a que termine en lugar de retornar vacío
+    if (_loadingPromise) {
+      return _loadingPromise
+    }
 
     permissionsLoading.value = true
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/users/me/permissions`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
+    _loadingPromise = (async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/me/permissions`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
 
-      if (response.ok) {
-        userPermissions.value = await response.json()
-        permissionsLoaded.value = true
-        console.log('✓ Permisos del usuario cargados:', userPermissions.value)
-      } else {
-        console.error('Error al cargar permisos:', response.status)
+        if (response.ok) {
+          userPermissions.value = await response.json()
+          permissionsLoaded.value = true
+        } else {
+          console.error('Error al cargar permisos:', response.status)
+          // Fallback: leer permisos del usuario en localStorage
+          _applyLocalStorageFallback()
+        }
+      } catch (error) {
+        console.error('Error loading permissions:', error)
+        _applyLocalStorageFallback()
+      } finally {
+        permissionsLoading.value = false
+        _loadingPromise = null
       }
-    } catch (error) {
-      console.error('Error loading permissions:', error)
-    } finally {
-      permissionsLoading.value = false
+    })()
+
+    return _loadingPromise
+  }
+
+  function _applyLocalStorageFallback() {
+    try {
+      const raw = localStorage.getItem('user')
+      if (!raw) return
+      const localUser = JSON.parse(raw)
+      const perms = localUser?.permissions
+      if (perms && typeof perms === 'object' && !Array.isArray(perms)) {
+        userPermissions.value = {
+          user_id: localUser.user_id || 0,
+          rol: localUser.rol || localUser.role || '',
+          areas: Object.keys(perms),
+          permissions: perms
+        }
+        permissionsLoaded.value = true
+      }
+    } catch {
+      // ignore
     }
   }
 
@@ -101,6 +135,7 @@ export function resetGranularPermissions() {
   userPermissions.value = null
   permissionsLoaded.value = false
   permissionsLoading.value = false
+  _loadingPromise = null
 }
 
 // Ejemplo de uso en un componente:
